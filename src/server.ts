@@ -266,6 +266,12 @@ app.post('/api/v0/cursada', requireAuthAPI, async (req,res) =>{
 
 })
 
+// Rutas del Frontend
+
+// Ruta raíz: Redirige automáticamente a la pantalla de login
+app.get('/', (req, res) => {
+    res.redirect('/app/login');
+});
 
 // Rutas del Frontend
 app.get('/menu', requireAuth, (req, res) => {
