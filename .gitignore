@@ -12,3 +12,7 @@ recursos/local-*
 # Archivos del sistema operativo
 .DS_Store
 Thumbs.db
+
+cli.ts
+polar.ts
+orquestador.ts

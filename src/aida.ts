@@ -1,7 +1,6 @@
 import { Client } from 'pg';
 import { readFile, writeFile } from 'fs/promises';
 import { Fecha, textoAFecha, fechaAIsoString } from './fechas.js';
-// Función 1: Encargada exclusivamente de cargar datos a la base
 
 if (!process.env.DB_PASSWORD) {
     console.error("❌ ERROR FATAL: Falta la variable de entorno DB_PASSWORD.");
@@ -43,7 +42,6 @@ export async function cargarNovedades(rutaArchivo: string ) {
     }
 }
 
-// En aida.ts
 export async function generarCertificadoAlumno(filtro: FiltroAlumnos, prefijoArchivo: string) {
         const alumnos = await obtenerAlumnoQueNecesitaCertificado(filtro);
 
@@ -129,14 +127,13 @@ async function obtenerAlumnoQueNecesitaCertificado(filtro: FiltroAlumnos) {
     }
     else if ('fecha' in filtro) {
        // Agregamos el filtro de titulo_en_tramite para que solo genere los que ya lo solicitaron
-        query += " WHERE egreso = $1 AND titulo_en_tramite IS NOT NULL";
+        query += " WHERE egreso = IS NOT NULL AND titulo_en_tramite $1";
         valores.push(fechaAIsoString(filtro.fecha));
     }
     
     const res = await client.query(query, valores);
     return res.rows; 
 }
-
 
 export async function obtenerAlumnosEnBD() {
     let query = "SELECT lu, nombres, apellido, titulo, titulo_en_tramite, egreso, carrera_id FROM aida.alumnos ORDER BY lu";
@@ -185,8 +182,6 @@ export async function actualizarAlumnoEnBD(lu: string, valores: Alumno) {
     }
 }
 
-
-
 export async function eliminarAlumno(lu: string) {
     console.log("Eliminando alumno con LU:", lu);
     try {
@@ -197,12 +192,10 @@ export async function eliminarAlumno(lu: string) {
         throw new Error(`No se pudo eliminar el alumno: ${(error as Error).message}`);
     }
 }
-// Exportamos una función para conectar
 export async function conectarBD() {
     await client.connect();
 }
 
-// Exportamos una función para desconectar
 export async function desconectarBD() {
     await client.end();
 }

@@ -1,11 +1,9 @@
 import express from 'express';
 import { client, conectarBD, generarCertificadoPorLU, generarCertifadosPorFecha, cargarAlumnosDesdeJson, obtenerCarreras, obtenerAlumnosEnBD , cargarAlumnoEnBD,cargarCursadaAprobada, actualizarAlumnoEnBD, eliminarAlumno , Alumno, verificarCarreraAprobada} from './aida.js';
-import path from 'path'; // Asegúrese de agregar este import al principio del archivo
+import path from 'path'; 
 import session from 'express-session';
 import { Request, Response, NextFunction } from 'express';
-// Fíjese que aquí uso el nombre que usted eligió en lugar de auth.js
 import { Usuario, crearUsuario, autenticarUsuario } from './autenticacion.js';
-import { error } from 'console';
 
 declare module 'express-session' {
     interface SessionData {
@@ -52,7 +50,7 @@ function requireAuthAPI(req: Request, res: Response, next: NextFunction) {
         res.status(401).json({ estado: 'error', mensaje: 'No autorizado. Debe iniciar sesión.' });
     }
 }
-// En server.ts
+// Endpoint: Genera el certificado para la lu suministrada y lo descarga localmente
 app.post('/api/v0/certificados', requireAuthAPI, async (req, res) => {
     try {
         const { lu } = req.body;
@@ -62,9 +60,6 @@ app.post('/api/v0/certificados', requireAuthAPI, async (req, res) => {
         
         // 1. Obtenemos la ruta del archivo generado
         const rutaArchivo = await generarCertificadoPorLU(lu);
-        
-        // 2. Enviamos el archivo para descarga
-        // El segundo parámetro es el nombre que verá el usuario al descargar
         res.download(rutaArchivo, `Certificado_${lu.replace('/', '-')}.html`);
 
     } catch (error: any) {
@@ -72,7 +67,7 @@ app.post('/api/v0/certificados', requireAuthAPI, async (req, res) => {
     }
 });
 
-// Endpoint: Simular que el alumno solicita su título
+// Endpoint: Recibe un lu y simula la solicitud del titulo en tramite (setea el atrib titulo_en_tramite con la fecha actual)
 app.post('/api/v0/tramite-titulo', requireAuthAPI, async (req, res) => {
     try {
         const { lu } = req.body;
@@ -101,20 +96,7 @@ app.post('/api/v0/tramite-titulo', requireAuthAPI, async (req, res) => {
     }
 });
 
-// 2. Endpoint: Buscar por LU (Adaptado para Express 5)
-app.get('/api/v0/lu/:prefijo/:anio',requireAuthAPI, async (req, res) => {
-    // Express nos entrega las dos partes. Nosotros las volvemos a unir con la barra.
-    const libreta = `${req.params.prefijo}/${req.params.anio}`;
-    
-    try {
-        await generarCertificadoPorLU(libreta);
-        res.json({ estado: "exito", mensaje: `Certificado generado para la LU: ${libreta}` });
-    } catch (error: any) {
-        res.status(500).json({ estado: "error", mensaje: "No se pudo generar el certificado", detalle: error.message });
-    }
-});
-
-// 3. Endpoint: Buscar por Fecha (Corregido a POST)
+// Endpoint: Recibe una fecha de titulo_en_tramite y genera los certificados para todos los alumnos que solicitaron titulo en esa fecha
 app.post('/api/v0/fecha', requireAuthAPI, async (req, res) => {
     try {
         const { fecha } = req.body;
@@ -122,22 +104,20 @@ app.post('/api/v0/fecha', requireAuthAPI, async (req, res) => {
             return res.status(400).json({ estado: "error", mensaje: "Debe ingresar una fecha válida." });
         }
 
-        console.log(`Generando certificados masivos para egresados del: ${fecha}`);
-        
-        // Llamamos a la función de aida.js
+        console.log(`Generando certificados masivos para solicitudes del: ${fecha}`);
         await generarCertifadosPorFecha(fecha);
         
         res.json({ 
             estado: "exito", 
-            mensaje: `Proceso finalizado. Revise la carpeta de salida para los egresados del ${fecha}.` 
+            mensaje: `Proceso finalizado. Certificados solicitados el ${fecha} se generaron exitosamente.` 
         });
     } catch (error: any) {
-        // Si no hay alumnos con trámite para esa fecha, aida.ts lanzará un error
+
         res.status(400).json({ estado: "error", mensaje: error.message });
     }
 });
 
-// 4. Endpoint: Buscar todos los alumno
+// Endpoint: Devuelve todos los alumnos en la base de datos (se llama al carga la pagina de alumnos y cuando esta hace un fetch?)
 app.get('/api/alumnos', requireAuthAPI, async (req, res) => {
     try {
         const alumnos = await obtenerAlumnosEnBD();
@@ -148,11 +128,9 @@ app.get('/api/alumnos', requireAuthAPI, async (req, res) => {
 
 })
 
-// 5. Crear Alumno
+// Endpoint carga a la bdd aida.alumnos el alumno suministrado por req
 app.post('/api/alumno', requireAuthAPI, async (req, res) => {
     try {
-        // 2. Le indicamos a TypeScript que trate al req.body como un Alumno
-        // Fragmento de ejemplo en server.ts
         const nuevoAlumno = req.body as Alumno
         await cargarAlumnoEnBD(nuevoAlumno);
         res.json({ estado: "exito", mensaje: "Alumno creado correctamente." });
@@ -161,7 +139,7 @@ app.post('/api/alumno', requireAuthAPI, async (req, res) => {
     }
 });
 
-//6. Actualizar Alumno
+// Endpoint: actualiza los datos pasados del alumno segun la lu
 app.put('/api/alumnos/:prefijo/:anio', requireAuthAPI, async (req, res) => {
     try {
         const lu = `${req.params.prefijo}/${req.params.anio}`
@@ -172,7 +150,7 @@ app.put('/api/alumnos/:prefijo/:anio', requireAuthAPI, async (req, res) => {
     }
 });
 
-//7. Eliminar Alumno
+//Endpoint elimina de la bdd aida.alumnos el alumno suministrado por req
 app.delete('/api/alumnos/:prefijo/:anio',requireAuthAPI, async (req, res) => {
     try {
         const lu = `${req.params.prefijo}/${req.params.anio}`
@@ -183,7 +161,35 @@ app.delete('/api/alumnos/:prefijo/:anio',requireAuthAPI, async (req, res) => {
     }
 });
 
-// Ednpoints de Autenticación
+// Endpoint: Obtener lista de carreras
+app.get('/api/v0/carreras', requireAuthAPI, async (req, res) => {
+    try {
+        const carreras = await obtenerCarreras();
+        res.json(carreras);
+    } catch (error: any) {
+        res.status(500).json({ estado: "error", mensaje: error.message });
+    }
+});
+
+// Endpoints para Funcionalidad de cursada
+
+// Añadir aprobado
+app.post('/api/v0/cursada', requireAuthAPI, async (req,res) =>{
+    try {
+        const cursadaDeAlumno = req.body; 
+        if(!cursadaDeAlumno.lu || !cursadaDeAlumno.idMateria || !cursadaDeAlumno.año || !cursadaDeAlumno.cuatrimestre){
+            return res.status(400).json({ estado: "error", mensaje: "Falta completar datos." });
+        }
+        await cargarCursadaAprobada(cursadaDeAlumno.lu,cursadaDeAlumno.idMateria, cursadaDeAlumno.año, cursadaDeAlumno.cuatrimestre); 
+        await verificarCarreraAprobada(cursadaDeAlumno.lu);
+        res.json({ estado: "exito", mensaje: "Cursada Aprobada cargadas correctamente." });
+    } catch (error: any) {
+        res.status(500).json({ estado: "error", mensaje: error.message });
+    } 
+
+})
+
+// ---- Ednpoints de Autenticación ----
 
 //Endpoint: creacion de usuario
 app.post('/api/v0/auth/register', async (req, res) => {
@@ -201,19 +207,7 @@ app.post('/api/v0/auth/register', async (req, res) => {
     }
 });
 
-// Endpoint: Obtener lista de carreras
-app.get('/api/v0/carreras', requireAuthAPI, async (req, res) => {
-    try {
-        const carreras = await obtenerCarreras();
-        res.json(carreras);
-    } catch (error: any) {
-        res.status(500).json({ estado: "error", mensaje: error.message });
-    }
-});
-
 //Endpoint: login del usuario
-
-// API de login
 app.post('/api/v0/auth/login', express.json(), async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -259,26 +253,7 @@ app.post('/api/v0/auth/logout', (req, res) => {
     });
 });
 
-// Endpoints para Funcionalidad de cursada
-
-// Añadir aprobado
-app.post('/api/v0/cursada', requireAuthAPI, async (req,res) =>{
-    try {
-        const cursadaDeAlumno = req.body; 
-        if(!cursadaDeAlumno.lu || !cursadaDeAlumno.idMateria || !cursadaDeAlumno.año || !cursadaDeAlumno.cuatrimestre){
-            return res.status(400).json({ estado: "error", mensaje: "Falta completar datos." });
-        }
-        await cargarCursadaAprobada(cursadaDeAlumno.lu,cursadaDeAlumno.idMateria, cursadaDeAlumno.año, cursadaDeAlumno.cuatrimestre); 
-        await verificarCarreraAprobada(cursadaDeAlumno.lu);
-        res.json({ estado: "exito", mensaje: "Cursada Aprobada cargadas correctamente." });
-    } catch (error: any) {
-        res.status(500).json({ estado: "error", mensaje: error.message });
-    } 
-
-
-})
-
-// Rutas del Frontend
+// --- Rutas del Frontend ---
 
 // Ruta raíz: Redirige automáticamente a la pantalla de login
 app.get('/', (req, res) => {
@@ -318,7 +293,7 @@ app.get('/app/login', (req, res) => {
     res.sendFile(path.resolve('./public/login.html'));
 });
 
-// 4. Endpoint: Cargar datos desde JSON
+// Endpoint: Carga multiples alumnos desde JSON
 app.patch('/api/v0/archivo',requireAuthAPI, async (req, res) => {
     const datosAlumnos = req.body; // Aquí llega el JSON
     
@@ -335,7 +310,7 @@ app.patch('/api/v0/archivo',requireAuthAPI, async (req, res) => {
     }
 });
 
-// 5. Arranque del servidor
+// Arranque del servidor
 async function iniciarServidor() {
     try {
         // A diferencia del CLI, en un servidor web nos conectamos a la BD UNA sola vez al arrancar
