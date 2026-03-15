@@ -24,7 +24,8 @@ export interface Alumno {
     apellido: string;
     titulo: string | null;
     titulo_en_tramite: string | null;
-    egreso: string;
+    egreso: string | null;
+    carrera_id?: number | null; // <--- NUEVO CAMPO
 }
 
 type FiltroAlumnos = {fecha: Fecha} | {lu: string} | {uno: true}
@@ -136,8 +137,9 @@ async function obtenerAlumnoQueNecesitaCertificado(filtro: FiltroAlumnos) {
     return res.rows; 
 }
 
+
 export async function obtenerAlumnosEnBD() {
-    let query = "SELECT lu, nombres, apellido, titulo, titulo_en_tramite, egreso FROM aida.alumnos ORDER BY lu";
+    let query = "SELECT lu, nombres, apellido, titulo, titulo_en_tramite, egreso, carrera_id FROM aida.alumnos ORDER BY lu";
     const res = await client.query(query);
     return res.rows;    
 }
@@ -145,17 +147,26 @@ export async function obtenerAlumnosEnBD() {
 export async function cargarAlumnoEnBD(alumno: Alumno) {
     console.log("Insertando alumno con LU:", alumno.lu);
     try {
-        let query = "INSERT INTO aida.alumnos (lu, nombres, apellido, titulo, titulo_en_tramite, egreso) VALUES ($1, $2, $3, $4, $5, $6);";
+        // Agregamos carrera_id al final
+        let query = "INSERT INTO aida.alumnos (lu, nombres, apellido, titulo, titulo_en_tramite, egreso, carrera_id) VALUES ($1, $2, $3, $4, $5, $6, $7);";
         
-        // Saneamiento defensivo: evitamos enviar "" a una columna DATE
         const tituloTramite = alumno.titulo_en_tramite === "" ? null : alumno.titulo_en_tramite;
         const egreso = alumno.egreso === "" ? null : alumno.egreso;
+        
+        // Convertimos a número si viene como texto, o pasamos null si está vacío
+        const carreraId = alumno.carrera_id ? Number(alumno.carrera_id) : null;
 
-        const valores = [alumno.lu, alumno.nombres, alumno.apellido, alumno.titulo, tituloTramite, egreso];
+        const valores = [alumno.lu, alumno.nombres, alumno.apellido, alumno.titulo, tituloTramite, egreso, carreraId];
         await client.query(query, valores);
     } catch (error) {
         throw new Error(`No se pudo cargar el alumno: ${(error as Error).message}`);
     }
+}
+
+export async function obtenerCarreras() {
+    let query = "SELECT id, nombre FROM aida.carreras ORDER BY id;";
+    const res = await client.query(query);
+    return res.rows;    
 }
 
 export async function actualizarAlumnoEnBD(lu: string, valores: Alumno) {
@@ -173,6 +184,8 @@ export async function actualizarAlumnoEnBD(lu: string, valores: Alumno) {
         throw new Error(`No se pudo actualizar el alumno: ${(error as Error).message}`);
     }
 }
+
+
 
 export async function eliminarAlumno(lu: string) {
     console.log("Eliminando alumno con LU:", lu);

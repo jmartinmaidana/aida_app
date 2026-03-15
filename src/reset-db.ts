@@ -1,13 +1,12 @@
 import { client, conectarBD, desconectarBD } from './aida.js';
 
 async function resetearDatosGestion() {
+    console.log(`⚠️ ATENCIÓN: Intentando conectar a HOST: ${process.env.DB_HOST}`);
+    
     try {
         await conectarBD();
         console.log("Conectado a la base de datos para reseteo...");
 
-        // Usamos TRUNCATE para vaciar las tablas rápido. 
-        // CASCADE se encarga de las relaciones (claves foráneas).
-        // IMPORTANTE: No incluimos 'aida.usuarios' en esta lista.
         const tablasALimpiar = [
             'aida.cursadas',
             'aida.plan_estudio',
@@ -16,17 +15,46 @@ async function resetearDatosGestion() {
             'aida.carreras'
         ];
 
-        console.log("Limpiando tablas de gestión...");
+        console.log("Limpiando tablas de gestión y reiniciando contadores...");
         await client.query(`TRUNCATE TABLE ${tablasALimpiar.join(', ')} RESTART IDENTITY CASCADE;`);
 
-        // Aquí puede agregar los INSERT de prueba que desee que siempre aparezcan después del reset
-        console.log("Insertando datos de prueba iniciales...");
+        // 1. Insertamos Carreras (IDs generados: 1, 2, 3)
+        console.log("Insertando carreras...");
         await client.query(`
-            INSERT INTO aida.carreras (nombre) VALUES ('Tecnicatura Web'), ('Ingeniería en Software');
-            INSERT INTO aida.materias (nombre) VALUES ('Programación Inicial'), ('Bases de Datos');
+            INSERT INTO aida.carreras (nombre) VALUES 
+            ('Tecnicatura Web'),             -- ID 1
+            ('Ingeniería en Software'),      -- ID 2
+            ('Licenciatura en Sistemas');    -- ID 3
         `);
 
-        console.log("✅ Reseteo completado. La tabla de usuarios permanece intacta.");
+        // 2. Insertamos Materias (IDs generados: 1 al 6)
+        console.log("Insertando materias...");
+        await client.query(`
+            INSERT INTO aida.materias (nombre) VALUES 
+            ('Programación Inicial'),        -- ID 1
+            ('Bases de Datos'),              -- ID 2
+            ('Arquitectura de Sistemas'),    -- ID 3
+            ('Matemática Discreta'),         -- ID 4
+            ('Diseño de Interfaces UX'),     -- ID 5
+            ('Gestión de Proyectos');        -- ID 6
+        `);
+
+        // 3. Asociamos Plan de Estudio
+        // Relacionamos los IDs según la lógica de cada carrera
+        console.log("Asociando materias a planes de estudio...");
+        await client.query(`
+            INSERT INTO aida.plan_estudio (carrera_id, materia_id) VALUES 
+            -- Tecnicatura Web (ID 1)
+            (1, 1), (1, 2), (1, 5),
+            -- Ingeniería en Software (ID 2)
+            (2, 1), (2, 2), (2, 3), (2, 4), (2, 6),
+            -- Licenciatura en Sistemas (ID 3)
+            (3, 1), (3, 2), (3, 4), (3, 6);
+        `);
+
+        console.log("✅ Reseteo y carga inicial completada.");
+        console.log("ℹ️ La tabla 'aida.usuarios' no fue modificada.");
+
     } catch (error: any) {
         console.error("❌ Error durante el reseteo:", error.message);
     } finally {

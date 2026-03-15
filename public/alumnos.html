@@ -15,7 +15,7 @@
         /* Estilos para el formulario oculto */
         #seccionFormulario { display: none; background: #f9f9f9; padding: 20px; border: 1px solid #ddd; margin-bottom: 20px; border-radius: 5px; }
         #seccionFormulario label { display: inline-block; width: 180px; font-weight: bold; margin-bottom: 10px; }
-        #seccionFormulario input { padding: 5px; width: 200px; margin-bottom: 10px; }
+        #seccionFormulario input, #seccionFormulario select { padding: 5px; width: 200px; margin-bottom: 10px; }
         .btn-guardar { background: #28a745; color: white; padding: 8px 15px; border: none; border-radius: 3px; cursor: pointer; }
         .btn-cancelar { background: #dc3545; color: white; padding: 8px 15px; border: none; border-radius: 3px; cursor: pointer; margin-left: 10px; }
     </style>
@@ -32,6 +32,12 @@
         <label>LU (ej. 123/24):</label> <input type="text" id="inputLu" placeholder="123/24"><br>
         <label>Nombres:</label> <input type="text" id="inputNombres"><br>
         <label>Apellido:</label> <input type="text" id="inputApellido"><br>
+        
+        <label>Carrera:</label> 
+        <select id="inputCarrera" required>
+            <option value="">-- Seleccione una carrera --</option>
+        </select><br>
+
         <label>Título:</label> <input type="text" id="inputTitulo"><br>
         <label>Fecha Título en Trámite:</label> <input type="date" id="inputTramite"><br>
         <label>Fecha Egreso:</label> <input type="date" id="inputEgreso"><br>
@@ -60,32 +66,52 @@
     </table>
 
     <script>
-        // Variable global para recordar qué estamos haciendo
         let alumnosLocales = []; 
         let luEnEdicion = null; 
-        // Nuevas variables para el ordenamiento
         let columnaOrdenActual = '';
         let ordenAscendente = true;
-        // Convierte "2025-08-20T03:00:00.000Z" a "20-08-2025" (Para la tabla visual)
+
         function formatoTabla(fechaIso) {
-            if (!fechaIso) return ''; // Si el alumno no tiene fecha, devolvemos vacío
-            const soloFecha = fechaIso.split('T')[0]; // Nos quedamos con "2025-08-20"
-            const partes = soloFecha.split('-'); // Cortamos por el guion
-            return `${partes[2]}-${partes[1]}-${partes[0]}`; // Invertimos a DD-MM-AAAA
+            if (!fechaIso) return ''; 
+            const soloFecha = fechaIso.split('T')[0]; 
+            const partes = soloFecha.split('-'); 
+            return `${partes[2]}-${partes[1]}-${partes[0]}`; 
         }
 
-        // Convierte "2025-08-20T03:00:00.000Z" a "2025-08-20" (Para rellenar el formulario de edición)
         function formatoInput(fechaIso) {
             if (!fechaIso) return '';
-            // Si viene como "2024-03-14T00:00:00.000Z", cortamos en la T
             return fechaIso.split('T')[0]; 
         }
+
         // ==========================================
         // 1. CARGA INICIAL (GET)
         // ==========================================
-        document.addEventListener('DOMContentLoaded', cargarAlumnos);
-
         
+        // MODIFICACIÓN: Ahora cargamos ambas cosas al abrir la página
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarAlumnos();
+            cargarOpcionesCarreras(); // Llenamos el select
+        });
+
+        // NUEVA FUNCIÓN: Trae las carreras y llena el menú desplegable
+        async function cargarOpcionesCarreras() {
+            try {
+                const respuesta = await fetch('/api/v0/carreras');
+                if (respuesta.ok) {
+                    const carreras = await respuesta.json();
+                    const select = document.getElementById('inputCarrera');
+                    
+                    carreras.forEach(carrera => {
+                        const opcion = document.createElement('option');
+                        opcion.value = carrera.id;
+                        opcion.textContent = carrera.nombre;
+                        select.appendChild(opcion);
+                    });
+                }
+            } catch (error) {
+                console.error("Error al cargar carreras:", error);
+            }
+        }
 
         async function cargarAlumnos() {
             try {
@@ -93,8 +119,8 @@
                 const json = await respuesta.json();
 
                 if (json.estado === 'exito') {
-                    alumnosLocales = json.datos; // Guardamos los datos
-                    renderizarTabla(); // Llamamos a la nueva función que solo dibuja
+                    alumnosLocales = json.datos;
+                    renderizarTabla(); 
                 } else {
                     document.getElementById('cuerpoTabla').innerHTML = `<tr><td colspan="7" style="color: red; text-align: center;">Error: ${json.mensaje}</td></tr>`;
                 }
@@ -102,13 +128,12 @@
                 document.getElementById('cuerpoTabla').innerHTML = `<tr><td colspan="7" style="color: red; text-align: center;">Error de conexión.</td></tr>`;
             }
         }
+
         function renderizarTabla() {
             const cuerpoTabla = document.getElementById('cuerpoTabla');
             cuerpoTabla.innerHTML = ''; 
 
             alumnosLocales.forEach(alumno => {
-                // Lógica para el botón de trámite:
-                // Solo aparece si ya egresó y si todavía no inició el trámite.
                 let htmlBotonTramite = '';
                 if (alumno.egreso && !alumno.titulo_en_tramite) {
                     htmlBotonTramite = `
@@ -123,7 +148,7 @@
                     <td>${alumno.lu}</td>
                     <td>${alumno.apellido}</td>
                     <td>${alumno.nombres}</td>
-                    <td>${alumno.titulo}</td>
+                    <td>${alumno.titulo || ''}</td>
                     <td>${formatoTabla(alumno.titulo_en_tramite)}</td>
                     <td>${formatoTabla(alumno.egreso)}</td>
                     <td>
@@ -143,12 +168,10 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ lu: lu })
                 });
-
                 const resultado = await respuesta.json();
-                
                 if (respuesta.ok) {
                     alert("Trámite iniciado con éxito");
-                    location.reload(); // Recargamos para ver la fecha reflejada
+                    location.reload(); 
                 } else {
                     alert("Error: " + resultado.mensaje);
                 }
@@ -158,26 +181,19 @@
         }
 
         function ordenarTabla(columna) {
-            // 1. Decidimos la dirección del orden
             if (columnaOrdenActual === columna) {
-                ordenAscendente = !ordenAscendente; // Si tocamos la misma, invertimos el orden
+                ordenAscendente = !ordenAscendente; 
             } else {
                 columnaOrdenActual = columna;
-                ordenAscendente = true; // Si es una nueva, empezamos de la A a la Z
+                ordenAscendente = true; 
             }
-
-            // 2. Ordenamos el arreglo en memoria
             alumnosLocales.sort((a, b) => {
-                // Convertimos a minúsculas para que la 'A' y la 'a' valgan lo mismo
                 let valorA = a[columna] ? a[columna].toString().toLowerCase() : '';
                 let valorB = b[columna] ? b[columna].toString().toLowerCase() : '';
-
                 if (valorA < valorB) return ordenAscendente ? -1 : 1;
                 if (valorA > valorB) return ordenAscendente ? 1 : -1;
-                return 0; // Son exactamente iguales
+                return 0; 
             });
-
-            // 3. Volvemos a dibujar la tabla con el arreglo ya ordenado
             renderizarTabla();
         }
 
@@ -190,63 +206,75 @@
 
         function ocultarFormulario() {
             document.getElementById('seccionFormulario').style.display = 'none';
-            
-            // Reseteamos el formulario a "Modo Creación"
             luEnEdicion = null;
             document.querySelector('#seccionFormulario h3').textContent = "Alta de Nuevo Alumno";
-            document.getElementById('inputLu').disabled = false; // Volvemos a habilitar la LU
+            document.getElementById('inputLu').disabled = false; 
 
+            // Limpiamos también el selector de carrera
             document.getElementById('inputLu').value = '';
             document.getElementById('inputNombres').value = '';
             document.getElementById('inputApellido').value = '';
+            document.getElementById('inputCarrera').value = ''; 
             document.getElementById('inputTitulo').value = '';
             document.getElementById('inputTramite').value = '';
             document.getElementById('inputEgreso').value = '';
         }
 
         function prepararEdicion(lu) {
-            // Buscamos los datos del alumno en la memoria
             const alumno = alumnosLocales.find(a => a.lu === lu);
             if (!alumno) return;
 
-            // Rellenamos el formulario
+            // Rellenamos el formulario (incluyendo la carrera_id si la tiene)
             document.getElementById('inputLu').value = alumno.lu;
             document.getElementById('inputNombres').value = alumno.nombres;
             document.getElementById('inputApellido').value = alumno.apellido;
-            document.getElementById('inputTitulo').value = alumno.titulo;
-            document.getElementById('inputTramite').value = alumno.titulo_en_tramite;
-            document.getElementById('inputEgreso').value = alumno.egreso;
+            document.getElementById('inputCarrera').value = alumno.carrera_id || '';
+            document.getElementById('inputTitulo').value = alumno.titulo || '';
+            document.getElementById('inputTramite').value = formatoInput(alumno.titulo_en_tramite);
+            document.getElementById('inputEgreso').value = formatoInput(alumno.egreso);
 
-            // Cambiamos a "Modo Edición"
             luEnEdicion = lu;
             document.querySelector('#seccionFormulario h3').textContent = `Editar Alumno: ${lu}`;
-            document.getElementById('inputLu').disabled = true; // Bloqueamos la LU para que no la rompan
+            document.getElementById('inputLu').disabled = true; 
             
             mostrarFormularioCreacion();
         }
 
         async function guardarNuevoAlumno() {
+            // MODIFICACIÓN: Capturamos el carrera_id y lo convertimos a número
+            const selectCarrera = document.getElementById('inputCarrera').value;
+
             const datosAlumno = {
-                // Si estamos editando, tomamos la LU de la variable (porque el input está deshabilitado). Si no, del input.
                 lu: luEnEdicion ? luEnEdicion : document.getElementById('inputLu').value,
                 nombres: document.getElementById('inputNombres').value,
                 apellido: document.getElementById('inputApellido').value,
-                titulo: document.getElementById('inputTitulo').value,
-                titulo_en_tramite: document.getElementById('inputTramite').value,
-                egreso: document.getElementById('inputEgreso').value
+                carrera_id: selectCarrera ? parseInt(selectCarrera) : null,
+                titulo: document.getElementById('inputTitulo').value || null,
+                titulo_en_tramite: document.getElementById('inputTramite').value || null,
+                egreso: document.getElementById('inputEgreso').value || null
             };
 
-            if (!datosAlumno.lu || !datosAlumno.apellido || !datosAlumno.nombres) {
-                alert("Por favor, complete al menos la LU, Nombres y Apellido.");
+            if (!datosAlumno.lu || !datosAlumno.apellido || !datosAlumno.nombres || !datosAlumno.carrera_id) {
+                alert("Por favor, complete LU, Nombres, Apellido y seleccione una Carrera.");
                 return;
             }
 
-            // Magia: Decidimos a qué endpoint pegarle según si estamos creando o editando
-            const url = luEnEdicion ? `/api/alumnos/${luEnEdicion}` : '/api/alumno';
+            const url = luEnEdicion ? `/api/alumnos/${luEnEdicion.replace('/', '/')}` : '/api/alumno';
             const metodo = luEnEdicion ? 'PUT' : 'POST';
 
             try {
-                const respuesta = await fetch(url, {
+                // Si la LU contiene barra invertida y va por URL, hay que tener cuidado con Express. 
+                // En su server.ts está configurado como /api/alumnos/:prefijo/:anio, 
+                // por lo que debemos asegurar el envío correcto.
+                
+                let urlFinal = url;
+                if (luEnEdicion) {
+                    // Convertimos "123/24" en "/api/alumnos/123/24"
+                    const partesLu = luEnEdicion.split('/');
+                    urlFinal = `/api/alumnos/${partesLu[0]}/${partesLu[1]}`;
+                }
+
+                const respuesta = await fetch(urlFinal, {
                     method: metodo,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(datosAlumno)
@@ -270,20 +298,22 @@
         // 3. ELIMINAR (DELETE)
         // ==========================================
         async function borrarAlumno(lu) {
-            // Confirmación de seguridad nativa del navegador
             const seguro = confirm(`¿Está absolutamente seguro que desea eliminar al alumno con LU: ${lu}? Esta acción no se puede deshacer.`);
-            
-            if (!seguro) return; // Si dice que no, abortamos
+            if (!seguro) return; 
 
             try {
-                const respuesta = await fetch(`/api/alumnos/${lu}`, {
-                    method: 'DELETE' // Le avisamos a Express que queremos borrar
+                // Manejo seguro de la barra en la URL para el DELETE
+                const partesLu = lu.split('/');
+                const urlDelete = `/api/alumnos/${partesLu[0]}/${partesLu[1]}`;
+
+                const respuesta = await fetch(urlDelete, {
+                    method: 'DELETE'
                 });
                 const json = await respuesta.json();
 
                 if (json.estado === 'exito') {
                     alert(json.mensaje);
-                    cargarAlumnos(); // Refrescamos la tabla para que desaparezca
+                    cargarAlumnos(); 
                 } else {
                     alert('Error al borrar: ' + json.mensaje);
                 }

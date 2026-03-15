@@ -1,5 +1,5 @@
 import express from 'express';
-import { client, conectarBD, generarCertificadoPorLU, generarCertifadosPorFecha, cargarAlumnosDesdeJson, obtenerAlumnosEnBD , cargarAlumnoEnBD,cargarCursadaAprobada, actualizarAlumnoEnBD, eliminarAlumno , Alumno, verificarCarreraAprobada} from './aida.js';
+import { client, conectarBD, generarCertificadoPorLU, generarCertifadosPorFecha, cargarAlumnosDesdeJson, obtenerCarreras, obtenerAlumnosEnBD , cargarAlumnoEnBD,cargarCursadaAprobada, actualizarAlumnoEnBD, eliminarAlumno , Alumno, verificarCarreraAprobada} from './aida.js';
 import path from 'path'; // Asegúrese de agregar este import al principio del archivo
 import session from 'express-session';
 import { Request, Response, NextFunction } from 'express';
@@ -152,8 +152,9 @@ app.get('/api/alumnos', requireAuthAPI, async (req, res) => {
 app.post('/api/alumno', requireAuthAPI, async (req, res) => {
     try {
         // 2. Le indicamos a TypeScript que trate al req.body como un Alumno
-        const nuevoAlumno = req.body as Alumno; 
-        await cargarAlumnoEnBD(nuevoAlumno); 
+        // Fragmento de ejemplo en server.ts
+        const nuevoAlumno = req.body as Alumno
+        await cargarAlumnoEnBD(nuevoAlumno);
         res.json({ estado: "exito", mensaje: "Alumno creado correctamente." });
     } catch (error: any) {
         res.status(500).json({ estado: "error", mensaje: error.message });
@@ -195,6 +196,16 @@ app.post('/api/v0/auth/register', async (req, res) => {
         
         await crearUsuario(client, username, password, nombre, email)
         res.json({ estado: "exito", mensaje: "Usuario registrado correctamente." });
+    } catch (error: any) {
+        res.status(500).json({ estado: "error", mensaje: error.message });
+    }
+});
+
+// Endpoint: Obtener lista de carreras
+app.get('/api/v0/carreras', requireAuthAPI, async (req, res) => {
+    try {
+        const carreras = await obtenerCarreras();
+        res.json(carreras);
     } catch (error: any) {
         res.status(500).json({ estado: "error", mensaje: error.message });
     }
