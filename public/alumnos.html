@@ -38,7 +38,6 @@
             <option value="">-- Seleccione una carrera --</option>
         </select><br>
 
-        <label>Título:</label> <input type="text" id="inputTitulo"><br>
         <label>Fecha Título en Trámite:</label> <input type="date" id="inputTramite"><br>
         <label>Fecha Egreso:</label> <input type="date" id="inputEgreso"><br>
         
@@ -215,7 +214,6 @@
             document.getElementById('inputNombres').value = '';
             document.getElementById('inputApellido').value = '';
             document.getElementById('inputCarrera').value = ''; 
-            document.getElementById('inputTitulo').value = '';
             document.getElementById('inputTramite').value = '';
             document.getElementById('inputEgreso').value = '';
         }
@@ -229,7 +227,6 @@
             document.getElementById('inputNombres').value = alumno.nombres;
             document.getElementById('inputApellido').value = alumno.apellido;
             document.getElementById('inputCarrera').value = alumno.carrera_id || '';
-            document.getElementById('inputTitulo').value = alumno.titulo || '';
             document.getElementById('inputTramite').value = formatoInput(alumno.titulo_en_tramite);
             document.getElementById('inputEgreso').value = formatoInput(alumno.egreso);
 
@@ -242,14 +239,25 @@
 
         async function guardarNuevoAlumno() {
             // MODIFICACIÓN: Capturamos el carrera_id y lo convertimos a número
-            const selectCarrera = document.getElementById('inputCarrera').value;
+            async function guardarNuevoAlumno() {
+    // 1. Capturamos el elemento select
+            const selectCarrera = document.getElementById('inputCarrera');
+            const idCarrera = selectCarrera.value ? parseInt(selectCarrera.value) : null;
+            
+            // 2. Extraemos el texto de la opción seleccionada (Ej: "Tecnicatura Web")
+            let tituloAutomatico = null;
+            if (idCarrera) {
+                // .selectedIndex nos dice qué posición eligió el usuario, y .text nos da el nombre visible
+                tituloAutomatico = selectCarrera.options[selectCarrera.selectedIndex].text;
+            }
 
+            // 3. Armamos el objeto de datos
             const datosAlumno = {
                 lu: luEnEdicion ? luEnEdicion : document.getElementById('inputLu').value,
                 nombres: document.getElementById('inputNombres').value,
                 apellido: document.getElementById('inputApellido').value,
-                carrera_id: selectCarrera ? parseInt(selectCarrera) : null,
-                titulo: document.getElementById('inputTitulo').value || null,
+                carrera_id: idCarrera,
+                titulo: tituloAutomatico, // <--- Aquí inyectamos el título automáticamente
                 titulo_en_tramite: document.getElementById('inputTramite').value || null,
                 egreso: document.getElementById('inputEgreso').value || null
             };
@@ -258,6 +266,8 @@
                 alert("Por favor, complete LU, Nombres, Apellido y seleccione una Carrera.");
                 return;
             }
+
+    // ... (el resto de la función url, metodo, fetch, etc. se mantiene exactamente igual)
 
             const url = luEnEdicion ? `/api/alumnos/${luEnEdicion.replace('/', '/')}` : '/api/alumno';
             const metodo = luEnEdicion ? 'PUT' : 'POST';
