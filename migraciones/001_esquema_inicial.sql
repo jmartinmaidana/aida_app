@@ -66,15 +66,15 @@ CREATE TABLE aida.cursadas (
 -- =========================================================================
 -- 4. PERMISOS DE SEGURIDAD 
 -- =========================================================================
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE aida.carreras TO aida_admin;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE aida.materias TO aida_admin;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE aida.alumnos TO aida_admin;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE aida.plan_estudio TO aida_admin;
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE aida.cursadas TO aida_admin;
+--GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE aida.carreras TO aida_admin;
+--GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE aida.materias TO aida_admin;
+--GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE aida.alumnos TO aida_admin;
+--GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE aida.plan_estudio TO aida_admin;
+--GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE aida.cursadas TO aida_admin;
 
-GRANT USAGE, SELECT ON SEQUENCE aida.carreras_id_seq TO aida_admin;
-GRANT USAGE, SELECT ON SEQUENCE aida.materias_id_seq TO aida_admin;
-GRANT USAGE, SELECT ON SEQUENCE aida.cursadas_id_seq TO aida_admin;
+--GRANT USAGE, SELECT ON SEQUENCE aida.carreras_id_seq TO aida_admin;
+--GRANT USAGE, SELECT ON SEQUENCE aida.materias_id_seq TO aida_admin;
+--GRANT USAGE, SELECT ON SEQUENCE aida.cursadas_id_seq TO aida_admin;
 
 -- =========================================================================
 -- 5. CARGA DE DATOS BASE (Estado Limpio)
