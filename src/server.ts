@@ -52,8 +52,7 @@ function requireAuthAPI(req: Request, res: Response, next: NextFunction) {
         res.status(401).json({ estado: 'error', mensaje: 'No autorizado. Debe iniciar sesión.' });
     }
 }
-
-// Endpoint: Emitir Certificado verificando reglas de negocio
+// En server.ts
 app.post('/api/v0/certificados', requireAuthAPI, async (req, res) => {
     try {
         const { lu } = req.body;
@@ -61,12 +60,14 @@ app.post('/api/v0/certificados', requireAuthAPI, async (req, res) => {
             return res.status(400).json({ estado: "error", mensaje: "Falta la LU." });
         }
         
-        // Llamamos a su función que ahora tiene las validaciones estrictas
-        await generarCertificadoPorLU(lu);
+        // 1. Obtenemos la ruta del archivo generado
+        const rutaArchivo = await generarCertificadoPorLU(lu);
         
-        res.json({ estado: "exito", mensaje: "Constancia generada exitosamente en el servidor." });
+        // 2. Enviamos el archivo para descarga
+        // El segundo parámetro es el nombre que verá el usuario al descargar
+        res.download(rutaArchivo, `Certificado_${lu.replace('/', '-')}.html`);
+
     } catch (error: any) {
-        // Devolvemos status 400 (Bad Request) para que el frontend atrape el texto del error
         res.status(400).json({ estado: "error", mensaje: error.message });
     }
 });

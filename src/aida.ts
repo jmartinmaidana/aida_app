@@ -42,8 +42,9 @@ export async function cargarNovedades(rutaArchivo: string ) {
     }
 }
 
+// En aida.ts
 export async function generarCertificadoAlumno(filtro: FiltroAlumnos, prefijoArchivo: string) {
-    const alumnos = await obtenerAlumnoQueNecesitaCertificado(filtro);
+        const alumnos = await obtenerAlumnoQueNecesitaCertificado(filtro);
 
     if (alumnos.length === 0) {
         throw new Error("No se encontró ningún alumno con los datos proporcionados.");
@@ -67,22 +68,26 @@ export async function generarCertificadoAlumno(filtro: FiltroAlumnos, prefijoArc
 
     const fechaEmision = new Date().toLocaleDateString('es-AR');
     const plantillaHtml = await readFile('./recursos/plantilla-certificado.html', { encoding: 'utf8' });
+    
+    let rutaFinal = ''; // Variable para guardar la ruta
 
-    // Iteramos sobre todos los alumnos encontrados
     for (const alumno of alumnos) {
-        let htmlContent = plantillaHtml;
+               let htmlContent = plantillaHtml;
         htmlContent = htmlContent.replace('{{NOMBRES}}', alumno.nombres);
         htmlContent = htmlContent.replace('{{APELLIDO}}', alumno.apellido);
         htmlContent = htmlContent.replace('{{TITULO}}', alumno.titulo);
         htmlContent = htmlContent.replace('{{FECHA}}', fechaEmision);
-
-        // Agregamos la LU al nombre del archivo, reemplazando la barra por un guión bajo
+        
         const luSegura = alumno.lu.replace(/\//g, '_');
-        const rutaCompleta = `./local-intercambio/salida/${prefijoArchivo}_${luSegura}.html`;
+        
+        // CAMBIO IMPORTANTE: Usamos /tmp para Render
+        const rutaCompleta = `/tmp/${prefijoArchivo}_${luSegura}.html`;
         
         await writeFile(rutaCompleta, htmlContent, { encoding: 'utf8' });
-        console.log(`Certificado generado exitosamente en: ${rutaCompleta}`);
+        rutaFinal = rutaCompleta; // Guardamos la última ruta generada
     }
+    
+    return rutaFinal; // <--- RETORNAMOS LA RUTA
 }
 
 export async function generarCertificadoPorLU(lu: string) {
@@ -90,7 +95,7 @@ export async function generarCertificadoPorLU(lu: string) {
     
     // Antes hacíamos el .replace() aquí. Ahora simplemente le pasamos 
     // la palabra 'certificado' como prefijo y la función central hará el resto.
-    await generarCertificadoAlumno({ lu: lu }, 'certificado');
+    return await generarCertificadoAlumno({ lu: lu }, 'certificado');
     
 }
 
@@ -100,13 +105,13 @@ export async function generarCertifadosPorFecha(fechaStr: string) {
     
     // Antes armábamos el nombre con la fecha. Ahora pasamos un prefijo base
     // y la función central le agregará automáticamente la LU de cada alumno encontrado.
-    await generarCertificadoAlumno({ fecha: fechaConvertida }, 'certificado_fecha');
+    return await generarCertificadoAlumno({ fecha: fechaConvertida }, 'certificado_fecha');
 }
 
 export async function generarCertificadoAlumnoPrueba() {
     console.log("Modo prueba activado.");
     // A esta le pasamos el prefijo 'prueba'
-    await generarCertificadoAlumno({ uno: true }, 'prueba');
+    return await generarCertificadoAlumno({ uno: true }, 'prueba');
 }
 
 async function obtenerAlumnoQueNecesitaCertificado(filtro: FiltroAlumnos) {

@@ -33,7 +33,6 @@
 
     <div id="cajaMensaje" class="mensaje"></div>
 </div>
-
 <script>
     document.getElementById('formCertificado').addEventListener('submit', async (evento) => {
         evento.preventDefault(); 
@@ -43,22 +42,35 @@
         const lu = document.getElementById('lu').value;
 
         try {
-            // Asegúrese de que esta URL coincida con el endpoint en su server.ts
-            // que llama a la función generarCertificadoPorLU(lu)
             const respuesta = await fetch('/api/v0/certificados', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ lu: lu })
             });
 
-            const json = await respuesta.json();
-            cajaMensaje.style.display = 'block';
-            cajaMensaje.textContent = json.mensaje || json.error;
-
             if (respuesta.ok) {
+                // Convertimos la respuesta en un "Blob" (archivo binario)
+                const blob = await respuesta.blob();
+                
+                // Creamos una URL temporal para ese archivo
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Certificado_${lu.replace('/', '-')}.html`;
+                
+                // Agregamos el link al documento, lo clickeamos y lo borramos
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                
+                cajaMensaje.style.display = 'block';
                 cajaMensaje.className = 'mensaje exito';
+                cajaMensaje.textContent = "Certificado descargado exitosamente.";
             } else {
+                const json = await respuesta.json();
+                cajaMensaje.style.display = 'block';
                 cajaMensaje.className = 'mensaje error';
+                cajaMensaje.textContent = json.mensaje || "Error al generar certificado.";
             }
         } catch (error) {
             cajaMensaje.style.display = 'block';
