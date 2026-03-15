@@ -1,0 +1,96 @@
+/* public/styles.css */
+:root {
+    --primario: #0284c7; /* Azul moderno */
+    --primario-hover: #0369a1;
+    --exito: #10b981; /* Verde esmeralda */
+    --exito-hover: #059669;
+    --peligro: #ef4444; /* Rojo suave */
+    --peligro-hover: #dc2626;
+    --advertencia: #f59e0b; /* Amarillo/Naranja */
+    --fondo: #f8fafc;
+    --tarjeta: #ffffff;
+    --texto: #1e293b;
+    --borde: #e2e8f0;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background-color: var(--fondo);
+    color: var(--texto);
+    margin: 0;
+    padding: 0;
+}
+
+/* Barra de Navegación */
+.navbar {
+    background-color: var(--primario);
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.navbar h1 { margin: 0; font-size: 1.5rem; }
+.navbar a { color: white; text-decoration: none; margin-right: 20px; font-weight: 500; }
+.navbar a:hover { text-decoration: underline; }
+.btn-logout { background: transparent; border: 1px solid white; color: white; padding: 5px 15px; border-radius: 4px; cursor: pointer; }
+.btn-logout:hover { background: rgba(255,255,255,0.1); }
+
+/* Contenedor Principal */
+.contenedor {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+.tarjeta {
+    background: var(--tarjeta);
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    border: 1px solid var(--borde);
+}
+
+/* Botones Universales */
+button, .btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background 0.2s;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+.btn-primario { background: var(--primario); color: white; }
+.btn-primario:hover { background: var(--primario-hover); }
+.btn-exito { background: var(--exito); color: white; }
+.btn-exito:hover { background: var(--exito-hover); }
+.btn-peligro { background: var(--peligro); color: white; }
+.btn-peligro:hover { background: var(--peligro-hover); }
+.btn-advertencia { background: var(--advertencia); color: white; }
+
+/* Formularios */
+.grupo-form { margin-bottom: 15px; }
+label { display: block; font-weight: 600; margin-bottom: 5px; color: #475569; }
+input, select { 
+    width: 100%; padding: 10px; border: 1px solid var(--borde); 
+    border-radius: 5px; box-sizing: border-box; font-family: inherit;
+}
+input:focus, select:focus { outline: none; border-color: var(--primario); box-shadow: 0 0 0 3px rgba(2,132,199,0.1); }
+
+/* Tablas */
+table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--borde); }
+th { background-color: var(--primario); color: white; cursor: pointer; }
+th:hover { background-color: var(--primario-hover); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background-color: #f1f5f9; }
+
+/* Alertas */
+.mensaje { padding: 12px; border-radius: 5px; margin-top: 15px; display: none; font-weight: 500; }
+.mensaje.exito { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+.mensaje.error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }

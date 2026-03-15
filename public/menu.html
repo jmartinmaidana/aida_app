@@ -2,22 +2,84 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>POLAR - Menú Principal</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
-        .boton { display: block; padding: 10px; margin: 10px 0; background: #0056b3; color: white; text-decoration: none; text-align: center; border-radius: 5px; }
-        .boton:hover { background: #004494; }
+    <title>AIDA - Panel de Control</title>
+    <link rel="stylesheet" href="/styles.css"> <style>
+        .grid-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .tarjeta-menu {
+            text-align: center;
+            padding: 30px 20px;
+            transition: transform 0.2s;
+        }
+        .tarjeta-menu:hover {
+            transform: translateY(-5px);
+            border-color: var(--primario);
+        }
+        .icono { font-size: 40px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
-    <h1>Sistema de Certificados POLAR</h1>
-    <p>Seleccione la operación que desea realizar:</p>
-    
-    <a href="/app/certificados" class="boton">Generar certificado por LU</a>
-    <a href="/app/fecha" class="boton">Generar certificados por Fecha</a>
-    <a href="/app/archivo" class="boton">Cargar nuevos alumnos (CSV)</a>
-    <a href="/app/cursada" class="boton">Cargar cursada aprobada</a>
-    <a href="/app/alumnos" class="boton">Ver tabla de alumnos</a>
+    <nav class="navbar">
+        <h1>🎓 AIDA System</h1>
+        <div class="nav-links">
+            <button onclick="cerrarSesion()" class="btn-logout">Cerrar Sesión</button>
+        </div>
+    </nav>
 
+    <div class="contenedor">
+        <h2>Bienvenido al Panel de Administración</h2>
+        <p style="color: var(--text-muted)">Seleccione el módulo con el que desea trabajar hoy:</p>
+        
+        <div class="grid-menu">
+            <a href="/app/alumnos" style="text-decoration: none;">
+                <div class="tarjeta tarjeta-menu">
+                    <div class="icono">👥</div>
+                    <h3 style="color: var(--texto); margin: 0;">Gestión de Alumnos</h3>
+                    <p style="color: #64748b; font-size: 14px;">Altas, bajas, modificaciones y consultas.</p>
+                </div>
+            </a>
+            <a href="/app/cursada" style="text-decoration: none;">
+                <div class="tarjeta tarjeta-menu">
+                    <div class="icono">📝</div>
+                    <h3 style="color: var(--texto); margin: 0;">Cargar Notas</h3>
+                    <p style="color: #64748b; font-size: 14px;">Registrar cursadas aprobadas.</p>
+                </div>
+            </a>
+            <a href="/app/certificados" style="text-decoration: none;">
+                <div class="tarjeta tarjeta-menu">
+                    <div class="icono">📜</div>
+                    <h3 style="color: var(--texto); margin: 0;">Emisión Individual</h3>
+                    <p style="color: #64748b; font-size: 14px;">Generar certificado por LU.</p>
+                </div>
+            </a>
+            <a href="/app/fecha" style="text-decoration: none;">
+                <div class="tarjeta tarjeta-menu">
+                    <div class="icono">📅</div>
+                    <h3 style="color: var(--texto); margin: 0;">Emisión Masiva</h3>
+                    <p style="color: #64748b; font-size: 14px;">Generar por fecha de egreso.</p>
+                </div>
+            </a>
+            <a href="/app/archivo" style="text-decoration: none;">
+                <div class="tarjeta tarjeta-menu">
+                    <div class="icono">📁</div>
+                    <h3 style="color: var(--texto); margin: 0;">Carga Masiva (CSV)</h3>
+                    <p style="color: #64748b; font-size: 14px;">Importar nuevos inscriptos.</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        async function cerrarSesion() {
+            try {
+                await fetch('/api/v0/auth/logout', { method: 'POST' });
+                window.location.href = '/app/login';
+            } catch (error) { alert("Error al cerrar sesión"); }
+        }
+    </script>
 </body>
 </html>

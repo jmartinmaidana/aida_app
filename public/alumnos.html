@@ -2,24 +2,64 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Gestión de Alumnos</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; max-width: 1000px; margin: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #0056b3; color: white; cursor: pointer; }
-        th:hover { background-color: #004494; }
-        .boton-nuevo { display: inline-block; padding: 10px 15px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 15px; cursor: pointer; border: none; font-size: 16px; }
-        .boton-nuevo:hover { background: #218838; }
-        
-        /* Estilos para el formulario oculto */
-        #seccionFormulario { display: none; background: #f9f9f9; padding: 20px; border: 1px solid #ddd; margin-bottom: 20px; border-radius: 5px; }
-        #seccionFormulario label { display: inline-block; width: 180px; font-weight: bold; margin-bottom: 10px; }
-        #seccionFormulario input, #seccionFormulario select { padding: 5px; width: 200px; margin-bottom: 10px; }
-        .btn-guardar { background: #28a745; color: white; padding: 8px 15px; border: none; border-radius: 3px; cursor: pointer; }
-        .btn-cancelar { background: #dc3545; color: white; padding: 8px 15px; border: none; border-radius: 3px; cursor: pointer; margin-left: 10px; }
+    <title>AIDA - Gestión de Alumnos</title>
+    <link rel="stylesheet" href="/styles.css"> <style>
+        /* Solo estilos muy específicos de esta página que no van en el global */
+        #seccionFormulario { display: none; margin-bottom: 20px; }
+        .grid-formulario { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .acciones-tabla button { margin-right: 5px; margin-bottom: 5px; }
     </style>
 </head>
+<body>
+    <nav class="navbar">
+        <h1>🎓 AIDA System</h1>
+        <div class="nav-links">
+            <a href="/menu">Panel Principal</a>
+        </div>
+    </nav>
+
+    <div class="contenedor">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0;">Directorio de Alumnos</h2>
+            <button class="btn btn-exito" onclick="mostrarFormularioCreacion()">➕ Nuevo Alumno</button>
+        </div>
+
+        <div id="seccionFormulario" class="tarjeta">
+            <h3 style="margin-top: 0; border-bottom: 1px solid var(--borde); padding-bottom: 10px;">Alta / Edición de Alumno</h3>
+            <div class="grid-formulario">
+                <div class="grupo-form">
+                    <label>LU (ej. 123/24):</label> 
+                    <input type="text" id="inputLu" placeholder="123/24">
+                </div>
+                <div class="grupo-form">
+                    <label>Carrera:</label> 
+                    <select id="inputCarrera" required><option value="">-- Seleccione --</option></select>
+                </div>
+                <div class="grupo-form">
+                    <label>Nombres:</label> 
+                    <input type="text" id="inputNombres">
+                </div>
+                <div class="grupo-form">
+                    <label>Apellido:</label> 
+                    <input type="text" id="inputApellido">
+                </div>
+                <div class="grupo-form">
+                    <label>Fecha Trámite Título:</label> 
+                    <input type="date" id="inputTramite">
+                </div>
+                <div class="grupo-form">
+                    <label>Fecha Egreso:</label> 
+                    <input type="date" id="inputEgreso">
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="btn btn-primario" onclick="guardarNuevoAlumno()">Guardar Datos</button>
+                <button class="btn btn-peligro" onclick="ocultarFormulario()">Cancelar</button>
+            </div>
+        </div>
+
+        <table id="tablaAlumnos">
 <body>
     <h2>Panel de Gestión de Alumnos</h2>
     <a href="/menu">← Volver al menú</a>
