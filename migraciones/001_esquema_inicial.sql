@@ -1,3 +1,5 @@
+
+CREATE SCHEMA IF NOT EXISTS aida;
 -- =========================================================================
 -- 0. LIMPIEZA TOTAL (El "Refresh")
 -- Destruye las tablas existentes y sus relaciones para empezar desde cero
