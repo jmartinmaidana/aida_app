@@ -1,0 +1,14 @@
+# Dependencias (Render las instalará)
+node_modules/
+
+# Archivos compilados (Render los compilará allá)
+dist/
+
+# Configuración local y secretos
+recursos/local-*
+*.bat
+.env
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db

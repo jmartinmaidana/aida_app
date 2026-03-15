@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIDA - Iniciar Sesión</title>
+    <style>
+        /* Estilos básicos para que se vea profesional y centrado */
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4f9; margin: 0; }
+        .login-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 300px; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        button:hover { background-color: #0056b3; }
+        .error-message { color: red; margin-top: 15px; display: none; font-size: 14px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <h2>Ingreso a AIDA</h2>
+    <form id="loginForm">
+        <input type="text" id="username" placeholder="Nombre de usuario" required>
+        <input type="password" id="password" placeholder="Contraseña" required>
+        <button type="submit">Iniciar Sesión</button>
+        <p id="mensajeError" class="error-message"></p>
+    </form>
+</div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault(); // Evitamos que el formulario recargue la página al hacer click
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const mensajeError = document.getElementById('mensajeError');
+
+        mensajeError.style.display = 'none'; // Ocultamos errores previos
+
+        try {
+            // Hacemos la petición POST a nuestro endpoint recién creado
+            const respuesta = await fetch('/api/v0/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const json = await respuesta.json();
+
+            if (json.estado === 'exito') {
+                // El servidor nos dio luz verde y ya guardó la cookie.
+                // Redirigimos al usuario al menú principal.
+                window.location.href = '/menu'; 
+            } else {
+                // Si el servidor rechazó las credenciales, mostramos el mensaje de error.
+                mensajeError.textContent = json.mensaje;
+                mensajeError.style.display = 'block';
+            }
+        } catch (error) {
+            mensajeError.textContent = "Error de conexión con el servidor.";
+            mensajeError.style.display = 'block';
+        }
+    });
+</script>
+
+</body>
+</html>

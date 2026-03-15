@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Buscar por Fecha</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+        input, button { padding: 8px; margin-top: 10px; }
+        #resultado { margin-top: 20px; padding: 10px; border-radius: 5px; display: none; }
+        .exito { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h2>Generar Certificados por Fecha de Egreso</h2>
+    <a href="/menu">← Volver al menú</a>
+    <hr>
+    
+    <label>Ingrese la fecha (ej. 01/01/2022 o 2022-01-01):</label><br>
+    <input type="text" id="inputFecha" placeholder="DD/MM/AAAA">
+    <button onclick="buscarPorFecha()">Generar</button>
+
+    <div id="resultado"></div>
+
+    <script>
+        async function buscarPorFecha() {
+            const fechaInput = document.getElementById('inputFecha').value;
+            if (!fechaInput) {
+                mostrarMensaje('Por favor, ingrese una fecha.', 'error');
+                return;
+            }
+
+            mostrarMensaje('Generando certificados masivos...', '');
+
+            try {
+                const respuesta = await fetch('/api/v0/fecha', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fecha: fechaInput }) // Enviamos la fecha segura en el body
+                });
+
+                const datos = await respuesta.json();
+
+                if (respuesta.ok) {
+                    mostrarMensaje(datos.mensaje, 'exito');
+                } else {
+                    mostrarMensaje(datos.mensaje, 'error');
+                }
+            } catch (error) {
+                mostrarMensaje('Error de conexión con el servidor.', 'error');
+            }
+        }
+
+        function mostrarMensaje(texto, tipo) {
+            const divResultado = document.getElementById('resultado');
+            divResultado.style.display = 'block';
+            divResultado.className = tipo;
+            divResultado.textContent = texto;
+        }
+    </script>
+</body>
+</html>

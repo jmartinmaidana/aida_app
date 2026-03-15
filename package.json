@@ -1,0 +1,24 @@
+{
+  "type": "module",
+  "name": "tpbdd",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "pg": "^8.20.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/express": "^5.0.6",
+    "@types/express-session": "^1.18.2",
+    "@types/node": "^25.4.0",
+    "@types/pg": "^8.18.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "npx tsc",
+    "predeploy": "node dist/migrador.js",
+    "start": "node dist/server.js"
+  }
+  
+}

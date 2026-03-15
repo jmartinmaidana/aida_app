@@ -1,0 +1,2 @@
+-- Agregamos la columna de fecha de nacimiento a la tabla alumnos
+-- ALTER TABLE aida.alumnos ADD COLUMN fecha_nacimiento DATE;

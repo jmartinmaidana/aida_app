@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cargar Alumnos</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+        input, button { padding: 8px; margin-top: 10px; }
+        #resultado { margin-top: 20px; padding: 10px; border-radius: 5px; display: none; }
+        .exito { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h2>Cargar Nuevos Alumnos</h2>
+    <a href="/menu">← Volver al menú</a>
+    <hr>
+    
+    <label>Seleccione un archivo CSV con los datos de los alumnos:</label><br>
+    <input type="file" id="inputCsv" accept=".csv">
+    <button onclick="procesarYEnviarArchivo()">Cargar Datos</button>
+
+    <div id="resultado"></div>
+
+    <script>
+        async function procesarYEnviarArchivo() {
+            const archivoInput = document.getElementById('inputCsv');
+            if (archivoInput.files.length === 0) {
+                mostrarMensaje('Por favor, seleccione un archivo CSV.', 'error');
+                return;
+            }
+
+            const archivo = archivoInput.files[0];
+            const lector = new FileReader();
+
+            mostrarMensaje('Leyendo y convirtiendo archivo...', '');
+
+            lector.onload = async function(evento) {
+                const contenido = evento.target.result;
+                const lineas = contenido.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                
+                // Exigimos que el CSV tenga encabezados para mayor seguridad
+                const encabezados = lineas[0].split(',');
+                if (encabezados.length < 6) {
+                    mostrarMensaje('El archivo CSV no tiene las columnas requeridas.', 'error');
+                    return;
+                }
+
+                // Transformamos el CSV a JSON (Requisito de la clase)
+                const alumnosJson = [];
+                for (let i = 1; i < lineas.length; i++) {
+                    const datos = lineas[i].split(',');
+                    if (datos.length >= 6) {
+                        alumnosJson.push({
+                            lu: datos[0],
+                            nombres: datos[1],
+                            apellido: datos[2],
+                            titulo: datos[3],
+                            titulo_en_tramite: datos[4],
+                            egreso: datos[5]
+                        });
+                    }
+                }
+
+                try {
+                    // Enviamos el JSON al servidor mediante PATCH
+                    const respuesta = await fetch('/api/v0/archivo', {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(alumnosJson)
+                    });
+
+                    const datosRespuesta = await respuesta.json();
+
+                    if (datosRespuesta.estado === 'exito') {
+                        mostrarMensaje(datosRespuesta.mensaje, 'exito');
+                    } else {
+                        mostrarMensaje(datosRespuesta.mensaje + (datosRespuesta.detalle ? ': ' + datosRespuesta.detalle : ''), 'error');
+                    }
+                } catch (error) {
+                    mostrarMensaje('Error de conexión al enviar los datos al servidor.', 'error');
+                }
+            };
+
+            // Inicia la lectura del archivo como texto
+            lector.readAsText(archivo);
+        }
+
+        function mostrarMensaje(texto, tipo) {
+            const divResultado = document.getElementById('resultado');
+            divResultado.style.display = 'block';
+            divResultado.className = tipo;
+            divResultado.textContent = texto;
+        }
+    </script>
+</body>
+</html>
