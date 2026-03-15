@@ -16,9 +16,10 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "npx tsc",
-    "predeploy": "node dist/migrador.js",
-    "start": "node dist/server.js"
-  }
+  "build": "npx tsc",
+  "predeploy": "node dist/migrador.js",
+  "start": "node dist/server.js",
+  "db:reset": "npx tsc && node dist/reset-db.js"
+}
   
 }
