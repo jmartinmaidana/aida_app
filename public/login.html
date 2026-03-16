@@ -12,159 +12,40 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <link rel="stylesheet" href="/styles.css"> 
-    
-    <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            margin: 0; 
-            background-color: #f8fafc; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .tarjeta-login { 
-            background: white; 
-            padding: 40px; 
-            border-radius: 8px; 
-            border: 1px solid #e2e8f0; 
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); 
-            width: 100%;
-            max-width: 400px;
-            box-sizing: border-box;
-        }
-
-        .cabecera-login {
-            text-align: center;
-            margin-bottom: 35px;
-        }
-
-        .cabecera-login h1 {
-            margin: 0;
-            color: #0284c7;
-            font-size: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            letter-spacing: -0.5px;
-        }
-
-        .cabecera-login p {
-            color: #64748b;
-            margin: 10px 0 0 0;
-            font-size: 1rem;
-        }
-
-        .grupo-form {
-            margin-bottom: 20px;
-        }
-
-        .grupo-form label {
-            display: block;
-            font-size: 0.95rem; 
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 8px;
-        }
-
-        .input-con-icono {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .input-con-icono i {
-            position: absolute;
-            left: 14px;
-            color: #94a3b8;
-            font-size: 1.2rem;
-        }
-
-        .input-con-icono input {
-            width: 100%;
-            padding: 12px 12px 12px 42px; /* Mayor espacio a la izquierda para el ícono */
-            font-size: 1rem; 
-            border: 2px solid #cbd5e1; 
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .input-con-icono input:focus {
-            outline: none;
-            border-color: #0284c7;
-            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
-        }
-
-        .btn-ingresar {
-            width: 100%; 
-            margin-top: 15px; 
-            font-size: 1.05rem; 
-            padding: 14px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            background-color: #0284c7;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            font-weight: 600;
-            transition: background-color 0.2s;
-        }
-
-        .btn-ingresar:hover {
-            background-color: #0369a1;
-        }
-
-        .mensaje { 
-            padding: 12px; 
-            border-radius: 5px; 
-            margin-top: 20px; 
-            display: none; 
-            font-weight: 500; 
-            text-align: center;
-            font-size: 0.9rem;
-        }
-        .mensaje.error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-    </style>
 </head>
 <body>
 
-    <div class="tarjeta-login">
-        <div class="cabecera-login">
-            <h1><i class="ph ph-graduation-cap"></i> AIDA</h1>
-            <p>Acceso al sistema de gestión</p>
-        </div>
-        
-        <form id="loginForm">
-            <div class="grupo-form">
-                <label for="username">Usuario</label>
-                <div class="input-con-icono">
-                    <i class="ph ph-user"></i>
-                    <input type="text" id="username" placeholder="Ingrese su nombre de usuario" required>
-                </div>
+    <div class="login-wrapper">
+        <div class="tarjeta-login">
+            <div class="cabecera-login">
+                <h1><i class="ph ph-graduation-cap"></i> AIDA</h1>
+                <p>Acceso al sistema de gestión</p>
             </div>
             
-            <div class="grupo-form">
-                <label for="password">Contraseña</label>
-                <div class="input-con-icono">
-                    <i class="ph ph-lock-key"></i>
-                    <input type="password" id="password" placeholder="Ingrese su contraseña" required>
+            <form id="loginForm">
+                <div class="grupo-form">
+                    <label for="username">Usuario</label>
+                    <div class="input-con-icono">
+                        <i class="ph ph-user"></i>
+                        <input type="text" id="username" placeholder="Ingrese su nombre de usuario" required>
+                    </div>
                 </div>
-            </div>
-            
-            <button type="submit" class="btn-ingresar">
-                Iniciar Sesión <i class="ph ph-sign-in"></i>
-            </button>
-        </form>
+                
+                <div class="grupo-form">
+                    <label for="password">Contraseña</label>
+                    <div class="input-con-icono">
+                        <i class="ph ph-lock-key"></i>
+                        <input type="password" id="password" placeholder="Ingrese su contraseña" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-ingresar">
+                    Iniciar Sesión <i class="ph ph-sign-in"></i>
+                </button>
+            </form>
 
-        <div id="mensajeError" class="mensaje error"></div>
+            <div id="mensajeError" class="mensaje error"></div>
+        </div>
     </div>
 
     <script>
@@ -198,6 +79,5 @@
             }
         });
     </script>
-
 </body>
 </html>

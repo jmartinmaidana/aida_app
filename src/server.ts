@@ -21,6 +21,8 @@ const puerto = 3000;
 // verifica si tiene forma de JSON, y si es así, lo convierte en un objeto real de JavaScript para que podamos usarlo directamente.
 app.use(express.json());
 
+app.use(express.static('public'));
+
 // Configuración del motor de sesiones
 app.use(session({
     secret: process.env.SESSION_SECRET || 'mi_secreto_super_seguro_123', //Codigo/clave necesaria para validar una cookie y asi  evitar que  un usuario acceda solo creando su propia cookie
