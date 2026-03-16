@@ -1,0 +1,43 @@
+name: Pipeline AIDA
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "*" ]
+
+jobs:
+  # === JOB 1: Verificar que el código no esté roto ===
+  verificacion:
+    name: Compilación y Verificación
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+      
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' 
+          
+      - name: Instalar dependencias
+        run: npm install
+        
+      - name: Compilar aplicación (TypeScript a JS)
+        run: npx tsc
+        
+      - name: Ejecutar Tests
+        run: echo "Aquí se ejecutarán los tests automáticos en el futuro"
+
+  # === JOB 2: Publicar en Render (Solo si el Job 1 fue exitoso) ===
+  deploy:
+    name: Deploy a Producción
+    needs: verificacion  # Obliga a esperar a que termine la verificación
+    if: github.ref == 'refs/heads/main' # Solo se ejecuta si estamos en la rama main
+    runs-on: ubuntu-latest
+    environment:
+      name: DEPLOYMENT # Conecta con el entorno y el revisor que configuramos
+    steps:
+      - name: Disparar deploy en Render
+        run: |
+          curl "${{ secrets.URL_DEPLOYMENT }}"

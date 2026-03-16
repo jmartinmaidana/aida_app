@@ -9,9 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
     <link rel="stylesheet" href="/styles.css"> 
-
 </head>
 <body>
     <nav class="navbar">
@@ -22,7 +20,6 @@
             <a href="/app/cursada"><i class="ph ph-pencil-line"></i> Notas</a>
             <a href="/app/certificados"><i class="ph ph-certificate"></i> Individual</a>
             <a href="/app/fecha"><i class="ph ph-files"></i> Masiva</a>
-            <a href="/app/archivo"><i class="ph ph-upload-simple"></i> CSV</a>
             <button onclick="cerrarSesion()" class="btn-logout"><i class="ph ph-sign-out"></i> Salir</button>
         </div>
     </nav>
@@ -32,8 +29,17 @@
             <h1><i class="ph ph-file-csv"></i> Carga Masiva de Alumnos</h1>
             <p>Seleccione un archivo en formato delimitado por comas (.csv) para importar un lote de inscriptos y registrarlos directamente en la base de datos.</p>
             
-            <div class="area-carga">
-                <input type="file" id="inputCsv" accept=".csv">
+            <div class="area-carga" id="zonaCarga">
+                <i class="ph ph-file-csv" style="font-size: 48px; color: #94a3b8; margin-bottom: 15px;"></i>
+                <p style="margin: 0 0 15px 0; color: #475569; font-size: 0.95rem;">Arrastre y suelte su archivo aquí o</p>
+                
+                <input type="file" id="inputCsv" accept=".csv" style="display: none;">
+                
+                <label for="inputCsv" class="btn-seleccionar">
+                    <i class="ph ph-folder-open"></i> Seleccionar Archivo
+                </label>
+                
+                <p id="nombreArchivo" style="margin: 15px 0 0 0; font-weight: 600; color: #0284c7; display: none; word-break: break-all; font-size: 0.95rem;"></p>
             </div>
             
             <button onclick="procesarYEnviarArchivo()" class="btn-generar">
@@ -45,14 +51,54 @@
     </div>
 
     <script>
+        // --- LÓGICA DE DRAG & DROP Y SELECCIÓN DE ARCHIVO ---
+        const zonaCarga = document.getElementById('zonaCarga');
+        const inputCsv = document.getElementById('inputCsv');
+        const nombreArchivo = document.getElementById('nombreArchivo');
+
+        // Cuando el usuario hace clic en el botón y selecciona un archivo tradicionalmente
+        inputCsv.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                nombreArchivo.textContent = e.target.files[0].name;
+                nombreArchivo.style.display = 'block';
+            }
+        });
+
+        // Eventos para arrastrar y soltar
+        zonaCarga.addEventListener('dragover', (e) => {
+            e.preventDefault(); // Necesario para permitir el "drop"
+            zonaCarga.classList.add('drag-over'); // Pinta la zona de azul claro
+        });
+
+        zonaCarga.addEventListener('dragleave', () => {
+            zonaCarga.classList.remove('drag-over'); // Vuelve al color normal
+        });
+
+        zonaCarga.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zonaCarga.classList.remove('drag-over');
+            
+            if (e.dataTransfer.files.length > 0) {
+                const archivoDroppeado = e.dataTransfer.files[0];
+                
+                if (archivoDroppeado.name.endsWith('.csv')) {
+                    inputCsv.files = e.dataTransfer.files; // Enganchamos el archivo al input oculto
+                    nombreArchivo.textContent = archivoDroppeado.name;
+                    nombreArchivo.style.display = 'block';
+                } else {
+                    mostrarMensaje('Por favor, arrastre únicamente un archivo con extensión .csv', 'error');
+                }
+            }
+        });
+
+        // --- LÓGICA DE ENVÍO AL SERVIDOR ---
         async function procesarYEnviarArchivo() {
-            const archivoInput = document.getElementById('inputCsv');
-            if (archivoInput.files.length === 0) {
-                mostrarMensaje('Por favor, seleccione un archivo CSV.', 'error');
+            if (inputCsv.files.length === 0) {
+                mostrarMensaje('Por favor, seleccione o arrastre un archivo CSV.', 'error');
                 return;
             }
 
-            const archivo = archivoInput.files[0];
+            const archivo = inputCsv.files[0];
             const lector = new FileReader();
 
             mostrarMensaje('Leyendo y convirtiendo archivo...', '');
@@ -95,7 +141,9 @@
 
                     if (datosRespuesta.estado === 'exito') {
                         mostrarMensaje(datosRespuesta.mensaje, 'exito');
-                        archivoInput.value = ''; // Limpiar el input tras éxito
+                        // Limpiamos la pantalla visualmente tras un éxito rotundo
+                        inputCsv.value = ''; 
+                        nombreArchivo.style.display = 'none';
                     } else {
                         mostrarMensaje(datosRespuesta.mensaje + (datosRespuesta.detalle ? ': ' + datosRespuesta.detalle : ''), 'error');
                     }

@@ -11,14 +11,12 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <link rel="stylesheet" href="/styles.css"> 
-    
 </head>
 <body>
     <nav class="navbar">
         <h1 class="navbar-brand"><i class="ph ph-graduation-cap"></i> Sistema AIDA</h1>
         <div class="navbar-links">
             <a href="/menu"><i class="ph ph-squares-four"></i> Inicio</a>
-            <a href="/app/alumnos"><i class="ph ph-users"></i> Alumnos</a>
             <a href="/app/cursada"><i class="ph ph-pencil-line"></i> Notas</a>
             <a href="/app/certificados"><i class="ph ph-certificate"></i> Individual</a>
             <a href="/app/fecha"><i class="ph ph-files"></i> Masiva</a>
@@ -30,13 +28,32 @@
     <div class="contenedor-ancho">
         <div class="cabecera-pagina">
             <h1><i class="ph ph-users"></i> Directorio de Alumnos</h1>
-            <button class="btn-accion-principal" onclick="mostrarFormularioCreacion()" style="background-color: #10b981;">
+            <button class="btn-accion-principal" onclick="mostrarFormularioCreacion()" style="background-color: #10b981; width: auto;">
                 <i class="ph ph-user-plus"></i> Registrar Alumno
             </button>
         </div>
 
-        <div id="seccionFormulario" class="tarjeta-form">
-            <h3 id="tituloFormulario">Alta de Nuevo Alumno</h3>
+        <div class="contenedor-tabla">
+            <table id="tablaAlumnos">
+                <thead>
+                    <tr>
+                        <th onclick="ordenarTabla('lu')">LU <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                        <th onclick="ordenarTabla('apellido')">Apellidos <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                        <th onclick="ordenarTabla('nombres')">Nombres <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                        <th onclick="ordenarTabla('titulo')">Título <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                        <th onclick="ordenarTabla('titulo_en_tramite')" style="text-align: center;">En Trámite <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                        <th onclick="ordenarTabla('egreso')" style="text-align: center;">Egreso <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTabla">
+                    <tr><td colspan="7" style="text-align: center; padding: 30px; color: #64748b;">Cargando datos del padrón...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="seccionFormulario" class="tarjeta-form" style="display: none; max-width: 800px; margin: 40px auto 0 auto; padding: 30px;">
+            <h3 id="tituloFormulario" style="margin-top: 0; font-size: 1.3rem; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 20px;">Alta de Nuevo Alumno</h3>
             
             <div class="grid-formulario">
                 <div class="grupo-form">
@@ -69,29 +86,10 @@
             
             <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px;">
                 <button class="btn-cancelar" onclick="ocultarFormulario()">Cancelar</button>
-                <button class="btn-accion-principal" onclick="guardarNuevoAlumno()">
+                <button class="btn-accion-principal" onclick="guardarNuevoAlumno()" style="width: auto;">
                     <i class="ph ph-floppy-disk"></i> Guardar Datos
                 </button>
             </div>
-        </div>
-
-        <div class="contenedor-tabla">
-            <table id="tablaAlumnos">
-                <thead>
-                    <tr>
-                        <th onclick="ordenarTabla('lu')">LU <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
-                        <th onclick="ordenarTabla('apellido')">Apellidos <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
-                        <th onclick="ordenarTabla('nombres')">Nombres <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
-                        <th onclick="ordenarTabla('titulo')">Título <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
-                        <th onclick="ordenarTabla('titulo_en_tramite')" style="text-align: center;">En Trámite <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
-                        <th onclick="ordenarTabla('egreso')" style="text-align: center;">Egreso <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpoTabla">
-                    <tr><td colspan="7" style="text-align: center; padding: 30px; color: #64748b;">Cargando datos del padrón...</td></tr>
-                </tbody>
-            </table>
         </div>
     </div>
 
@@ -235,9 +233,16 @@
             renderizarTabla();
         }
 
+        // --- MAGIA DE SCROLL SUAVE AÑADIDA AQUÍ ---
         function mostrarFormularioCreacion() {
-            document.getElementById('seccionFormulario').style.display = 'block';
-            document.getElementById('inputLu').focus();
+            const form = document.getElementById('seccionFormulario');
+            form.style.display = 'block';
+            
+            // Pausa milimétrica para que el navegador dibuje el formulario antes de desplazarse hacia él
+            setTimeout(() => {
+                form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                document.getElementById('inputLu').focus();
+            }, 50);
         }
 
         function ocultarFormulario() {
@@ -252,6 +257,9 @@
             document.getElementById('inputCarrera').value = ''; 
             document.getElementById('inputTramite').value = '';
             document.getElementById('inputEgreso').value = '';
+            
+            // Si el usuario cancela, volvemos a subir a la tabla de forma suave
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function prepararEdicion(lu) {

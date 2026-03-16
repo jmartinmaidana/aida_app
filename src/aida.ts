@@ -192,13 +192,6 @@ export async function eliminarAlumno(lu: string) {
         throw new Error(`No se pudo eliminar el alumno: ${(error as Error).message}`);
     }
 }
-export async function conectarBD() {
-    await client.connect();
-}
-
-export async function desconectarBD() {
-    await client.end();
-}
 
 export async function cargarAlumnosDesdeJson(alumnos: Alumno[]) {
     console.log(`Procesando carga de ${alumnos.length} alumnos desde JSON...`);
@@ -311,4 +304,12 @@ export async function cargarCursadaAprobada(lu: string, idMateria: string, año:
         // Lanzamos el error hacia arriba (server.ts) para que el frontend se entere
         throw new Error(error.message); 
     }
+}
+
+export async function conectarBD() {
+    await client.connect();
+}
+
+export async function desconectarBD() {
+    await client.end();
 }

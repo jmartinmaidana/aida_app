@@ -106,6 +106,26 @@ tr:hover td { background-color: #f8fafc; }
 .area-carga:hover { border-color: #0284c7; background-color: #f0f9ff; }
 .area-carga input[type="file"] { font-family: 'Inter', sans-serif; color: #475569; font-size: 0.95rem; width: 100%; cursor: pointer; }
 
+/* --- MÓDULO ARCHIVOS (DRAG & DROP) --- */
+.area-carga { 
+    border: 2px dashed #cbd5e1; border-radius: 8px; padding: 40px 20px; text-align: center; 
+    background-color: #f8fafc; margin-bottom: 25px; transition: all 0.2s ease; 
+    display: flex; flex-direction: column; align-items: center; justify-content: center; 
+}
+/* Efecto visual cuando un archivo está flotando sobre la caja */
+.area-carga.drag-over { 
+    border-color: #0284c7; background-color: #e0f2fe; transform: scale(1.02); 
+}
+/* Estética del nuevo botón de selección */
+.btn-seleccionar { 
+    background-color: white; color: #0284c7; border: 1px solid #0284c7; padding: 10px 20px; 
+    border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; 
+    display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; 
+}
+.btn-seleccionar:hover { 
+    background-color: #f0f9ff; 
+}
+
 /* --- MÓDULO MENU --- */
 .grid-menu { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
 .tarjeta-menu { text-align: left; padding: 24px; transition: all 0.2s ease; border: 1px solid #e2e8f0; border-radius: 8px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 100%; box-sizing: border-box; }
