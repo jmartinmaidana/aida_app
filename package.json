@@ -3,6 +3,7 @@
   "name": "tpbdd",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "pg": "^8.20.0"
@@ -16,10 +17,9 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
-  "build": "npx tsc",
-  "predeploy": "node dist/migrador.js",
-  "start": "node dist/server.js",
-  "db:reset": "npx tsc && node dist/reset-db.js"
-}
-  
+    "build": "npx tsc",
+    "predeploy": "node dist/migrador.js",
+    "start": "node dist/server.js",
+    "db:reset": "npx tsc && node dist/reset-db.js"
+  }
 }

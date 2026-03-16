@@ -1,21 +1,12 @@
 import { Client } from 'pg';
 import { readFile, writeFile } from 'fs/promises';
 import { Fecha, textoAFecha, fechaAIsoString } from './fechas.js';
-
-if (!process.env.DB_PASSWORD) {
-    console.error("❌ ERROR FATAL: Falta la variable de entorno DB_PASSWORD.");
-    console.error("Por favor, ejecute su archivo local-sets.bat antes de iniciar el migrador.");
-    process.exit(1); // Detenemos la ejecución inmediatamente
-}
+import dotenv from 'dotenv';
+dotenv.config(); // Lectura del .env
 
 export const client = new Client({
-    user: process.env.DB_USER || 'aida_admin',
-    password: process.env.DB_PASSWORD, // Ya no hay contraseñas hardcodeadas
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5433'),
-    database: process.env.DB_NAME || 'aida_db'
+    connectionString: process.env.DATABASE_URL
 });
-
 
 export interface Alumno {
     lu: string;

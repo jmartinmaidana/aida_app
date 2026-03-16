@@ -5,6 +5,7 @@ import session from 'express-session';
 import { Request, Response, NextFunction } from 'express';
 import { Usuario, crearUsuario, autenticarUsuario } from './autenticacion.js';
 
+
 declare module 'express-session' {
     interface SessionData {
         usuario?: Usuario;
