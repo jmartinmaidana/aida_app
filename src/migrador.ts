@@ -1,23 +1,21 @@
-import { Client } from 'pg'; // Importamos Client directamente, no usamos el de aida.ts
+import { Client } from 'pg'; 
 import * as fs from 'fs/promises';
 import * as path from 'path';
+// 1. IMPORTANTE: Agregar dotenv para que el migrador lea el .env localmente
+import dotenv from 'dotenv';
+dotenv.config();
 
-
-// Validamos de forma estricta que la variable de entorno exista
-if (!process.env.DB_PASSWORD_OWNER) {
-    console.error("❌ ERROR FATAL: Falta la variable de entorno DB_PASSWORD_OWNER.");
-    console.error("Por favor, ejecute su archivo local-sets.bat antes de iniciar el migrador.");
-    process.exit(1); // Detenemos la ejecución inmediatamente
+// 2. Nueva validación: ahora buscamos la URL completa
+if (!process.env.DATABASE_URL) {
+    console.error("❌ ERROR FATAL: Falta la variable de entorno DATABASE_URL.");
+    console.error("Asegúrese de tener su archivo .env configurado o la variable en Render.");
+    process.exit(1);
 }
 
+// 3. Conexión simplificada usando la URL
 const clientAdmin = new Client({
-    user: process.env.DB_USER_OWNER || 'aida_owner',
-    password: process.env.DB_PASSWORD_OWNER, // Ya no hay contraseñas hardcodeadas
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432'),
-    database: process.env.DB_NAME || 'aida_db'
+    connectionString: process.env.DATABASE_URL
 });
-
 
 async function ejecutarMigraciones() {
     try {
