@@ -2,30 +2,114 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>AIDA - Gestión de Alumnos</title>
-    <link rel="stylesheet" href="/styles.css"> <style>
-        /* Solo estilos muy específicos de esta página que no van en el global */
-        #seccionFormulario { display: none; margin-bottom: 20px; }
-        .grid-formulario { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .acciones-tabla button { margin-right: 5px; margin-bottom: 5px; }
+    <title>Sistema AIDA - Gestión de Alumnos</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <link rel="stylesheet" href="/styles.css"> 
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; margin: 0; background-color: #f8fafc; }
+        
+        /* --- BARRA DE NAVEGACIÓN COMPLETA --- */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #0284c7;
+            color: white;
+            padding: 16px 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand { display: flex; align-items: center; gap: 10px; font-size: 1.4rem; font-weight: 600; margin: 0; }
+        .navbar-links { display: flex; align-items: center; gap: 20px; }
+        .navbar-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s; display: flex; align-items: center; gap: 6px; }
+        .navbar-links a:hover { color: white; }
+        
+        .btn-logout { 
+            background: transparent; border: 1px solid rgba(255, 255, 255, 0.5); color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; transition: all 0.2s; margin-left: 15px; 
+        }
+        .btn-logout:hover { background: rgba(255, 255, 255, 0.15); border-color: white; }
+        
+        /* --- ESTRUCTURA PRINCIPAL --- */
+        .contenedor-ancho { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+        
+        .cabecera-pagina { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .cabecera-pagina h1 { margin: 0; color: #0f172a; font-size: 1.6rem; display: flex; align-items: center; gap: 10px; }
+        
+        /* --- FORMULARIO TARJETA --- */
+        .tarjeta-form { 
+            background: white; padding: 30px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 30px; display: none; 
+        }
+        .tarjeta-form h3 { margin-top: 0; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px; color: #1e293b; font-size: 1.2rem; }
+        
+        .grid-formulario { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        .grupo-form label { display: block; font-size: 0.95rem; font-weight: 600; color: #1e293b; margin-bottom: 8px; }
+        .grupo-form input, .grupo-form select {
+            width: 100%; padding: 12px; font-size: 1rem; border: 2px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-family: 'Inter', sans-serif; transition: border-color 0.2s;
+        }
+        .grupo-form input:focus, .grupo-form select:focus { outline: none; border-color: #0284c7; }
+        .grupo-form input:disabled { background-color: #f1f5f9; cursor: not-allowed; }
+
+        /* --- BOTONES --- */
+        .btn-accion-principal {
+            background-color: #0284c7; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: background-color 0.2s; font-size: 1rem;
+        }
+        .btn-accion-principal:hover { background-color: #0369a1; }
+        
+        .btn-cancelar {
+            background-color: white; color: #64748b; border: 1px solid #cbd5e1; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
+        }
+        .btn-cancelar:hover { background-color: #f1f5f9; color: #0f172a; }
+
+        /* --- ESTILOS DE LA TABLA Y SUS BOTONES --- */
+        .contenedor-tabla {
+            background: white; border-radius: 8px; border: 1px solid #e2e8f0; overflow-x: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .acciones-tabla { display: flex; gap: 6px; }
+        
+        .btn-mini {
+            border: none; border-radius: 4px; padding: 6px 10px; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; transition: background-color 0.2s; font-size: 1.1rem;
+        }
+        .btn-mini.tramite { background-color: #10b981; } /* Verde */
+        .btn-mini.tramite:hover { background-color: #059669; }
+        .btn-mini.editar { background-color: #f59e0b; } /* Amarillo */
+        .btn-mini.editar:hover { background-color: #d97706; }
+        .btn-mini.borrar { background-color: #ef4444; } /* Rojo */
+        .btn-mini.borrar:hover { background-color: #dc2626; }
     </style>
 </head>
 <body>
     <nav class="navbar">
-        <h1>🎓 AIDA System</h1>
-        <div class="nav-links">
-            <a href="/menu">Panel Principal</a>
+        <h1 class="navbar-brand"><i class="ph ph-graduation-cap"></i> Sistema AIDA</h1>
+        <div class="navbar-links">
+            <a href="/menu"><i class="ph ph-squares-four"></i> Inicio</a>
+            <a href="/app/alumnos"><i class="ph ph-users"></i> Alumnos</a>
+            <a href="/app/cursada"><i class="ph ph-pencil-line"></i> Notas</a>
+            <a href="/app/fecha"><i class="ph ph-files"></i> Masiva</a>
+            <a href="/app/archivo"><i class="ph ph-upload-simple"></i> CSV</a>
+            <button onclick="cerrarSesion()" class="btn-logout"><i class="ph ph-sign-out"></i> Salir</button>
         </div>
     </nav>
 
-    <div class="contenedor">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="margin: 0;">Directorio de Alumnos</h2>
-            <button class="btn btn-exito" onclick="mostrarFormularioCreacion()">➕ Nuevo Alumno</button>
+    <div class="contenedor-ancho">
+        <div class="cabecera-pagina">
+            <h1><i class="ph ph-users"></i> Directorio de Alumnos</h1>
+            <button class="btn-accion-principal" onclick="mostrarFormularioCreacion()" style="background-color: #10b981;">
+                <i class="ph ph-user-plus"></i> Registrar Alumno
+            </button>
         </div>
 
-        <div id="seccionFormulario" class="tarjeta">
-            <h3 style="margin-top: 0; border-bottom: 1px solid var(--borde); padding-bottom: 10px;">Alta / Edición de Alumno</h3>
+        <div id="seccionFormulario" class="tarjeta-form">
+            <h3 id="tituloFormulario">Alta de Nuevo Alumno</h3>
+            
             <div class="grid-formulario">
                 <div class="grupo-form">
                     <label>LU (ej. 123/24):</label> 
@@ -33,18 +117,20 @@
                 </div>
                 <div class="grupo-form">
                     <label>Carrera:</label> 
-                    <select id="inputCarrera" required><option value="">-- Seleccione --</option></select>
+                    <select id="inputCarrera" required>
+                        <option value="">-- Seleccione una carrera --</option>
+                    </select>
                 </div>
                 <div class="grupo-form">
                     <label>Nombres:</label> 
-                    <input type="text" id="inputNombres">
+                    <input type="text" id="inputNombres" placeholder="Nombres del alumno">
                 </div>
                 <div class="grupo-form">
                     <label>Apellido:</label> 
-                    <input type="text" id="inputApellido">
+                    <input type="text" id="inputApellido" placeholder="Apellidos del alumno">
                 </div>
                 <div class="grupo-form">
-                    <label>Fecha Trámite Título:</label> 
+                    <label>Fecha Título en Trámite:</label> 
                     <input type="date" id="inputTramite">
                 </div>
                 <div class="grupo-form">
@@ -53,56 +139,33 @@
                 </div>
             </div>
             
-            <div style="margin-top: 20px; text-align: right;">
-                <button class="btn btn-primario" onclick="guardarNuevoAlumno()">Guardar Datos</button>
-                <button class="btn btn-peligro" onclick="ocultarFormulario()">Cancelar</button>
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px;">
+                <button class="btn-cancelar" onclick="ocultarFormulario()">Cancelar</button>
+                <button class="btn-accion-principal" onclick="guardarNuevoAlumno()">
+                    <i class="ph ph-floppy-disk"></i> Guardar Datos
+                </button>
             </div>
         </div>
 
-        <table id="tablaAlumnos">
-<body>
-    <h2>Panel de Gestión de Alumnos</h2>
-    <a href="/menu">← Volver al menú</a>
-    <hr>
-    
-    <button class="boton-nuevo" onclick="mostrarFormularioCreacion()">➕ Cargar Nuevo Alumno</button>
-
-    <div id="seccionFormulario">
-        <h3>Alta de Nuevo Alumno</h3>
-        <label>LU (ej. 123/24):</label> <input type="text" id="inputLu" placeholder="123/24"><br>
-        <label>Nombres:</label> <input type="text" id="inputNombres"><br>
-        <label>Apellido:</label> <input type="text" id="inputApellido"><br>
-        
-        <label>Carrera:</label> 
-        <select id="inputCarrera" required>
-            <option value="">-- Seleccione una carrera --</option>
-        </select><br>
-
-        <label>Fecha Título en Trámite:</label> <input type="date" id="inputTramite"><br>
-        <label>Fecha Egreso:</label> <input type="date" id="inputEgreso"><br>
-        
-        <div style="margin-top: 15px;">
-            <button class="btn-guardar" onclick="guardarNuevoAlumno()">Guardar Alumno</button>
-            <button class="btn-cancelar" onclick="ocultarFormulario()">Cancelar</button>
+        <div class="contenedor-tabla">
+            <table id="tablaAlumnos">
+                <thead>
+                    <tr>
+                        <th onclick="ordenarTabla('lu')">LU <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                        <th onclick="ordenarTabla('apellido')">Apellidos <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                        <th onclick="ordenarTabla('nombres')">Nombres <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                        <th onclick="ordenarTabla('titulo')">Título <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                        <th onclick="ordenarTabla('titulo_en_tramite')" style="text-align: center;">En Trámite <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                        <th onclick="ordenarTabla('egreso')" style="text-align: center;">Egreso <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTabla">
+                    <tr><td colspan="7" style="text-align: center; padding: 30px; color: #64748b;">Cargando datos del padrón...</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
-
-    <table id="tablaAlumnos">
-        <thead>
-            <tr>
-                <th onclick="ordenarTabla('lu')">LU ↕️</th>
-                <th onclick="ordenarTabla('apellido')">Apellidos ↕️</th>
-                <th onclick="ordenarTabla('nombres')">Nombres ↕️</th>
-                <th onclick="ordenarTabla('titulo')">Título ↕️</th>
-                <th onclick="ordenarTabla('titulo_en_tramite')">En Trámite ↕️</th>
-                <th onclick="ordenarTabla('egreso')">Egreso ↕️</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="cuerpoTabla">
-            <tr><td colspan="7" style="text-align: center;">Cargando datos...</td></tr>
-        </tbody>
-    </table>
 
     <script>
         let alumnosLocales = []; 
@@ -122,17 +185,11 @@
             return fechaIso.split('T')[0]; 
         }
 
-        // ==========================================
-        // 1. CARGA INICIAL (GET)
-        // ==========================================
-        
-        // MODIFICACIÓN: Ahora cargamos ambas cosas al abrir la página
         document.addEventListener('DOMContentLoaded', () => {
             cargarAlumnos();
-            cargarOpcionesCarreras(); // Llenamos el select
+            cargarOpcionesCarreras();
         });
 
-        // NUEVA FUNCIÓN: Trae las carreras y llena el menú desplegable
         async function cargarOpcionesCarreras() {
             try {
                 const respuesta = await fetch('/api/v0/carreras');
@@ -161,53 +218,53 @@
                     alumnosLocales = json.datos;
                     renderizarTabla(); 
                 } else {
-                    document.getElementById('cuerpoTabla').innerHTML = `<tr><td colspan="7" style="color: red; text-align: center;">Error: ${json.mensaje}</td></tr>`;
+                    document.getElementById('cuerpoTabla').innerHTML = `<tr><td colspan="7" style="color: #ef4444; text-align: center; padding: 20px;">Error: ${json.mensaje}</td></tr>`;
                 }
             } catch (error) {
-                document.getElementById('cuerpoTabla').innerHTML = `<tr><td colspan="7" style="color: red; text-align: center;">Error de conexión.</td></tr>`;
+                document.getElementById('cuerpoTabla').innerHTML = `<tr><td colspan="7" style="color: #ef4444; text-align: center; padding: 20px;">Error de conexión con el servidor.</td></tr>`;
             }
         }
+
         function renderizarTabla() {
             const cuerpoTabla = document.getElementById('cuerpoTabla');
             cuerpoTabla.innerHTML = ''; 
 
-            // Mensaje por si la base de datos está vacía
             if (alumnosLocales.length === 0) {
-                cuerpoTabla.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #666;">No hay alumnos registrados en el sistema.</td></tr>';
+                cuerpoTabla.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 30px;">No hay alumnos registrados en el sistema.</td></tr>';
                 return;
             }
 
             alumnosLocales.forEach(alumno => {
-                // Lógica del botón de trámite
                 let htmlBotonTramite = '';
                 if (alumno.egreso && !alumno.titulo_en_tramite) {
                     htmlBotonTramite = `
-                        <button onclick="iniciarTramite('${alumno.lu}')" 
-                            style="background: #28a745; color: white; border: none; padding: 5px; cursor: pointer; border-radius: 3px; margin-right: 5px;">
-                            🎓 Iniciar Trámite
+                        <button class="btn-mini tramite" onclick="iniciarTramite('${alumno.lu}')" title="Iniciar Trámite de Título">
+                            <i class="ph ph-graduation-cap"></i>
                         </button>`;
                 }
 
-                // --- MEJORAS VISUALES ---
-                // Si no hay título, mostramos "Sin asignar" en gris cursiva
-                const tituloMostrar = alumno.titulo ? alumno.titulo : '<span style="color: #999; font-style: italic;">Sin asignar</span>';
-                
-                // Si no hay fechas, mostramos un guion centrado en lugar de un cuadro vacío
-                const tramiteMostrar = alumno.titulo_en_tramite ? formatoTabla(alumno.titulo_en_tramite) : '<span style="color: #ccc;">-</span>';
-                const egresoMostrar = alumno.egreso ? formatoTabla(alumno.egreso) : '<span style="color: #ccc;">-</span>';
+                const tituloMostrar = alumno.titulo ? alumno.titulo : '<span style="color: #94a3b8; font-style: italic;">Sin asignar</span>';
+                const tramiteMostrar = alumno.titulo_en_tramite ? formatoTabla(alumno.titulo_en_tramite) : '<span style="color: #cbd5e1;">-</span>';
+                const egresoMostrar = alumno.egreso ? formatoTabla(alumno.egreso) : '<span style="color: #cbd5e1;">-</span>';
 
                 const fila = document.createElement('tr');
                 fila.innerHTML = `
-                    <td><strong>${alumno.lu}</strong></td>
-                    <td>${alumno.apellido}</td>
+                    <td style="font-weight: 500; color: #0284c7;">${alumno.lu}</td>
+                    <td style="font-weight: 500;">${alumno.apellido}</td>
                     <td>${alumno.nombres}</td>
                     <td>${tituloMostrar}</td>
                     <td style="text-align: center;">${tramiteMostrar}</td>
                     <td style="text-align: center;">${egresoMostrar}</td>
                     <td>
-                        ${htmlBotonTramite}
-                        <button onclick="prepararEdicion('${alumno.lu}')" style="background: #ffc107; border: none; padding: 5px; cursor: pointer; border-radius: 3px;">Editar</button>
-                        <button onclick="borrarAlumno('${alumno.lu}')" style="background: #dc3545; color: white; border: none; padding: 5px; cursor: pointer; border-radius: 3px;">Borrar</button>
+                        <div class="acciones-tabla">
+                            ${htmlBotonTramite}
+                            <button class="btn-mini editar" onclick="prepararEdicion('${alumno.lu}')" title="Editar Alumno">
+                                <i class="ph ph-pencil-simple"></i>
+                            </button>
+                            <button class="btn-mini borrar" onclick="borrarAlumno('${alumno.lu}')" title="Borrar Alumno">
+                                <i class="ph ph-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 `;
                 cuerpoTabla.appendChild(fila);
@@ -250,20 +307,17 @@
             renderizarTabla();
         }
 
-        // ==========================================
-        // 2. LÓGICA DEL FORMULARIO (POST / PUT)
-        // ==========================================
         function mostrarFormularioCreacion() {
             document.getElementById('seccionFormulario').style.display = 'block';
+            document.getElementById('inputLu').focus();
         }
 
         function ocultarFormulario() {
             document.getElementById('seccionFormulario').style.display = 'none';
             luEnEdicion = null;
-            document.querySelector('#seccionFormulario h3').textContent = "Alta de Nuevo Alumno";
+            document.getElementById('tituloFormulario').textContent = "Alta de Nuevo Alumno";
             document.getElementById('inputLu').disabled = false; 
 
-            // Limpiamos también el selector de carrera
             document.getElementById('inputLu').value = '';
             document.getElementById('inputNombres').value = '';
             document.getElementById('inputApellido').value = '';
@@ -276,7 +330,6 @@
             const alumno = alumnosLocales.find(a => a.lu === lu);
             if (!alumno) return;
 
-            // Rellenamos el formulario (incluyendo la carrera_id si la tiene)
             document.getElementById('inputLu').value = alumno.lu;
             document.getElementById('inputNombres').value = alumno.nombres;
             document.getElementById('inputApellido').value = alumno.apellido;
@@ -285,31 +338,27 @@
             document.getElementById('inputEgreso').value = formatoInput(alumno.egreso);
 
             luEnEdicion = lu;
-            document.querySelector('#seccionFormulario h3').textContent = `Editar Alumno: ${lu}`;
+            document.getElementById('tituloFormulario').textContent = `Editar Alumno: ${lu}`;
             document.getElementById('inputLu').disabled = true; 
             
             mostrarFormularioCreacion();
         }
 
         async function guardarNuevoAlumno() {
-    // 1. Capturamos el elemento select
             const selectCarrera = document.getElementById('inputCarrera');
             const idCarrera = selectCarrera.value ? parseInt(selectCarrera.value) : null;
             
-            // 2. Extraemos el texto de la opción seleccionada (Ej: "Tecnicatura Web")
             let tituloAutomatico = null;
             if (idCarrera) {
-                // .selectedIndex nos dice qué posición eligió el usuario, y .text nos da el nombre visible
                 tituloAutomatico = selectCarrera.options[selectCarrera.selectedIndex].text;
             }
 
-            // 3. Armamos el objeto de datos
             const datosAlumno = {
                 lu: luEnEdicion ? luEnEdicion : document.getElementById('inputLu').value,
                 nombres: document.getElementById('inputNombres').value,
                 apellido: document.getElementById('inputApellido').value,
                 carrera_id: idCarrera,
-                titulo: tituloAutomatico, // <--- Aquí inyectamos el título automáticamente
+                titulo: tituloAutomatico,
                 titulo_en_tramite: document.getElementById('inputTramite').value || null,
                 egreso: document.getElementById('inputEgreso').value || null
             };
@@ -319,19 +368,12 @@
                 return;
             }
 
-    // ... (el resto de la función url, metodo, fetch, etc. se mantiene exactamente igual)
-
             const url = luEnEdicion ? `/api/alumnos/${luEnEdicion.replace('/', '/')}` : '/api/alumno';
             const metodo = luEnEdicion ? 'PUT' : 'POST';
 
             try {
-                // Si la LU contiene barra invertida y va por URL, hay que tener cuidado con Express. 
-                // En su server.ts está configurado como /api/alumnos/:prefijo/:anio, 
-                // por lo que debemos asegurar el envío correcto.
-                
                 let urlFinal = url;
                 if (luEnEdicion) {
-                    // Convertimos "123/24" en "/api/alumnos/123/24"
                     const partesLu = luEnEdicion.split('/');
                     urlFinal = `/api/alumnos/${partesLu[0]}/${partesLu[1]}`;
                 }
@@ -356,15 +398,11 @@
             }
         }
 
-        // ==========================================
-        // 3. ELIMINAR (DELETE)
-        // ==========================================
         async function borrarAlumno(lu) {
             const seguro = confirm(`¿Está absolutamente seguro que desea eliminar al alumno con LU: ${lu}? Esta acción no se puede deshacer.`);
             if (!seguro) return; 
 
             try {
-                // Manejo seguro de la barra en la URL para el DELETE
                 const partesLu = lu.split('/');
                 const urlDelete = `/api/alumnos/${partesLu[0]}/${partesLu[1]}`;
 
@@ -381,6 +419,15 @@
                 }
             } catch (error) {
                 alert('Error de conexión al intentar borrar.');
+            }
+        }
+
+        async function cerrarSesion() {
+            try {
+                await fetch('/api/v0/auth/logout', { method: 'POST' });
+                window.location.href = '/app/login';
+            } catch (error) { 
+                alert("Error al intentar cerrar sesión."); 
             }
         }
     </script>

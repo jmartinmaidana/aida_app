@@ -3,64 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIDA - Iniciar Sesión</title>
+    <title>Sistema AIDA - Iniciar Sesión</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <link rel="stylesheet" href="/styles.css"> 
+    
     <style>
-        /* Estilos básicos para que se vea profesional y centrado */
-        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4f9; margin: 0; }
-        .login-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 300px; text-align: center; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        button:hover { background-color: #0056b3; }
-        .error-message { color: red; margin-top: 15px; display: none; font-size: 14px; font-weight: bold; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            background-color: #f8fafc; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .tarjeta-login { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 8px; 
+            border: 1px solid #e2e8f0; 
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); 
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+
+        .cabecera-login {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .cabecera-login h1 {
+            margin: 0;
+            color: #0284c7;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .cabecera-login p {
+            color: #64748b;
+            margin: 10px 0 0 0;
+            font-size: 1rem;
+        }
+
+        .grupo-form {
+            margin-bottom: 20px;
+        }
+
+        .grupo-form label {
+            display: block;
+            font-size: 0.95rem; 
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .input-con-icono {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-con-icono i {
+            position: absolute;
+            left: 14px;
+            color: #94a3b8;
+            font-size: 1.2rem;
+        }
+
+        .input-con-icono input {
+            width: 100%;
+            padding: 12px 12px 12px 42px; /* Mayor espacio a la izquierda para el ícono */
+            font-size: 1rem; 
+            border: 2px solid #cbd5e1; 
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input-con-icono input:focus {
+            outline: none;
+            border-color: #0284c7;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+        }
+
+        .btn-ingresar {
+            width: 100%; 
+            margin-top: 15px; 
+            font-size: 1.05rem; 
+            padding: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .btn-ingresar:hover {
+            background-color: #0369a1;
+        }
+
+        .mensaje { 
+            padding: 12px; 
+            border-radius: 5px; 
+            margin-top: 20px; 
+            display: none; 
+            font-weight: 500; 
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .mensaje.error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
     </style>
 </head>
 <body>
 
-<div class="login-container">
-    <h2>Ingreso a AIDA</h2>
-    <form id="loginForm">
-        <input type="text" id="username" placeholder="Nombre de usuario" required>
-        <input type="password" id="password" placeholder="Contraseña" required>
-        <button type="submit">Iniciar Sesión</button>
-        <p id="mensajeError" class="error-message"></p>
-    </form>
-</div>
+    <div class="tarjeta-login">
+        <div class="cabecera-login">
+            <h1><i class="ph ph-graduation-cap"></i> AIDA</h1>
+            <p>Acceso al sistema de gestión</p>
+        </div>
+        
+        <form id="loginForm">
+            <div class="grupo-form">
+                <label for="username">Usuario</label>
+                <div class="input-con-icono">
+                    <i class="ph ph-user"></i>
+                    <input type="text" id="username" placeholder="Ingrese su nombre de usuario" required>
+                </div>
+            </div>
+            
+            <div class="grupo-form">
+                <label for="password">Contraseña</label>
+                <div class="input-con-icono">
+                    <i class="ph ph-lock-key"></i>
+                    <input type="password" id="password" placeholder="Ingrese su contraseña" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-ingresar">
+                Iniciar Sesión <i class="ph ph-sign-in"></i>
+            </button>
+        </form>
 
-<script>
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault(); // Evitamos que el formulario recargue la página al hacer click
+        <div id="mensajeError" class="mensaje error"></div>
+    </div>
 
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const mensajeError = document.getElementById('mensajeError');
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); 
 
-        mensajeError.style.display = 'none'; // Ocultamos errores previos
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const mensajeError = document.getElementById('mensajeError');
 
-        try {
-            // Hacemos la petición POST a nuestro endpoint recién creado
-            const respuesta = await fetch('/api/v0/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
+            mensajeError.style.display = 'none'; 
 
-            const json = await respuesta.json();
+            try {
+                const respuesta = await fetch('/api/v0/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
 
-            if (json.estado === 'exito') {
-                // El servidor nos dio luz verde y ya guardó la cookie.
-                // Redirigimos al usuario al menú principal.
-                window.location.href = '/menu'; 
-            } else {
-                // Si el servidor rechazó las credenciales, mostramos el mensaje de error.
-                mensajeError.textContent = json.mensaje;
+                const json = await respuesta.json();
+
+                if (json.estado === 'exito') {
+                    window.location.href = '/menu'; 
+                } else {
+                    mensajeError.textContent = json.mensaje;
+                    mensajeError.style.display = 'block';
+                }
+            } catch (error) {
+                mensajeError.textContent = "Error de conexión con el servidor.";
                 mensajeError.style.display = 'block';
             }
-        } catch (error) {
-            mensajeError.textContent = "Error de conexión con el servidor.";
-            mensajeError.style.display = 'block';
-        }
-    });
-</script>
+        });
+    </script>
 
 </body>
 </html>

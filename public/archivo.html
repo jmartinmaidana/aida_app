@@ -2,25 +2,202 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Cargar Alumnos</title>
-    <link rel="stylesheet" href="/styles.css">
+    <title>Sistema AIDA - Carga Masiva (CSV)</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <link rel="stylesheet" href="/styles.css"> 
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; margin: 0; background-color: #f8fafc; }
+        
+        /* --- BARRA DE NAVEGACIÓN COMPLETA --- */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #0284c7;
+            color: white;
+            padding: 16px 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            font-size: 1.4rem; 
+            font-weight: 600; 
+            margin: 0; 
+        }
+
+        .navbar-links { 
+            display: flex; 
+            align-items: center; 
+            gap: 20px; 
+        }
+
+        .navbar-links a { 
+            color: rgba(255,255,255,0.85); 
+            text-decoration: none; 
+            font-weight: 500; 
+            font-size: 0.95rem; 
+            transition: color 0.2s; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+        }
+
+        .navbar-links a:hover { 
+            color: white; 
+        }
+        
+        .btn-logout { 
+            background: transparent; 
+            border: 1px solid rgba(255, 255, 255, 0.5); 
+            color: white; 
+            padding: 8px 16px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-family: 'Inter', sans-serif; 
+            font-weight: 500; 
+            font-size: 0.9rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            transition: all 0.2s; 
+            margin-left: 15px; 
+        }
+
+        .btn-logout:hover { 
+            background: rgba(255, 255, 255, 0.15); 
+            border-color: white; 
+        }
+        
+        /* --- TARJETA DE FORMULARIO --- */
+        .contenedor { 
+            max-width: 600px; 
+            margin: 60px auto; 
+            padding: 0 20px; 
+        }
+
+        .tarjeta-form { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 8px; 
+            border: 1px solid #e2e8f0; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+        }
+
+        .tarjeta-form h1 { 
+            margin-top: 0; 
+            color: #0f172a; 
+            font-size: 1.4rem; 
+            margin-bottom: 8px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+
+        .tarjeta-form p {
+            color: #64748b; 
+            margin-bottom: 30px; 
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* --- ESTILO PARA EL ÁREA DE CARGA DE ARCHIVO --- */
+        .area-carga {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 30px 20px;
+            text-align: center;
+            background-color: #f8fafc;
+            margin-bottom: 25px;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .area-carga:hover {
+            border-color: #0284c7;
+            background-color: #f0f9ff;
+        }
+
+        .area-carga input[type="file"] {
+            font-family: 'Inter', sans-serif;
+            color: #475569;
+            font-size: 0.95rem;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        /* --- BOTÓN Y MENSAJES --- */
+        .btn-generar {
+            width: 100%; 
+            font-size: 1.1rem; 
+            padding: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .btn-generar:hover {
+            background-color: #0369a1;
+        }
+
+        .mensaje { 
+            padding: 12px; 
+            border-radius: 5px; 
+            margin-top: 20px; 
+            display: none; 
+            font-weight: 500; 
+            text-align: center;
+        }
+        .mensaje.exito { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .mensaje.error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    </style>
 </head>
 <body>
     <nav class="navbar">
-        <h1>🎓 AIDA System</h1>
-        <div class="nav-links"><a href="/menu">Panel Principal</a></div>
+        <h1 class="navbar-brand"><i class="ph ph-graduation-cap"></i> Sistema AIDA</h1>
+        <div class="navbar-links">
+            <a href="/menu"><i class="ph ph-squares-four"></i> Inicio</a>
+            <a href="/app/alumnos"><i class="ph ph-users"></i> Alumnos</a>
+            <a href="/app/cursada"><i class="ph ph-pencil-line"></i> Notas</a>
+            <a href="/app/fecha"><i class="ph ph-files"></i> Masiva</a>
+            <a href="/app/archivo"><i class="ph ph-upload-simple"></i> CSV</a>
+            <button onclick="cerrarSesion()" class="btn-logout"><i class="ph ph-sign-out"></i> Salir</button>
+        </div>
     </nav>
-    <hr>
-    <div class="contenedor">
-        <div class="tarjeta"> 
-            <label>Seleccione un archivo CSV con los datos de los alumnos:</label><br>
-            <input type="file" id="inputCsv" accept=".csv">
-            <button onclick="procesarYEnviarArchivo()">Cargar Datos</button>
 
-            <div id="resultado"></div>
+    <div class="contenedor">
+        <div class="tarjeta-form">
+            <h1><i class="ph ph-file-csv"></i> Carga Masiva de Alumnos</h1>
+            <p>Seleccione un archivo en formato delimitado por comas (.csv) para importar un lote de inscriptos y registrarlos directamente en la base de datos.</p>
+            
+            <div class="area-carga">
+                <input type="file" id="inputCsv" accept=".csv">
+            </div>
+            
+            <button onclick="procesarYEnviarArchivo()" class="btn-generar">
+                <i class="ph ph-upload-simple"></i> Procesar y Cargar Datos
+            </button>
+
+            <div id="resultado" class="mensaje"></div>
         </div>
     </div>
-
 
     <script>
         async function procesarYEnviarArchivo() {
@@ -39,14 +216,12 @@
                 const contenido = evento.target.result;
                 const lineas = contenido.split('\n').map(l => l.trim()).filter(l => l.length > 0);
                 
-                // Exigimos que el CSV tenga encabezados para mayor seguridad
                 const encabezados = lineas[0].split(',');
                 if (encabezados.length < 6) {
                     mostrarMensaje('El archivo CSV no tiene las columnas requeridas.', 'error');
                     return;
                 }
 
-                // Transformamos el CSV a JSON (Requisito de la clase)
                 const alumnosJson = [];
                 for (let i = 1; i < lineas.length; i++) {
                     const datos = lineas[i].split(',');
@@ -63,7 +238,6 @@
                 }
 
                 try {
-                    // Enviamos el JSON al servidor mediante PATCH
                     const respuesta = await fetch('/api/v0/archivo', {
                         method: 'PATCH',
                         headers: {
@@ -76,6 +250,7 @@
 
                     if (datosRespuesta.estado === 'exito') {
                         mostrarMensaje(datosRespuesta.mensaje, 'exito');
+                        archivoInput.value = ''; // Limpiar el input tras éxito
                     } else {
                         mostrarMensaje(datosRespuesta.mensaje + (datosRespuesta.detalle ? ': ' + datosRespuesta.detalle : ''), 'error');
                     }
@@ -84,15 +259,32 @@
                 }
             };
 
-            // Inicia la lectura del archivo como texto
             lector.readAsText(archivo);
         }
 
         function mostrarMensaje(texto, tipo) {
             const divResultado = document.getElementById('resultado');
             divResultado.style.display = 'block';
-            divResultado.className = tipo;
+            
+            if (tipo === '') {
+                divResultado.className = 'mensaje';
+                divResultado.style.backgroundColor = '#f1f5f9';
+                divResultado.style.borderColor = '#e2e8f0';
+                divResultado.style.color = '#475569';
+            } else {
+                divResultado.removeAttribute('style'); 
+                divResultado.className = `mensaje ${tipo}`;
+            }
             divResultado.textContent = texto;
+        }
+
+        async function cerrarSesion() {
+            try {
+                await fetch('/api/v0/auth/logout', { method: 'POST' });
+                window.location.href = '/app/login';
+            } catch (error) { 
+                alert("Error al intentar cerrar sesión."); 
+            }
         }
     </script>
 </body>
