@@ -2,72 +2,207 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>AIDA - Panel de Control</title>
-    <link rel="stylesheet" href="/styles.css"> <style>
+    <title>Sistema AIDA - Panel de Control</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <link rel="stylesheet" href="/styles.css"> 
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+        }
+
+        /* --- NUEVA BARRA DE NAVEGACIÓN --- */
+        .navbar {
+            display: flex;
+            justify-content: space-between; /* Envía el título a la izquierda y el botón a la derecha */
+            align-items: center;
+            background-color: #0284c7; /* Azul corporativo */
+            color: white;
+            padding: 16px 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .btn-logout {
+            background-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-logout:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-color: white;
+        }
+
+        /* --- CONTENEDOR Y TARJETAS --- */
+        .contenedor {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .header-seccion {
+            margin-bottom: 30px;
+        }
+
+        .header-seccion h2 {
+            font-weight: 600;
+            color: #0f172a;
+            margin: 0 0 8px 0;
+            font-size: 1.5rem;
+        }
+
+        .header-seccion p {
+            color: #64748b;
+            font-size: 1rem;
+            margin: 0;
+        }
+
         .grid-menu {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
         }
+
         .tarjeta-menu {
-            text-align: center;
-            padding: 30px 20px;
-            transition: transform 0.2s;
+            text-align: left;
+            padding: 24px;
+            transition: all 0.2s ease;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            box-sizing: border-box;
         }
+
         .tarjeta-menu:hover {
-            transform: translateY(-5px);
-            border-color: var(--primario);
+            transform: translateY(-3px);
+            border-color: #0284c7;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
         }
-        .icono { font-size: 40px; margin-bottom: 15px; }
+
+        .icono-contenedor {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background-color: #f0f9ff;
+            color: #0284c7;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 26px;
+        }
+
+        /* Títulos agrandados según su solicitud */
+        .tarjeta-menu h3 {
+            font-size: 1.2rem; 
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            color: #1e293b;
+        }
+
+        .tarjeta-menu p {
+            font-size: 0.95rem;
+            color: #64748b;
+            margin: 0;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
     <nav class="navbar">
-        <h1>🎓 AIDA System</h1>
-        <div class="nav-links">
-            <button onclick="cerrarSesion()" class="btn-logout">Cerrar Sesión</button>
-        </div>
+        <h1><i class="ph ph-graduation-cap"></i> Sistema AIDA</h1>
+        <button onclick="cerrarSesion()" class="btn-logout">
+            <i class="ph ph-sign-out"></i> Cerrar Sesión
+        </button>
     </nav>
 
     <div class="contenedor">
-        <h2>Bienvenido al Panel de Administración</h2>
-        <p style="color: var(--text-muted)">Seleccione el módulo con el que desea trabajar hoy:</p>
+        <div class="header-seccion">
+            <h2>Panel de Administración</h2>
+            <p>Seleccione el módulo operativo para comenzar:</p>
+        </div>
         
         <div class="grid-menu">
             <a href="/app/alumnos" style="text-decoration: none;">
-                <div class="tarjeta tarjeta-menu">
-                    <div class="icono">👥</div>
-                    <h3 style="color: var(--texto); margin: 0;">Gestión de Alumnos</h3>
-                    <p style="color: #64748b; font-size: 14px;">Altas, bajas, modificaciones y consultas.</p>
+                <div class="tarjeta-menu">
+                    <div class="icono-contenedor">
+                        <i class="ph ph-users"></i>
+                    </div>
+                    <h3>Gestión de Alumnos</h3>
+                    <p>Altas, bajas, modificaciones y consultas del padrón.</p>
                 </div>
             </a>
+            
             <a href="/app/cursada" style="text-decoration: none;">
-                <div class="tarjeta tarjeta-menu">
-                    <div class="icono">📝</div>
-                    <h3 style="color: var(--texto); margin: 0;">Cargar Notas</h3>
-                    <p style="color: #64748b; font-size: 14px;">Registrar cursadas aprobadas.</p>
+                <div class="tarjeta-menu">
+                    <div class="icono-contenedor">
+                        <i class="ph ph-pencil-line"></i>
+                    </div>
+                    <h3>Cargar Notas</h3>
+                    <p>Registrar aprobaciones de cursadas en el sistema.</p>
                 </div>
             </a>
+            
             <a href="/app/certificados" style="text-decoration: none;">
-                <div class="tarjeta tarjeta-menu">
-                    <div class="icono">📜</div>
-                    <h3 style="color: var(--texto); margin: 0;">Emisión Individual</h3>
-                    <p style="color: #64748b; font-size: 14px;">Generar certificado por LU.</p>
+                <div class="tarjeta-menu">
+                    <div class="icono-contenedor">
+                        <i class="ph ph-certificate"></i>
+                    </div>
+                    <h3>Emisión Individual</h3>
+                    <p>Generar constancias de título por Libreta Universitaria.</p>
                 </div>
             </a>
+            
             <a href="/app/fecha" style="text-decoration: none;">
-                <div class="tarjeta tarjeta-menu">
-                    <div class="icono">📅</div>
-                    <h3 style="color: var(--texto); margin: 0;">Emisión Masiva</h3>
-                    <p style="color: #64748b; font-size: 14px;">Generar por fecha de egreso.</p>
+                <div class="tarjeta-menu">
+                    <div class="icono-contenedor">
+                        <i class="ph ph-files"></i>
+                    </div>
+                    <h3>Emisión Masiva</h3>
+                    <p>Generación de lotes por fecha de egreso registrada.</p>
                 </div>
             </a>
+            
             <a href="/app/archivo" style="text-decoration: none;">
-                <div class="tarjeta tarjeta-menu">
-                    <div class="icono">📁</div>
-                    <h3 style="color: var(--texto); margin: 0;">Carga Masiva (CSV)</h3>
-                    <p style="color: #64748b; font-size: 14px;">Importar nuevos inscriptos.</p>
+                <div class="tarjeta-menu">
+                    <div class="icono-contenedor">
+                        <i class="ph ph-upload-simple"></i>
+                    </div>
+                    <h3>Carga Masiva (CSV)</h3>
+                    <p>Importar nuevos inscriptos mediante archivo delimitado.</p>
                 </div>
             </a>
         </div>
