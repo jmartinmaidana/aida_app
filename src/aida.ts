@@ -17,7 +17,7 @@ export interface Alumno {
     titulo: string | null;
     titulo_en_tramite: string | null;
     egreso: string | null;
-    carrera_id?: number | null; // <--- NUEVO CAMPO
+    carrera_id?: number | null; 
 }
 
 type FiltroAlumnos = {fecha: Fecha} | {lu: string} | {uno: true}

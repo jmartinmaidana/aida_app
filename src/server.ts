@@ -1,9 +1,10 @@
 import express from 'express';
-import { pool, conectarBD, generarCertificadoPorLU, generarCertifadosPorFecha, cargarAlumnosDesdeJson, obtenerCarreras, obtenerAlumnosEnBD , cargarAlumnoEnBD,cargarCursadaAprobada, actualizarAlumnoEnBD, eliminarAlumno , Alumno, verificarCarreraAprobada} from './aida.js';
+import { pool, conectarBD, generarCertificadoPorLU, generarCertifadosPorFecha, cargarAlumnosDesdeJson, obtenerCarreras, obtenerAlumnosEnBD , cargarAlumnoEnBD,cargarCursadaAprobada, actualizarAlumnoEnBD, eliminarAlumno , verificarCarreraAprobada} from './aida.js';
 import path from 'path'; 
 import session from 'express-session';
 import { Request, Response, NextFunction } from 'express';
 import { Usuario, crearUsuario, autenticarUsuario } from './autenticacion.js';
+import { alumnoSchema } from './schemas_validator.js';
 
 
 declare module 'express-session' {
@@ -134,10 +135,24 @@ app.get('/api/alumnos', requireAuthAPI, async (req, res) => {
 // Endpoint carga a la bdd aida.alumnos el alumno suministrado por req
 app.post('/api/alumno', requireAuthAPI, async (req, res) => {
     try {
-        const nuevoAlumno = req.body as Alumno
+        // 1. Zod inspecciona req.body. Si algo está mal, interrumpe y salta al catch.
+        // Si está bien, lo guarda en nuevoAlumno ya con el tipo correcto.
+        const nuevoAlumno = alumnoSchema.parse(req.body); 
+        
+        // 2. Si llegamos aquí, los datos son 100% seguros
         await cargarAlumnoEnBD(nuevoAlumno);
         res.json({ estado: "exito", mensaje: "Alumno creado correctamente." });
+
     } catch (error: any) {
+        // 3. Si el error viene de Zod, le damos al frontend un mensaje detallado (Error 400: Bad Request)
+        if (error.errors) {
+            return res.status(400).json({ 
+                estado: "error", 
+                mensaje: "Datos inválidos", 
+                detalles: error.errors 
+            });
+        }
+        // Si es un error de la base de datos u otro, devolvemos 500
         res.status(500).json({ estado: "error", mensaje: error.message });
     }
 });
