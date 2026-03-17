@@ -7,6 +7,7 @@ import { Request, Response, NextFunction } from 'express';
 import { Usuario, crearUsuario, autenticarUsuario } from './autenticacion.js';
 import { alumnoSchema } from './schemas_validator.js';
 import { CertificadoService } from './services/CertificadoService.js';
+import { catchAsync,manejadorDeErrores } from './middlewares/errorHandler.js';
 
 
 declare module 'express-session' {
@@ -18,6 +19,8 @@ declare module 'express-session' {
 const app = express();
 const puerto = 3000;
 
+
+// Middleswares ------
 // 1. Middleware fundamental: Le dice a Express que procese el body de las peticiones como JSON
 
 //Un Middleware es una función que intercepta la petición antes de que llegue a nuestras rutas. 
@@ -27,7 +30,6 @@ app.use(express.json());
 
 app.use(express.static('public'));
 
-// Configuración del motor de sesiones
 app.use(session({
     secret: process.env.SESSION_SECRET || 'mi_secreto_super_seguro_123', //Codigo/clave necesaria para validar una cookie y asi  evitar que  un usuario acceda solo creando su propia cookie
     resave: false, //Si ya hay una cookie creada no la dupliques
@@ -38,6 +40,8 @@ app.use(session({
         maxAge: 1000 * 60 * 60 * 24 // La sesión dura 1 día (en milisegundos)
     }
 }));
+
+
 
 // Guardia para las páginas HTML (Redirige al login si no está autenticado)
 function requireAuth(req: Request, res: Response, next: NextFunction) {
@@ -57,195 +61,106 @@ function requireAuthAPI(req: Request, res: Response, next: NextFunction) {
     }
 }
 // Endpoint: Genera el certificado para la lu suministrada y lo descarga localmente
-app.post('/api/v0/certificados', requireAuthAPI, async (req, res) => {
-    try {
-        const { lu } = req.body;
-        if (!lu) return res.status(400).json({ estado: "error", mensaje: "Falta la LU." });
-        
-        // Llamamos al servicio de forma limpia
-        const rutaArchivo = await CertificadoService.generarPorLU(lu);
-        res.download(rutaArchivo, `Certificado_${lu.replace('/', '-')}.html`);
+app.post('/api/v0/certificados', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
+    const { lu } = req.body;
+    if (!lu) return res.status(400).json({ estado: "error", mensaje: "Falta la LU." });
+    
+    const rutaArchivo = await CertificadoService.generarPorLU(lu);
+    res.download(rutaArchivo, `Certificado_${lu.replace('/', '-')}.html`);
+}));
 
-    } catch (error: any) {
-        res.status(400).json({ estado: "error", mensaje: error.message });
-    }
-});
 // Endpoint: Recibe un lu y simula la solicitud del titulo en tramite (setea el atrib titulo_en_tramite con la fecha actual)
-app.post('/api/v0/tramite-titulo', requireAuthAPI, async (req, res) => {
-    try {
-        const { lu } = req.body;
-        if (!lu) {
-            return res.status(400).json({ estado: "error", mensaje: "Falta la LU." });
-        }
+app.post('/api/v0/tramite-titulo', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
+    const { lu } = req.body;
+    if (!lu) return res.status(400).json({ estado: "error", mensaje: "Falta la LU." });
 
-        // Blindaje SQL: Solo actualiza si TIENE egreso y NO TIENE trámite previo
-        const query = `
-            UPDATE aida.alumnos 
-            SET titulo_en_tramite = CURRENT_DATE 
-            WHERE lu = $1 AND egreso IS NOT NULL AND titulo_en_tramite IS NULL;
-        `;
-        const resultado = await pool.query(query, [lu]);
+    const query = `UPDATE aida.alumnos SET titulo_en_tramite = CURRENT_DATE WHERE lu = $1 AND egreso IS NOT NULL AND titulo_en_tramite IS NULL;`;
+    const resultado = await pool.query(query, [lu]);
 
-        if (resultado.rowCount === 0) {
-            return res.status(400).json({ 
-                estado: "error", 
-                mensaje: "No se puede iniciar el trámite. Verifique que el alumno haya egresado y no tenga un trámite activo." 
-            });
-        }
-
-        res.json({ estado: "exito", mensaje: "Trámite de título iniciado con la fecha de hoy." });
-    } catch (error: any) {
-        res.status(500).json({ estado: "error", mensaje: "Error al registrar el trámite." });
+    if (resultado.rowCount === 0) {
+        return res.status(400).json({ estado: "error", mensaje: "No se puede iniciar el trámite. Verifique que el alumno haya egresado y no tenga un trámite activo." });
     }
-});
+    res.json({ estado: "exito", mensaje: "Trámite de título iniciado con la fecha de hoy." });
+}));
 
 // Endpoint: Recibe una fecha de titulo_en_tramite y genera los certificados para todos los alumnos que solicitaron titulo en esa fecha
-app.post('/api/v0/fecha', requireAuthAPI, async (req, res) => {
-    try {
-        const { fecha } = req.body;
-        if (!fecha) {
-            return res.status(400).json({ estado: "error", mensaje: "Debe ingresar una fecha válida." });
-        }
+app.post('/api/v0/fecha', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
+    const { fecha } = req.body;
+    if (!fecha) return res.status(400).json({ estado: "error", mensaje: "Debe ingresar una fecha válida." });
 
-        console.log(`Generando certificados masivos para solicitudes del: ${fecha}`);
-        await CertificadoService.generarPorFecha(fecha);
-        
-        res.json({ 
-            estado: "exito", 
-            mensaje: `Proceso finalizado. Certificados solicitados el ${fecha} se generaron exitosamente.` 
-        });
-    } catch (error: any) {
-
-        res.status(400).json({ estado: "error", mensaje: error.message });
-    }
-});
+    await CertificadoService.generarPorFecha(fecha);
+    res.json({ estado: "exito", mensaje: `Proceso finalizado para el ${fecha}.` });
+}));
 
 // Endpoint: Devuelve todos los alumnos en la base de datos (se llama al carga la pagina de alumnos y cuando esta hace un fetch?)
-app.get('/api/alumnos', requireAuthAPI, async (req, res) => {
-    try {
-        // Mágicamente limpio: El servidor no sabe de SQL, solo le pide datos al Repositorio
-        const alumnos = await AlumnoRepository.obtenerTodos();
-        res.json({ estado: "exito", datos: alumnos });   
-    } catch (error: any) {
-        res.status(500).json({ estado: "error", mensaje: error.message });
-    }
-});
+app.get('/api/alumnos', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
+    const alumnos = await AlumnoRepository.obtenerTodos();
+    res.json({ estado: "exito", datos: alumnos });   
+}));
 
 // Crear alumno 
-app.post('/api/alumno', requireAuthAPI, async (req, res) => {
-    try {
-        const nuevoAlumno = alumnoSchema.parse(req.body); 
-        await AlumnoRepository.crear(nuevoAlumno);
-        res.json({ estado: "exito", mensaje: "Alumno creado correctamente." });
-    } catch (error: any) {
-        if (error.errors) {
-            return res.status(400).json({ estado: "error", mensaje: "Datos inválidos", detalles: error.errors });
-        }
-        res.status(500).json({ estado: "error", mensaje: error.message });
-    }
-});
+app.post('/api/alumno', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
+    const nuevoAlumno = alumnoSchema.parse(req.body); 
+    await AlumnoRepository.crear(nuevoAlumno);
+    res.json({ estado: "exito", mensaje: "Alumno creado correctamente." });
+}));
 
 
 
 // Endpoint: actualiza los datos pasados del alumno segun la lu
-app.put('/api/alumnos/:prefijo/:anio', requireAuthAPI, async (req, res) => {
-    try {
-        const lu = `${req.params.prefijo}/${req.params.anio}`;
-        // Idealmente, aquí también pasaríamos req.body por Zod antes de enviar al repo
-        const datosValidados = alumnoSchema.parse(req.body);
-        await AlumnoRepository.actualizar(lu, datosValidados);
-        res.json({ estado: "exito", mensaje: "Alumno actualizado correctamente." });
-    } catch (error: any) {
-        if (error.errors) return res.status(400).json({ estado: "error", detalles: error.errors });
-        res.status(500).json({ estado: "error", mensaje: error.message });
-    }
-});
+app.put('/api/alumnos/:prefijo/:anio', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
+    const lu = `${req.params.prefijo}/${req.params.anio}`;
+    const datosValidados = alumnoSchema.parse(req.body);
+    await AlumnoRepository.actualizar(lu, datosValidados);
+    res.json({ estado: "exito", mensaje: "Alumno actualizado correctamente." });
+}));
 
 //Endpoint elimina de la bdd aida.alumnos el alumno suministrado por req
-app.delete('/api/alumnos/:prefijo/:anio', requireAuthAPI, async (req, res) => {
-    try {
-        const lu = `${req.params.prefijo}/${req.params.anio}`;
-        await AlumnoRepository.eliminar(lu);
-        res.json({ estado: "exito", mensaje: "Alumno eliminado correctamente." });
-    } catch (error: any) {
-        res.status(500).json({ estado: "error", mensaje: error.message });
-    }
-});
+app.delete('/api/alumnos/:prefijo/:anio', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
+    const lu = `${req.params.prefijo}/${req.params.anio}`;
+    await AlumnoRepository.eliminar(lu);
+    res.json({ estado: "exito", mensaje: "Alumno eliminado correctamente." });
+}));
 
 // Endpoint: Obtener lista de carreras
-app.get('/api/v0/carreras', requireAuthAPI, async (req, res) => {
-    try {
-        const carreras = await obtenerCarreras();
-        res.json(carreras);
-    } catch (error: any) {
-        res.status(500).json({ estado: "error", mensaje: error.message });
-    }
-});
+app.get('/api/v0/carreras', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
+    const carreras = await obtenerCarreras();
+    res.json(carreras);
+}));
 
 // Endpoints para Funcionalidad de cursada
 
 // Añadir aprobado
-app.post('/api/v0/cursada', requireAuthAPI, async (req,res) =>{
-    try {
-        const cursadaDeAlumno = req.body; 
-        if(!cursadaDeAlumno.lu || !cursadaDeAlumno.idMateria || !cursadaDeAlumno.año || !cursadaDeAlumno.cuatrimestre){
-            return res.status(400).json({ estado: "error", mensaje: "Falta completar datos." });
-        }
-        await cargarCursadaAprobada(cursadaDeAlumno.lu,cursadaDeAlumno.idMateria, cursadaDeAlumno.año, cursadaDeAlumno.cuatrimestre); 
-        await verificarCarreraAprobada(cursadaDeAlumno.lu);
-        res.json({ estado: "exito", mensaje: "Cursada Aprobada cargadas correctamente." });
-    } catch (error: any) {
-        res.status(500).json({ estado: "error", mensaje: error.message });
-    } 
-
-})
-
+app.post('/api/v0/cursada', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
+    const { lu, idMateria, año, cuatrimestre } = req.body; 
+    if(!lu || !idMateria || !año || !cuatrimestre){
+        return res.status(400).json({ estado: "error", mensaje: "Falta completar datos." });
+    }
+    await cargarCursadaAprobada(lu, idMateria, año, cuatrimestre); 
+    await verificarCarreraAprobada(lu);
+    res.json({ estado: "exito", mensaje: "Cursada Aprobada cargadas correctamente." });
+}));
 // ---- Ednpoints de Autenticación ----
 
 //Endpoint: creacion de usuario
-app.post('/api/v0/auth/register', async (req, res) => {
-    try {
-        
-        const { username, password, nombre, email } = req.body;
-        if (!username || !password || !nombre || !email) {
-            return res.status(400).json({ estado: 'error', mensaje: 'No se ingresaron todos los datos necesario' });
-        }
-        
-        await crearUsuario(pool, username, password, nombre, email)
-        res.json({ estado: "exito", mensaje: "Usuario registrado correctamente." });
-    } catch (error: any) {
-        res.status(500).json({ estado: "error", mensaje: error.message });
+app.post('/api/v0/auth/register', catchAsync(async (req: Request, res: Response) => {
+    const { username, password, nombre, email } = req.body;
+    if (!username || !password || !nombre || !email) {
+        return res.status(400).json({ estado: 'error', mensaje: 'No se ingresaron todos los datos necesario' });
     }
-});
+    await crearUsuario(pool, username, password, nombre, email);
+    res.json({ estado: "exito", mensaje: "Usuario registrado correctamente." });
+}));
 
 //Endpoint: login del usuario
-app.post('/api/v0/auth/login', express.json(), async (req, res) => {
-    try {
-        const { username, password } = req.body;
-        if (!username || !password) {
-            return res.status(400).json({ estado: "error", mensaje: "Usuario y contraseña son obligatorios." });
-        }
-
-        const usuarioValidado = await autenticarUsuario(pool, username, password);
-
-        if (!usuarioValidado) {
-            return res.status(401).json({ estado: "error", mensaje: "Credenciales incorrectas." });
-        }
-
-        req.session.usuario = usuarioValidado;
-        /* Esto es la estructura que  tiene req.session.usuario{
-        "id": 1,
-        "username": "admin",
-        "nombre": "Administrador",
-        "email": "admin@aida.com"
-        }*/
-
-        res.json({ estado: "exito", mensaje: "Usuario logueado correctamente." });
-
-    } catch (error: any) {
-        res.status(500).json({ estado: "error", mensaje: error.message });
+app.post('/api/v0/auth/register', catchAsync(async (req: Request, res: Response) => {
+    const { username, password, nombre, email } = req.body;
+    if (!username || !password || !nombre || !email) {
+        return res.status(400).json({ estado: 'error', mensaje: 'No se ingresaron todos los datos necesario' });
     }
-});
+    await crearUsuario(pool, username, password, nombre, email);
+    res.json({ estado: "exito", mensaje: "Usuario registrado correctamente." });
+}));
 
 //Endpoint de Logout
 app.post('/api/v0/auth/logout', (req, res) => {
@@ -305,21 +220,14 @@ app.get('/app/login', (req, res) => {
 });
 
 // Endpoint: Carga multiples alumnos desde JSON
-app.patch('/api/v0/archivo',requireAuthAPI, async (req, res) => {
-    const datosAlumnos = req.body; // Aquí llega el JSON
-    
+app.patch('/api/v0/archivo', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
+    const datosAlumnos = req.body;
     if (!Array.isArray(datosAlumnos)) {
-        res.status(400).json({ estado: "error", mensaje: "El formato debe ser un arreglo JSON." });
-        return;
+        return res.status(400).json({ estado: "error", mensaje: "El formato debe ser un arreglo JSON." });
     }
-
-    try {
-        const insertados = await cargarAlumnosDesdeJson(datosAlumnos);
-        res.json({ estado: "exito", mensaje: `Se insertaron ${insertados} alumnos en la base de datos.` });
-    } catch (error: any) {
-        res.status(500).json({ estado: "error", mensaje: "Error al procesar el JSON", detalle: error.message });
-    }
-});
+    const insertados = await cargarAlumnosDesdeJson(datosAlumnos);
+    res.json({ estado: "exito", mensaje: `Se insertaron ${insertados} alumnos en la base de datos.` });
+}));
 
 // Arranque del servidor
 async function iniciarServidor() {
@@ -337,6 +245,11 @@ async function iniciarServidor() {
         console.error("Error fatal al arrancar el servidor:", error);
     }
 }
+
+
+// --- Middleware Global de Errores ---
+// Debe ir siempre al final de todas las rutas definidas en Express
+app.use(manejadorDeErrores);
 
 iniciarServidor();
 
