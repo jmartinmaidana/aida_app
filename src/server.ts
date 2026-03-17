@@ -1,10 +1,12 @@
 import express from 'express';
-import { pool, conectarBD, generarCertificadoPorLU, generarCertifadosPorFecha, cargarAlumnosDesdeJson, obtenerCarreras, obtenerAlumnosEnBD , cargarAlumnoEnBD,cargarCursadaAprobada, actualizarAlumnoEnBD, eliminarAlumno , verificarCarreraAprobada} from './aida.js';
+import { AlumnoRepository } from './repositories/AlumnosRepository.js';
+import { pool, conectarBD, cargarAlumnosDesdeJson, obtenerCarreras,  cargarCursadaAprobada, verificarCarreraAprobada} from './aida.js';
 import path from 'path'; 
 import session from 'express-session';
 import { Request, Response, NextFunction } from 'express';
 import { Usuario, crearUsuario, autenticarUsuario } from './autenticacion.js';
 import { alumnoSchema } from './schemas_validator.js';
+import { CertificadoService } from './services/CertificadoService.js';
 
 
 declare module 'express-session' {
@@ -58,19 +60,16 @@ function requireAuthAPI(req: Request, res: Response, next: NextFunction) {
 app.post('/api/v0/certificados', requireAuthAPI, async (req, res) => {
     try {
         const { lu } = req.body;
-        if (!lu) {
-            return res.status(400).json({ estado: "error", mensaje: "Falta la LU." });
-        }
+        if (!lu) return res.status(400).json({ estado: "error", mensaje: "Falta la LU." });
         
-        // 1. Obtenemos la ruta del archivo generado
-        const rutaArchivo = await generarCertificadoPorLU(lu);
+        // Llamamos al servicio de forma limpia
+        const rutaArchivo = await CertificadoService.generarPorLU(lu);
         res.download(rutaArchivo, `Certificado_${lu.replace('/', '-')}.html`);
 
     } catch (error: any) {
         res.status(400).json({ estado: "error", mensaje: error.message });
     }
 });
-
 // Endpoint: Recibe un lu y simula la solicitud del titulo en tramite (setea el atrib titulo_en_tramite con la fecha actual)
 app.post('/api/v0/tramite-titulo', requireAuthAPI, async (req, res) => {
     try {
@@ -109,7 +108,7 @@ app.post('/api/v0/fecha', requireAuthAPI, async (req, res) => {
         }
 
         console.log(`Generando certificados masivos para solicitudes del: ${fecha}`);
-        await generarCertifadosPorFecha(fecha);
+        await CertificadoService.generarPorFecha(fecha);
         
         res.json({ 
             estado: "exito", 
@@ -124,55 +123,49 @@ app.post('/api/v0/fecha', requireAuthAPI, async (req, res) => {
 // Endpoint: Devuelve todos los alumnos en la base de datos (se llama al carga la pagina de alumnos y cuando esta hace un fetch?)
 app.get('/api/alumnos', requireAuthAPI, async (req, res) => {
     try {
-        const alumnos = await obtenerAlumnosEnBD();
+        // Mágicamente limpio: El servidor no sabe de SQL, solo le pide datos al Repositorio
+        const alumnos = await AlumnoRepository.obtenerTodos();
         res.json({ estado: "exito", datos: alumnos });   
     } catch (error: any) {
         res.status(500).json({ estado: "error", mensaje: error.message });
     }
+});
 
-})
-
-// Endpoint carga a la bdd aida.alumnos el alumno suministrado por req
+// Crear alumno 
 app.post('/api/alumno', requireAuthAPI, async (req, res) => {
     try {
-        // 1. Zod inspecciona req.body. Si algo está mal, interrumpe y salta al catch.
-        // Si está bien, lo guarda en nuevoAlumno ya con el tipo correcto.
         const nuevoAlumno = alumnoSchema.parse(req.body); 
-        
-        // 2. Si llegamos aquí, los datos son 100% seguros
-        await cargarAlumnoEnBD(nuevoAlumno);
+        await AlumnoRepository.crear(nuevoAlumno);
         res.json({ estado: "exito", mensaje: "Alumno creado correctamente." });
-
     } catch (error: any) {
-        // 3. Si el error viene de Zod, le damos al frontend un mensaje detallado (Error 400: Bad Request)
         if (error.errors) {
-            return res.status(400).json({ 
-                estado: "error", 
-                mensaje: "Datos inválidos", 
-                detalles: error.errors 
-            });
+            return res.status(400).json({ estado: "error", mensaje: "Datos inválidos", detalles: error.errors });
         }
-        // Si es un error de la base de datos u otro, devolvemos 500
         res.status(500).json({ estado: "error", mensaje: error.message });
     }
 });
 
+
+
 // Endpoint: actualiza los datos pasados del alumno segun la lu
 app.put('/api/alumnos/:prefijo/:anio', requireAuthAPI, async (req, res) => {
     try {
-        const lu = `${req.params.prefijo}/${req.params.anio}`
-        await actualizarAlumnoEnBD(lu, req.body);
+        const lu = `${req.params.prefijo}/${req.params.anio}`;
+        // Idealmente, aquí también pasaríamos req.body por Zod antes de enviar al repo
+        const datosValidados = alumnoSchema.parse(req.body);
+        await AlumnoRepository.actualizar(lu, datosValidados);
         res.json({ estado: "exito", mensaje: "Alumno actualizado correctamente." });
     } catch (error: any) {
+        if (error.errors) return res.status(400).json({ estado: "error", detalles: error.errors });
         res.status(500).json({ estado: "error", mensaje: error.message });
     }
 });
 
 //Endpoint elimina de la bdd aida.alumnos el alumno suministrado por req
-app.delete('/api/alumnos/:prefijo/:anio',requireAuthAPI, async (req, res) => {
+app.delete('/api/alumnos/:prefijo/:anio', requireAuthAPI, async (req, res) => {
     try {
-        const lu = `${req.params.prefijo}/${req.params.anio}`
-        await eliminarAlumno(lu);
+        const lu = `${req.params.prefijo}/${req.params.anio}`;
+        await AlumnoRepository.eliminar(lu);
         res.json({ estado: "exito", mensaje: "Alumno eliminado correctamente." });
     } catch (error: any) {
         res.status(500).json({ estado: "error", mensaje: error.message });
