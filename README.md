@@ -19,10 +19,9 @@ El sistema está diseñado para ser escalable y mantenible, separando estrictame
 * **Autenticación:** Sistema basado en Sesiones (`express-session`)
 
 ---
-
 ## 📁 Estructura del Proyecto
 
-\`\`\`text
+```text
 src/
 ├── middlewares/       # Interceptores (Manejo de errores, Autenticación)
 ├── repositories/      # Capa de acceso a datos (Patrón Repositorio)
@@ -30,7 +29,7 @@ src/
 ├── aida.ts            # Configuración del Pool de PostgreSQL
 ├── server.ts          # Configuración de Express y definición de rutas
 └── migrador.ts        # Sistema automático de migraciones de base de datos
-\`\`\`
+```
 
 ---
 
