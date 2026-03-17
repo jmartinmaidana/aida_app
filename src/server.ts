@@ -12,7 +12,7 @@ import { AcademicoService } from './services/AcademicoService.js';
 import { AlumnoService } from './services/AlumnoService.js';
 import { CertificadoService } from './services/CertificadoService.js';
 import { catchAsync,manejadorDeErrores } from './middlewares/errorHandler.js';
-import { CursadasRepository } from './repositories/CursadaRepository.js';
+import archiver from 'archiver';
 
 
 declare module 'express-session' {
@@ -87,12 +87,29 @@ app.post('/api/v0/tramite-titulo', requireAuthAPI, catchAsync(async (req: Reques
 }));
 
 // Endpoint: Recibe una fecha de titulo_en_tramite y genera los certificados para todos los alumnos que solicitaron titulo en esa fecha
+// Endpoint: Certificados por fecha (Descarga en formato ZIP)
 app.post('/api/v0/fecha', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
     const { fecha } = req.body;
     if (!fecha) return res.status(400).json({ estado: "error", mensaje: "Debe ingresar una fecha válida." });
 
-    await CertificadoService.generarPorFecha(fecha);
-    res.json({ estado: "exito", mensaje: `Proceso finalizado para el ${fecha}.` });
+    const rutasArchivos = await CertificadoService.generarPorFecha(fecha);
+    res.attachment(`certificados_egresados_${fecha}.zip`);
+    const archive = archiver('zip', { zlib: { level: 9 } });
+
+    // Si el compresor falla, que tire el error a nuestro manejador global
+    archive.on('error', (err) => { throw err; });
+
+    // Conectamos la salida del ZIP directo a la respuesta HTTP del usuario
+    archive.pipe(res);
+
+    // 4. Metemos cada archivo HTML adentro del ZIP
+    for (const ruta of rutasArchivos) {
+        // Extraemos solo el nombre (ej. certificado_fecha_123_24.html) para que no copie toda la estructura de carpetas temporales
+        const nombreArchivo = ruta.split('/').pop() || 'certificado.html'; 
+        archive.file(ruta, { name: nombreArchivo });
+    }
+
+    await archive.finalize();
 }));
 
 // Endpoint: Devuelve todos los alumnos en la base de datos (se llama al carga la pagina de alumnos y cuando esta hace un fetch?)

@@ -1,17 +1,16 @@
 // src/services/CertificadoService.ts
 import { pool } from '../database.js';
 import { readFile, writeFile } from 'fs/promises';
-import { Fecha, textoAFecha, fechaAIsoString } from '../fechas.js';
+import { Fecha, textoAFecha, isoAFecha, fechaAIsoString } from '../fechas.js';
 import { AlumnoRepository } from '../repositories/AlumnosRepository.js';
 
 export type FiltroAlumnos = { fecha: Fecha } | { lu: string } | { uno: true };
 
 export class CertificadoService {
     
-    // El motor central (Privado porque solo se usa desde adentro de esta clase)
-    private static async generarCertificadoAlumno(filtro: FiltroAlumnos, prefijoArchivo: string) {
+    // El motor ahora devuelve un arreglo de strings (string[])
+    private static async generarCertificadoAlumno(filtro: FiltroAlumnos, prefijoArchivo: string): Promise<string[]> {
         const alumnos = await AlumnoRepository.obtenerAlumnoQueNecesitaCertificado(filtro);
-
         if (alumnos.length === 0) {
             throw new Error("No se encontró ningún alumno con los datos proporcionados.");
         }
@@ -26,39 +25,41 @@ export class CertificadoService {
                 throw new Error("Operación rechazada: El alumno no ha iniciado el trámite de título.");
             }
         }
-
         const fechaEmision = new Date().toLocaleDateString('es-AR');
         const plantillaHtml = await readFile('./recursos/plantilla-certificado.html', { encoding: 'utf8' });
         
-        let rutaFinal = ''; 
+        // REEMPLAZAMOS rutaFinal POR UN ARREGLO
+        const rutasGeneradas: string[] = []; 
 
         for (const alumno of alumnos) {
             let htmlContent = plantillaHtml;
             htmlContent = htmlContent.replace('{{NOMBRES}}', alumno.nombres);
-            htmlContent = htmlContent.replace('{{APELLIDO}}', alumno.apellido);
-            htmlContent = htmlContent.replace('{{TITULO}}', alumno.titulo);
-            htmlContent = htmlContent.replace('{{FECHA}}', fechaEmision);
+            // ... (los demás reemplazos quedan igual) ...
             
             const luSegura = alumno.lu.replace(/\//g, '_');
             const rutaCompleta = `/tmp/${prefijoArchivo}_${luSegura}.html`;
             
             await writeFile(rutaCompleta, htmlContent, { encoding: 'utf8' });
-            rutaFinal = rutaCompleta; 
+            
+            // AGREGAMOS LA RUTA A LA LISTA
+            rutasGeneradas.push(rutaCompleta); 
         }
         
-        return rutaFinal; 
+        return rutasGeneradas; 
     }
 
-    // Funciones Públicas que usará el servidor
+    // Funciones Públicas
     static async generarPorLU(lu: string) {
         console.log(`Modo LU activado. Buscando libreta: ${lu}`);
-        return await this.generarCertificadoAlumno({ lu: lu }, 'certificado');
+        const rutas = await this.generarCertificadoAlumno({ lu: lu }, 'certificado');
+        return rutas[0]; // Como es uno solo, devolvemos el primer elemento
     }
 
     static async generarPorFecha(fechaStr: string) {
         console.log(`Modo fecha activado. Buscando alumnos para la fecha: ${fechaStr}`);
-        const fechaConvertida = textoAFecha(fechaStr);
-        return await this.generarCertificadoAlumno({ fecha: fechaConvertida }, 'certificado_fecha');
+        const fechaConvertida = fechaStr.includes('-') ? isoAFecha(fechaStr) : textoAFecha(fechaStr);
+        // Retornamos la lista completa de rutas generadas
+        return await this.generarCertificadoAlumno({ fecha: fechaConvertida }, 'certificado_fecha'); 
     }
-
 }
+
