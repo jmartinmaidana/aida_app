@@ -128,7 +128,7 @@ app.get('/api/v0/carreras', requireAuthAPI, catchAsync(async (req: Request, res:
     res.json(carreras);
 }));
 
-// Endpoints para Funcionalidad de cursada
+// ----Endpoints para Funcionalidad de cursada----
 
 // Añadir aprobado
 app.post('/api/v0/cursada', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
