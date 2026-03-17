@@ -1,21 +1,6 @@
 # 🎓 API REST - Sistema de Gestión Académica (AIDA)
 
-Una API RESTful robusta construida con Node.js y TypeScript para la gestión integral de alumnos, cursadas y emisión de certificados académicos. 
-
-Este proyecto destaca por su enfoque en la **Arquitectura Limpia (Clean Architecture)**, la seguridad de los datos y el manejo profesional de errores, preparado para entornos de producción.
-
----
-
-## 🏗️ Arquitectura y Patrones de Diseño
-
-El sistema está diseñado para ser escalable y mantenible, separando estrictamente las responsabilidades:
-
-* **Arquitectura en Capas:** * **Controladores (Rutas):** Interceptan las peticiones HTTP en Express y delegan el trabajo.
-    * **Capa de Servicios (`/services`):** Encapsula las reglas de negocio complejas (ej. lógica académica, encriptación de contraseñas con `bcrypt`, generación de certificados).
-    * **Patrón Repositorio (`/repositories`):** Aísla la lógica de acceso a la base de datos, permitiendo consultas limpias y reutilizables por cada entidad del dominio.
-* **Validación Estricta (Zod):** Implementación de esquemas de validación en la capa de entrada para garantizar que la base de datos solo reciba información estructurada y segura, actuando como un escudo contra datos maliciosos o incompletos.
-* **Manejo Global de Errores:** Uso de un *Middleware* centralizado e interceptores asíncronos (`catchAsync`) para capturar excepciones de forma unificada, garantizando que el cliente siempre reciba respuestas JSON estandarizadas sin riesgo de colapsar el servidor.
-* **Gestión de Conexiones:** Implementación de un `Pool` de conexiones a PostgreSQL para soportar concurrencia real y optimizar el uso de recursos en la nube.
+Una API RESTful construida con Node.js y TypeScript para la gestión integral de alumnos, cursadas y emisión de certificados académicos. 
 
 ---
 
