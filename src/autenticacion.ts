@@ -1,6 +1,5 @@
 import bcrypt from 'bcrypt';
-import { Client } from 'pg';
-
+import { Pool } from 'pg';
 // Interfaz para usar en todo el sistema (sin la contraseña por seguridad)
 export interface Usuario {
     id: number;
@@ -23,7 +22,7 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 }
 
 // 3. Crea un nuevo usuario en la base de datos
-export async function crearUsuario(client: Client, username: string, passwordPlana: string, nombre: string = '', email: string = '') {
+export async function crearUsuario(pool: Pool, username: string, passwordPlana: string, nombre: string = '', email: string = '') {
     const hash = await hashPassword(passwordPlana);
     
     const query = `
@@ -31,14 +30,14 @@ export async function crearUsuario(client: Client, username: string, passwordPla
         VALUES ($1, $2, $3, $4) RETURNING id, username, nombre, email;
     `;
     
-    const resultado = await client.query(query, [username, hash, nombre, email]);
+    const resultado = await pool.query(query, [username, hash, nombre, email]);
     return resultado.rows[0];
 }
 
 // 4. Valida credenciales y retorna el usuario si todo es correcto
-export async function autenticarUsuario(client: Client, username: string, passwordPlana: string): Promise<Usuario | null> {
+export async function autenticarUsuario(pool: Pool, username: string, passwordPlana: string): Promise<Usuario | null> {
     const query = `SELECT * FROM aida.usuarios WHERE username = $1;`;
-    const resultado = await client.query(query, [username]);
+    const resultado = await pool.query(query, [username]);
     
     if (resultado.rows.length === 0) {
         return null; // El usuario no existe

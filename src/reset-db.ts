@@ -1,4 +1,4 @@
-import { client, conectarBD, desconectarBD } from './aida.js';
+import { pool, conectarBD, desconectarBD } from './aida.js';
 
 async function resetearDatosGestion() {
     console.log(`⚠️ ATENCIÓN: Intentando conectar a HOST: ${process.env.DB_HOST}`);
@@ -16,11 +16,11 @@ async function resetearDatosGestion() {
         ];
 
         console.log("Limpiando tablas de gestión y reiniciando contadores...");
-        await client.query(`TRUNCATE TABLE ${tablasALimpiar.join(', ')} RESTART IDENTITY CASCADE;`);
+        await pool.query(`TRUNCATE TABLE ${tablasALimpiar.join(', ')} RESTART IDENTITY CASCADE;`);
 
         // 1. Insertamos Carreras (IDs generados: 1, 2, 3)
         console.log("Insertando carreras...");
-        await client.query(`
+        await pool.query(`
             INSERT INTO aida.carreras (nombre) VALUES 
             ('Tecnicatura Web'),             -- ID 1
             ('Ingeniería en Software'),      -- ID 2
@@ -29,7 +29,7 @@ async function resetearDatosGestion() {
 
         // 2. Insertamos Materias (IDs generados: 1 al 6)
         console.log("Insertando materias...");
-        await client.query(`
+        await pool.query(`
             INSERT INTO aida.materias (nombre) VALUES 
             ('Programación Inicial'),        -- ID 1
             ('Bases de Datos'),              -- ID 2
@@ -42,7 +42,7 @@ async function resetearDatosGestion() {
         // 3. Asociamos Plan de Estudio
         // Relacionamos los IDs según la lógica de cada carrera
         console.log("Asociando materias a planes de estudio...");
-        await client.query(`
+        await pool.query(`
             INSERT INTO aida.plan_estudio (carrera_id, materia_id) VALUES 
             -- Tecnicatura Web (ID 1)
             (1, 1), (1, 2), (1, 5),

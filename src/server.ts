@@ -1,5 +1,5 @@
 import express from 'express';
-import { client, conectarBD, generarCertificadoPorLU, generarCertifadosPorFecha, cargarAlumnosDesdeJson, obtenerCarreras, obtenerAlumnosEnBD , cargarAlumnoEnBD,cargarCursadaAprobada, actualizarAlumnoEnBD, eliminarAlumno , Alumno, verificarCarreraAprobada} from './aida.js';
+import { pool, conectarBD, generarCertificadoPorLU, generarCertifadosPorFecha, cargarAlumnosDesdeJson, obtenerCarreras, obtenerAlumnosEnBD , cargarAlumnoEnBD,cargarCursadaAprobada, actualizarAlumnoEnBD, eliminarAlumno , Alumno, verificarCarreraAprobada} from './aida.js';
 import path from 'path'; 
 import session from 'express-session';
 import { Request, Response, NextFunction } from 'express';
@@ -84,7 +84,7 @@ app.post('/api/v0/tramite-titulo', requireAuthAPI, async (req, res) => {
             SET titulo_en_tramite = CURRENT_DATE 
             WHERE lu = $1 AND egreso IS NOT NULL AND titulo_en_tramite IS NULL;
         `;
-        const resultado = await client.query(query, [lu]);
+        const resultado = await pool.query(query, [lu]);
 
         if (resultado.rowCount === 0) {
             return res.status(400).json({ 
@@ -203,7 +203,7 @@ app.post('/api/v0/auth/register', async (req, res) => {
             return res.status(400).json({ estado: 'error', mensaje: 'No se ingresaron todos los datos necesario' });
         }
         
-        await crearUsuario(client, username, password, nombre, email)
+        await crearUsuario(pool, username, password, nombre, email)
         res.json({ estado: "exito", mensaje: "Usuario registrado correctamente." });
     } catch (error: any) {
         res.status(500).json({ estado: "error", mensaje: error.message });
@@ -218,7 +218,7 @@ app.post('/api/v0/auth/login', express.json(), async (req, res) => {
             return res.status(400).json({ estado: "error", mensaje: "Usuario y contraseña son obligatorios." });
         }
 
-        const usuarioValidado = await autenticarUsuario(client, username, password);
+        const usuarioValidado = await autenticarUsuario(pool, username, password);
 
         if (!usuarioValidado) {
             return res.status(401).json({ estado: "error", mensaje: "Credenciales incorrectas." });

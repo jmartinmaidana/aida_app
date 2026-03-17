@@ -1,11 +1,13 @@
-import { Client } from 'pg';
+import { Pool } from 'pg'; // Cambiamos Client por Pool
 import { readFile, writeFile } from 'fs/promises';
 import { Fecha, textoAFecha, fechaAIsoString } from './fechas.js';
 import dotenv from 'dotenv';
 dotenv.config(); // Lectura del .env
 
-export const client = new Client({
-    connectionString: process.env.DATABASE_URL
+export const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    max: 20, // Número máximo de conexiones simultáneas en el pool
+    idleTimeoutMillis: 30000, // Cierra las conexiones inactivas después de 30 segundos
 });
 
 export interface Alumno {
@@ -24,7 +26,7 @@ export async function cargarNovedades(rutaArchivo: string ) {
     console.log("Cargando archivo en ruta:", rutaArchivo);
     try {
         const querySql = await readFile('./recursos/insert-ejemplo.sql', { encoding: 'utf8' });
-        await client.query(querySql);
+        await pool.query(querySql);
         console.log("Datos cargados exitosamente en la base de datos.");
     } catch (error: any) {
         // Capturamos el error (ej. llave duplicada) para que el programa no se detenga
@@ -122,13 +124,13 @@ async function obtenerAlumnoQueNecesitaCertificado(filtro: FiltroAlumnos) {
         valores.push(fechaAIsoString(filtro.fecha));
     }
     
-    const res = await client.query(query, valores);
+    const res = await pool.query(query, valores);
     return res.rows; 
 }
 
 export async function obtenerAlumnosEnBD() {
     let query = "SELECT lu, nombres, apellido, titulo, titulo_en_tramite, egreso, carrera_id FROM aida.alumnos ORDER BY lu";
-    const res = await client.query(query);
+    const res = await pool.query(query);
     return res.rows;    
 }
 
@@ -145,7 +147,7 @@ export async function cargarAlumnoEnBD(alumno: Alumno) {
         const carreraId = alumno.carrera_id ? Number(alumno.carrera_id) : null;
 
         const valores = [alumno.lu, alumno.nombres, alumno.apellido, alumno.titulo, tituloTramite, egreso, carreraId];
-        await client.query(query, valores);
+        await pool.query(query, valores);
     } catch (error) {
         throw new Error(`No se pudo cargar el alumno: ${(error as Error).message}`);
     }
@@ -153,7 +155,7 @@ export async function cargarAlumnoEnBD(alumno: Alumno) {
 
 export async function obtenerCarreras() {
     let query = "SELECT id, nombre FROM aida.carreras ORDER BY id;";
-    const res = await client.query(query);
+    const res = await pool.query(query);
     return res.rows;    
 }
 
@@ -167,7 +169,7 @@ export async function actualizarAlumnoEnBD(lu: string, valores: Alumno) {
         const egreso = valores.egreso === "" ? null : valores.egreso;
 
         const nuevos_valores = [valores.nombres, valores.apellido, valores.titulo, tituloTramite, egreso, lu];
-        await client.query(query, nuevos_valores);
+        await pool.query(query, nuevos_valores);
     } catch (error) {
         throw new Error(`No se pudo actualizar el alumno: ${(error as Error).message}`);
     }
@@ -178,7 +180,7 @@ export async function eliminarAlumno(lu: string) {
     try {
         let query = "DELETE FROM aida.alumnos WHERE lu = $1;";
         const valor = [lu];
-        await client.query(query, valor);
+        await pool.query(query, valor);
     } catch (error) {
         throw new Error(`No se pudo eliminar el alumno: ${(error as Error).message}`);
     }
@@ -201,7 +203,7 @@ export async function cargarAlumnosDesdeJson(alumnos: Alumno[]) {
 
             const valores = [alumno.lu, alumno.nombres, alumno.apellido, alumno.titulo, tituloTramite, egreso];
             
-            await client.query(query, valores); 
+            await pool.query(query, valores); 
             insertados++;
         } catch (error: any) {
             console.error(`Error al insertar la LU ${alumno.lu}: ${error.message}`);
@@ -221,7 +223,7 @@ export async function verificarCarreraAprobada(lu: string) {
             JOIN aida.plan_estudio pe ON a.carrera_id = pe.carrera_id
             WHERE a.lu = $1;
         `;
-        const resRequeridas = await client.query(queryRequeridas, [lu]);
+        const resRequeridas = await pool.query(queryRequeridas, [lu]);
         // ParseInt asegura que tratemos el resultado como número y no como texto
         const totalRequeridas = parseInt(resRequeridas.rows[0].total_requeridas);
 
@@ -231,7 +233,7 @@ export async function verificarCarreraAprobada(lu: string) {
             FROM aida.cursadas
             WHERE lu_alumno = $1 AND aprobada = true;
         `;
-        const resAprobadas = await client.query(queryAprobadas, [lu]);
+        const resAprobadas = await pool.query(queryAprobadas, [lu]);
         const totalAprobadas = parseInt(resAprobadas.rows[0].total_aprobadas);
 
         console.log(`Progreso académico: ${totalAprobadas} / ${totalRequeridas} materias aprobadas.`);
@@ -244,7 +246,7 @@ export async function verificarCarreraAprobada(lu: string) {
         // Agregamos "AND egreso IS NULL" para blindar el dato. 
         // Si el alumno ya tenía fecha, esta consulta no hará nada y protegerá el dato original.
         const queryUpdate = `UPDATE aida.alumnos SET egreso = CURRENT_DATE WHERE lu = $1 AND egreso IS NULL;`;
-        const resultadoUpdate = await client.query(queryUpdate, [lu]);       
+        const resultadoUpdate = await pool.query(queryUpdate, [lu]);       
             
         // rowCount nos dice cuántas filas se modificaron realmente
         if (resultadoUpdate.rowCount && resultadoUpdate.rowCount > 0) {
@@ -268,7 +270,7 @@ export async function cargarCursadaAprobada(lu: string, idMateria: string, año:
     try {
         // 1. Obtener el ID real de la carrera del alumno
         const queryIDCarrera = "SELECT a.carrera_id FROM aida.alumnos a WHERE a.lu = $1;";
-        const resultadoCarrera = await client.query(queryIDCarrera, [lu]); 
+        const resultadoCarrera = await pool.query(queryIDCarrera, [lu]); 
         
         // Verificamos que el alumno exista y tenga una carrera asignada
         if (resultadoCarrera.rows.length === 0 || !resultadoCarrera.rows[0].carrera_id) {
@@ -278,13 +280,13 @@ export async function cargarCursadaAprobada(lu: string, idMateria: string, año:
 
         // 2. Verificar si ESA materia específica pertenece a ESA carrera
         const queryCursadaValida = "SELECT 1 FROM aida.plan_estudio pe WHERE pe.carrera_id = $1 AND pe.materia_id = $2;";
-        const cursadaValida = await client.query(queryCursadaValida, [idCarreraReal, idMateria]);
+        const cursadaValida = await pool.query(queryCursadaValida, [idCarreraReal, idMateria]);
         
         // 3. Evaluar y Ejecutar (Contando las filas)
         if (cursadaValida.rows.length > 0) {
             const queryInsert = "INSERT INTO aida.cursadas (lu_alumno, materia_id, anio, cuatrimestre, aprobada) VALUES ($1, $2, $3, $4, $5);";
             // Agregamos el 'true' al final del arreglo para el $5
-            await client.query(queryInsert, [lu, idMateria, año, cuatrimestre, true]);
+            await pool.query(queryInsert, [lu, idMateria, año, cuatrimestre, true]);
         } else {
             // Lanzamos el error específico
             throw new Error("Cursada inválida: La materia no pertenece al plan de estudios de este alumno.");
@@ -298,9 +300,10 @@ export async function cargarCursadaAprobada(lu: string, idMateria: string, año:
 }
 
 export async function conectarBD() {
-    await client.connect();
+    const clientePrueba = await pool.connect();
+    clientePrueba.release(); // Libera la conexión para que vuelva al pool
 }
 
 export async function desconectarBD() {
-    await client.end();
+    await pool.end();
 }
