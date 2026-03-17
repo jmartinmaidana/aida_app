@@ -153,6 +153,21 @@ app.post('/api/v0/auth/register', catchAsync(async (req: Request, res: Response)
 }));
 
 //Endpoint: login del usuario
+app.post('/api/v0/auth/login', catchAsync(async (req: Request, res: Response) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ estado: "error", mensaje: "Usuario y contraseña son obligatorios." });
+    }
+
+    const usuarioValidado = await autenticarUsuario(pool, username, password);
+    if (!usuarioValidado) {
+        return res.status(401).json({ estado: "error", mensaje: "Credenciales incorrectas." });
+    }
+
+    req.session.usuario = usuarioValidado;
+    res.json({ estado: "exito", mensaje: "Usuario logueado correctamente." });
+}));
+
 app.post('/api/v0/auth/register', catchAsync(async (req: Request, res: Response) => {
     const { username, password, nombre, email } = req.body;
     if (!username || !password || !nombre || !email) {
