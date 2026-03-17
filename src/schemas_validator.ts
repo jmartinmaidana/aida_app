@@ -1,8 +1,7 @@
 import { z } from 'zod';
 
 export const alumnoSchema = z.object({
-    lu: z.string().min(3, "La libreta universitaria es obligatoria."),
-    nombres: z.string().min(1, "El nombre no puede estar vacío."),
+    lu: z.string().regex(/^\d+\/\d{2,4}$/, "La LU debe tener el formato numérico 'prefijo/año' (ej. 123/24 o 123/2024)."),    nombres: z.string().min(1, "El nombre no puede estar vacío."),
     apellido: z.string().min(1, "El apellido no puede estar vacío."),
     
     // Si viene un texto, genial. Si viene null, genial. Si no lo envían, Zod pone null.
