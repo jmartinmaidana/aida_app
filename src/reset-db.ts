@@ -1,4 +1,4 @@
-import { pool, conectarBD, desconectarBD } from './aida.js';
+import { pool, conectarBD, desconectarBD } from './database.js';
 
 async function resetearDatosGestion() {
     console.log(`⚠️ ATENCIÓN: Intentando conectar a HOST: ${process.env.DB_HOST}`);

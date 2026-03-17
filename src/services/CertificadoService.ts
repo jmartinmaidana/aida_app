@@ -1,15 +1,16 @@
 // src/services/CertificadoService.ts
-import { pool } from '../aida.js';
+import { pool } from '../database.js';
 import { readFile, writeFile } from 'fs/promises';
 import { Fecha, textoAFecha, fechaAIsoString } from '../fechas.js';
+import { AlumnoRepository } from '../repositories/AlumnosRepository.js';
 
-type FiltroAlumnos = { fecha: Fecha } | { lu: string } | { uno: true };
+export type FiltroAlumnos = { fecha: Fecha } | { lu: string } | { uno: true };
 
 export class CertificadoService {
     
     // El motor central (Privado porque solo se usa desde adentro de esta clase)
     private static async generarCertificadoAlumno(filtro: FiltroAlumnos, prefijoArchivo: string) {
-        const alumnos = await this.obtenerAlumnoQueNecesitaCertificado(filtro);
+        const alumnos = await AlumnoRepository.obtenerAlumnoQueNecesitaCertificado(filtro);
 
         if (alumnos.length === 0) {
             throw new Error("No se encontró ningún alumno con los datos proporcionados.");
@@ -60,29 +61,4 @@ export class CertificadoService {
         return await this.generarCertificadoAlumno({ fecha: fechaConvertida }, 'certificado_fecha');
     }
 
-    static async generarPrueba() {
-        console.log("Modo prueba activado.");
-        return await this.generarCertificadoAlumno({ uno: true }, 'prueba');
-    }
-
-    // Idealmente esto iría en el Repositorio, pero por ahora lo mantenemos aquí para no romper el flujo
-    private static async obtenerAlumnoQueNecesitaCertificado(filtro: FiltroAlumnos) {
-        let query = "SELECT lu, nombres, apellido, titulo, egreso, titulo_en_tramite FROM aida.alumnos";
-        let valores: any[] = []; 
-
-        if ('uno' in filtro) {
-            query += " LIMIT 1";
-        } 
-        else if ('lu' in filtro) {
-            query += " WHERE lu = $1";
-            valores.push(filtro.lu); 
-        }
-        else if ('fecha' in filtro) {
-            query += " WHERE egreso IS NOT NULL AND titulo_en_tramite = $1";
-            valores.push(fechaAIsoString(filtro.fecha));
-        }
-        
-        const res = await pool.query(query, valores);
-        return res.rows; 
-    }
 }

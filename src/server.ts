@@ -1,13 +1,18 @@
 import express from 'express';
 import { AlumnoRepository } from './repositories/AlumnosRepository.js';
-import { pool, conectarBD, cargarAlumnosDesdeJson, obtenerCarreras,  cargarCursadaAprobada, verificarCarreraAprobada} from './aida.js';
+import { CarrerasRepository } from './repositories/CarrerasRepository.js';
+import { pool, conectarBD} from './database.js';
 import path from 'path'; 
 import session from 'express-session';
 import { Request, Response, NextFunction } from 'express';
-import { Usuario, crearUsuario, autenticarUsuario } from './autenticacion.js';
+import { AuthenticationService } from './services/AuthenticationService.js';
+import { Usuario } from './repositories/UsuariosRepository.js';
 import { alumnoSchema } from './schemas_validator.js';
+import { AcademicoService } from './services/AcademicoService.js';
+import { AlumnoService } from './services/AlumnoService.js';
 import { CertificadoService } from './services/CertificadoService.js';
 import { catchAsync,manejadorDeErrores } from './middlewares/errorHandler.js';
+import { CursadasRepository } from './repositories/CursadaRepository.js';
 
 
 declare module 'express-session' {
@@ -17,8 +22,6 @@ declare module 'express-session' {
 }
 
 const app = express();
-const puerto = 3000;
-
 
 // Middleswares ------
 // 1. Middleware fundamental: Le dice a Express que procese el body de las peticiones como JSON
@@ -124,7 +127,7 @@ app.delete('/api/alumnos/:prefijo/:anio', requireAuthAPI, catchAsync(async (req:
 
 // Endpoint: Obtener lista de carreras
 app.get('/api/v0/carreras', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
-    const carreras = await obtenerCarreras();
+    const carreras = await CarrerasRepository.obtenerCarreras();
     res.json(carreras);
 }));
 
@@ -136,9 +139,9 @@ app.post('/api/v0/cursada', requireAuthAPI, catchAsync(async (req: Request, res:
     if(!lu || !idMateria || !año || !cuatrimestre){
         return res.status(400).json({ estado: "error", mensaje: "Falta completar datos." });
     }
-    await cargarCursadaAprobada(lu, idMateria, año, cuatrimestre); 
-    await verificarCarreraAprobada(lu);
-    res.json({ estado: "exito", mensaje: "Cursada Aprobada cargadas correctamente." });
+    await AcademicoService.procesarNuevaNota(lu, idMateria, año, cuatrimestre); 
+    
+    res.json({ estado: "exito", mensaje: "Cursada procesada correctamente." });
 }));
 // ---- Ednpoints de Autenticación ----
 
@@ -148,7 +151,7 @@ app.post('/api/v0/auth/register', catchAsync(async (req: Request, res: Response)
     if (!username || !password || !nombre || !email) {
         return res.status(400).json({ estado: 'error', mensaje: 'No se ingresaron todos los datos necesario' });
     }
-    await crearUsuario(pool, username, password, nombre, email);
+    await AuthenticationService.registrarUsuario(username, password, nombre, email);
     res.json({ estado: "exito", mensaje: "Usuario registrado correctamente." });
 }));
 
@@ -159,22 +162,15 @@ app.post('/api/v0/auth/login', catchAsync(async (req: Request, res: Response) =>
         return res.status(400).json({ estado: "error", mensaje: "Usuario y contraseña son obligatorios." });
     }
 
-    const usuarioValidado = await autenticarUsuario(pool, username, password);
+    // Delegamos la búsqueda y la verificación criptográfica al Servicio
+    const usuarioValidado = await AuthenticationService.login(username, password);
+    
     if (!usuarioValidado) {
         return res.status(401).json({ estado: "error", mensaje: "Credenciales incorrectas." });
     }
 
     req.session.usuario = usuarioValidado;
     res.json({ estado: "exito", mensaje: "Usuario logueado correctamente." });
-}));
-
-app.post('/api/v0/auth/register', catchAsync(async (req: Request, res: Response) => {
-    const { username, password, nombre, email } = req.body;
-    if (!username || !password || !nombre || !email) {
-        return res.status(400).json({ estado: 'error', mensaje: 'No se ingresaron todos los datos necesario' });
-    }
-    await crearUsuario(pool, username, password, nombre, email);
-    res.json({ estado: "exito", mensaje: "Usuario registrado correctamente." });
 }));
 
 //Endpoint de Logout
@@ -240,7 +236,7 @@ app.patch('/api/v0/archivo', requireAuthAPI, catchAsync(async (req: Request, res
     if (!Array.isArray(datosAlumnos)) {
         return res.status(400).json({ estado: "error", mensaje: "El formato debe ser un arreglo JSON." });
     }
-    const insertados = await cargarAlumnosDesdeJson(datosAlumnos);
+    const insertados = await AlumnoService.cargarDesdeJson(datosAlumnos);
     res.json({ estado: "exito", mensaje: `Se insertaron ${insertados} alumnos en la base de datos.` });
 }));
 
