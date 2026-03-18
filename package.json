@@ -30,6 +30,6 @@
     "predeploy": "node dist/migrador.js",
     "start": "node dist/server.js",
     "db:reset": "npx tsc && node dist/reset-db.js",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest"
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest --runInBand"
   }
 }
