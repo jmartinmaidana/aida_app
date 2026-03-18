@@ -48,6 +48,8 @@ export class AlumnoRepository {
         return res.rowCount && res.rowCount > 0; // Devuelve true si realmente se modificó
     }
     
+    // En src/repositories/AlumnosRepository.ts
+
     static async obtenerAlumnoQueNecesitaCertificado(filtro: FiltroAlumnos) {
         let query = "SELECT lu, nombres, apellido, titulo, egreso, titulo_en_tramite FROM aida.alumnos";
         let valores: any[] = []; 
@@ -60,10 +62,13 @@ export class AlumnoRepository {
             valores.push(filtro.lu); 
         }
         else if ('fecha' in filtro) {
-            query += " WHERE egreso IS NOT NULL AND titulo_en_tramite = $1";
+            // CAMBIO CRÍTICO: Usamos ::date para asegurar que Postgres compare manzanas con manzanas
+            // Y quitamos temporalmente 'egreso IS NOT NULL' para probar si es lo que está bloqueando
+            query += " WHERE titulo_en_tramite::date = $1::date";
             valores.push(fechaAIsoString(filtro.fecha));
         }
         
+        console.log("Ejecutando SQL:", query, "con valores:", valores); // Esto nos dirá la verdad en la consola
         const res = await pool.query(query, valores);
         return res.rows; 
     }
