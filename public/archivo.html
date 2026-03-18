@@ -108,22 +108,26 @@
                 const lineas = contenido.split('\n').map(l => l.trim()).filter(l => l.length > 0);
                 
                 const encabezados = lineas[0].split(',');
-                if (encabezados.length < 6) {
-                    mostrarMensaje('El archivo CSV no tiene las columnas requeridas.', 'error');
+                // AHORA EXIGIMOS 7 COLUMNAS
+                if (encabezados.length < 7) {
+                    mostrarMensaje('El archivo CSV no tiene las 7 columnas requeridas (lu, nombres, apellido, carrera_id, titulo, titulo_en_tramite, egreso).', 'error');
                     return;
                 }
 
                 const alumnosJson = [];
                 for (let i = 1; i < lineas.length; i++) {
                     const datos = lineas[i].split(',');
-                    if (datos.length >= 6) {
+                    if (datos.length >= 7) {
                         alumnosJson.push({
-                            lu: datos[0],
-                            nombres: datos[1],
-                            apellido: datos[2],
-                            titulo: datos[3],
-                            titulo_en_tramite: datos[4],
-                            egreso: datos[5]
+                            lu: datos[0].trim(),
+                            nombres: datos[1].trim(),
+                            apellido: datos[2].trim(),
+                            // Convertimos el texto a número. Si está vacío, falla la validación luego.
+                            carrera_id: datos[3].trim() ? parseInt(datos[3].trim()) : null, 
+                            // Si los campos de fecha o texto están vacíos, mandamos null al backend
+                            titulo: datos[4].trim() || null,
+                            titulo_en_tramite: datos[5].trim() || null,
+                            egreso: datos[6].trim() || null
                         });
                     }
                 }
@@ -131,9 +135,7 @@
                 try {
                     const respuesta = await fetch('/api/v0/archivo', {
                         method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(alumnosJson)
                     });
 
@@ -141,7 +143,6 @@
 
                     if (datosRespuesta.estado === 'exito') {
                         mostrarMensaje(datosRespuesta.mensaje, 'exito');
-                        // Limpiamos la pantalla visualmente tras un éxito rotundo
                         inputCsv.value = ''; 
                         nombreArchivo.style.display = 'none';
                     } else {

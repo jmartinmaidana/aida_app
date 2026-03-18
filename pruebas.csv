@@ -1,11 +1,11 @@
-lu,nombres,apellido,titulo,titulo_en_tramite,egreso
-901/26,Ana Maria,Gomez,,,
-902/26,Carlos Daniel,Perez,,,
-903/26,Lucia,Rodriguez,Ingeniero en Software,2026-03-15,2026-03-10
-904/26,Martin,Fernandez,,,
-905/26,Sofia,Martinez,Licenciado en Sistemas,2026-03-18,2026-03-17
-906/26,Jorge,Lopez,,,
-907/26,Valeria,Gonzalez,,,
-908/26,Diego,Sanchez,Tecnico Web,2026-03-18,2026-03-18
-909/26,Camila,Torres,,,
-910/26,Nicolas,Ruiz,,,
+lu,nombres,apellido,titulo,titulo_en_tramite,egreso,carrera_id
+901/26,Ana Maria,Gomez,,,,1
+902/26,Carlos Daniel,Perez,,,,2
+903/26,Lucia,Rodriguez,Ingeniero en Software,15/03/2026,10/03/2026,
+904/26,Martin,Fernandez,,,,
+905/26,Sofia,Martinez,Licenciado en Sistemas,18/03/2026,17/03/2026,
+906/26,Jorge,Lopez,,,,
+907/26,Valeria,Gonzalez,,,,
+908/26,Diego,Sanchez,Tecnico Web,18/03/2026,18/03/2026,
+909/26,Camila,Torres,,,,
+910/26,Nicolas,Ruiz,,,,

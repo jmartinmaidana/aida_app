@@ -284,35 +284,26 @@
             const selectCarrera = document.getElementById('inputCarrera');
             const idCarrera = selectCarrera.value ? parseInt(selectCarrera.value) : null;
             
-            let tituloAutomatico = null;
-            if (idCarrera) {
-                tituloAutomatico = selectCarrera.options[selectCarrera.selectedIndex].text;
-            }
-
             const datosAlumno = {
                 lu: luEnEdicion ? luEnEdicion : document.getElementById('inputLu').value,
                 nombres: document.getElementById('inputNombres').value,
                 apellido: document.getElementById('inputApellido').value,
                 carrera_id: idCarrera,
-                titulo: tituloAutomatico,
+                // Le pasamos null explícitamente. ¡El backend se encargará de completarlo!
+                titulo: null, 
                 titulo_en_tramite: document.getElementById('inputTramite').value || null,
                 egreso: document.getElementById('inputEgreso').value || null
             };
 
+            // La barrera de seguridad del frontend
             if (!datosAlumno.lu || !datosAlumno.apellido || !datosAlumno.nombres || !datosAlumno.carrera_id) {
                 alert("Por favor, complete LU, Nombres, Apellido y seleccione una Carrera.");
                 return;
             }
 
-            const url = luEnEdicion ? `/api/alumnos/${luEnEdicion.replace('/', '/')}` : '/api/alumno';
-            const metodo = luEnEdicion ? 'PUT' : 'POST';
-
             try {
-                let urlFinal = url;
-                if (luEnEdicion) {
-                    const partesLu = luEnEdicion.split('/');
-                    urlFinal = `/api/alumnos/${partesLu[0]}/${partesLu[1]}`;
-                }
+                let urlFinal = luEnEdicion ? `/api/alumnos/${luEnEdicion.split('/')[0]}/${luEnEdicion.split('/')[1]}` : '/api/alumno';
+                const metodo = luEnEdicion ? 'PUT' : 'POST';
 
                 const respuesta = await fetch(urlFinal, {
                     method: metodo,
@@ -322,7 +313,7 @@
 
                 const json = await respuesta.json();
 
-                if (json.estado === 'exito') {
+                if (respuesta.ok) { // Es más seguro validar respuesta.ok que json.estado
                     alert(json.mensaje);
                     ocultarFormulario();
                     cargarAlumnos(); 

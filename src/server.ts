@@ -130,9 +130,11 @@ app.get('/api/alumnos', requireAuthAPI, catchAsync(async (req: Request, res: Res
 }));
 
 // Crear alumno 
+// Crear alumno individual (Refactorizado para usar el Servicio)
 app.post('/api/alumno', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
-    const nuevoAlumno = alumnoSchema.parse(req.body); 
-    await AlumnoRepository.crear(nuevoAlumno);
+    const datosValidados = alumnoSchema.parse(req.body); 
+    await AlumnoService.crearAlumno(datosValidados);
+    
     res.json({ estado: "exito", mensaje: "Alumno creado correctamente." });
 }));
 

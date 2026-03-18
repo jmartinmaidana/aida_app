@@ -9,9 +9,29 @@ export class AlumnoRepository {
         return res.rows;
     }
 
-    static async crear(alumno: Alumno) {
-        const query = "INSERT INTO aida.alumnos (lu, nombres, apellido, titulo, titulo_en_tramite, egreso, carrera_id) VALUES ($1, $2, $3, $4, $5, $6, $7);";
-        const valores = [alumno.lu, alumno.nombres, alumno.apellido, alumno.titulo, alumno.titulo_en_tramite, alumno.egreso, alumno.carrera_id];
+    static async crear(alumno: any) {
+        const query = `
+            INSERT INTO aida.alumnos (lu, nombres, apellido, carrera_id, titulo, titulo_en_tramite, egreso)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            ON CONFLICT (lu) DO UPDATE 
+            SET nombres = EXCLUDED.nombres,
+                apellido = EXCLUDED.apellido,
+                carrera_id = EXCLUDED.carrera_id,
+                titulo = EXCLUDED.titulo,
+                titulo_en_tramite = EXCLUDED.titulo_en_tramite,
+                egreso = EXCLUDED.egreso;
+        `;
+        
+        const valores = [
+            alumno.lu,
+            alumno.nombres,
+            alumno.apellido,
+            alumno.carrera_id,
+            alumno.titulo || null,
+            alumno.titulo_en_tramite || null,
+            alumno.egreso || null
+        ];
+
         await pool.query(query, valores);
     }
 
