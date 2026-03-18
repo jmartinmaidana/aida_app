@@ -93,23 +93,35 @@ app.post('/api/v0/fecha', requireAuthAPI, catchAsync(async (req: Request, res: R
     if (!fecha) return res.status(400).json({ estado: "error", mensaje: "Debe ingresar una fecha válida." });
 
     const rutasArchivos = await CertificadoService.generarPorFecha(fecha);
-    res.attachment(`certificados_egresados_${fecha}.zip`);
+
+    // 1. Forzamos los encabezados de descarga
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename=certificados_${fecha}.zip`);
+
     const archive = archiver('zip', { zlib: { level: 9 } });
 
-    // Si el compresor falla, que tire el error a nuestro manejador global
-    archive.on('error', (err) => { throw err; });
+    // 2. Manejo de errores del compresor
+    archive.on('error', (err) => {
+        console.error("Error en el compresor ZIP:", err);
+        if (!res.headersSent) {
+            res.status(500).send({ error: err.message });
+        }
+    });
 
-    // Conectamos la salida del ZIP directo a la respuesta HTTP del usuario
+    // 3. Canalizar la salida directamente a la respuesta
     archive.pipe(res);
 
+    // 4. Agregar archivos
     for (const ruta of rutasArchivos) {
-        // Esto extrae "archivo.html" sin importar si la ruta usa \ o /
-        const nombreLimpio = path.basename(ruta); 
-        archive.file(ruta, { name: nombreLimpio });
+        const nombreArchivo = path.basename(ruta);
+        archive.file(ruta, { name: nombreArchivo });
     }
 
-        await archive.finalize();
-    }));
+    // 5. Finalizar y esperar a que el stream se complete
+    await archive.finalize();
+    
+    console.log(`ZIP enviado exitosamente para la fecha: ${fecha}`);
+}));
 
 // Endpoint: Devuelve todos los alumnos en la base de datos (se llama al carga la pagina de alumnos y cuando esta hace un fetch?)
 app.get('/api/alumnos', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
