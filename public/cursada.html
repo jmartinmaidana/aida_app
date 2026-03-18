@@ -53,6 +53,11 @@
                         <label for="cuatrimestre">Cuatrimestre:</label>
                         <input type="number" id="cuatrimestre" name="cuatrimestre" placeholder="1 o 2" min="1" max="2" required>
                     </div>
+
+                    <div class="grupo-form" style="margin-top: 15px;">
+                        <label for="nota">Nota de cierre (1 al 10):</label>
+                        <input type="number" id="nota" name="nota" placeholder="Ej: 7" min="1" max="10" required>
+                    </div>
                 </div>
                 
                 <button type="submit" class="btn-generar">
@@ -72,16 +77,17 @@
             const idMateria = document.getElementById('idMateria').value;
             const anio = document.getElementById('anio').value;
             const cuatrimestre = document.getElementById('cuatrimestre').value;
+            const nota = document.getElementById('nota').value;
 
             mostrarMensaje('Procesando carga, por favor espere...', '');
 
             const paqueteDatos = {
                 lu: lu,
                 idMateria: idMateria,
-                año: anio, // Nota: Mantenemos "año" porque así lo espera su backend (server.ts)
-                cuatrimestre: cuatrimestre
+                año: anio, 
+                cuatrimestre: cuatrimestre,
+                nota: parseInt(nota) 
             };
-
             try {
                 const respuesta = await fetch('/api/v0/cursada', {
                     method: 'POST',
@@ -104,17 +110,23 @@
 
         function mostrarMensaje(texto, tipo) {
             const divResultado = document.getElementById('resultado');
-            divResultado.style.display = 'block';
             
             if (tipo === '') {
+                // Estilos para el estado "Cargando..."
                 divResultado.className = 'mensaje';
                 divResultado.style.backgroundColor = '#f1f5f9';
                 divResultado.style.borderColor = '#e2e8f0';
                 divResultado.style.color = '#475569';
             } else {
-                divResultado.removeAttribute('style'); 
+                // Limpiamos los colores en línea para que actúen las clases CSS (exito/error)
+                divResultado.style.backgroundColor = '';
+                divResultado.style.borderColor = '';
+                divResultado.style.color = '';
                 divResultado.className = `mensaje ${tipo}`;
             }
+            
+            // Aseguramos que SIEMPRE sea visible al final
+            divResultado.style.display = 'block'; 
             divResultado.textContent = texto;
         }
 

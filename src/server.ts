@@ -161,16 +161,24 @@ app.get('/api/v0/carreras', requireAuthAPI, catchAsync(async (req: Request, res:
 
 // ----Endpoints para Funcionalidad de cursada----
 
-// Añadir aprobado
+// Añadir cursada
 app.post('/api/v0/cursada', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
-    const { lu, idMateria, año, cuatrimestre } = req.body; 
-    if(!lu || !idMateria || !año || !cuatrimestre){
+    const { lu, idMateria, año, cuatrimestre, nota } = req.body; 
+    
+    if(!lu || !idMateria || !año || !cuatrimestre || nota === undefined){
         return res.status(400).json({ estado: "error", mensaje: "Falta completar datos." });
     }
-    await AcademicoService.procesarNuevaNota(lu, idMateria, año, cuatrimestre); 
+
+    const notaNum = parseInt(nota);
+    if (isNaN(notaNum) || notaNum < 1 || notaNum > 10) {
+        return res.status(400).json({ estado: "error", mensaje: "La nota debe ser un número entero entre 1 y 10." });
+    }
+
+    await AcademicoService.procesarNuevaNota(lu, idMateria, año, cuatrimestre, notaNum); 
     
-    res.json({ estado: "exito", mensaje: "Cursada procesada correctamente." });
+    res.json({ estado: "exito", mensaje: "Cursada procesada y registrada correctamente." });
 }));
+
 // ---- Ednpoints de Autenticación ----
 
 //Endpoint: creacion de usuario

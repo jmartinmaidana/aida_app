@@ -4,7 +4,7 @@ import { PlanEstudiosRepository } from '../repositories/PlanEstudiosRepository.j
 
 export class AcademicoService {
     
-    static async procesarNuevaNota(lu: string, idMateria: string, anio: string, cuatrimestre: string) {
+    static async procesarNuevaNota(lu: string, idMateria: string, anio: string, cuatrimestre: string, nota: number) {
         
         const idCarrera = await AlumnoRepository.obtenerCarreraDeAlumno(lu);
         
@@ -17,9 +17,21 @@ export class AcademicoService {
             throw new Error("Cursada inválida: La materia no pertenece al plan de estudios de este alumno.");
         }
 
-        await CursadasRepository.guardarCursadaAprobada(lu, idMateria, anio, cuatrimestre);
+        const yaAprobada = await CursadasRepository.verificarMateriaAprobada(lu, idMateria);
+        if (yaAprobada) {
+            throw new Error("Operación rechazada: El alumno ya tiene esta materia aprobada en su historial.");
+        }
 
-        return await this.verificarCarreraAprobada(lu)
+        const aprobada = nota >= 4;
+
+        await CursadasRepository.guardarCursada(lu, idMateria, anio, cuatrimestre, nota, aprobada);
+
+        // 3. REGLA DE NEGOCIO: Solo verificamos si se recibe en su carrera si acaba de aprobar algo
+        if (aprobada) {
+            return await this.verificarCarreraAprobada(lu);
+        }
+
+        return false
     }
 
 

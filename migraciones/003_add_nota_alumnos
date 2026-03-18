@@ -1,0 +1,1 @@
+ALTER TABLE aida.cursadas ADD COLUMN IF NOT EXISTS nota INTEGER NOT NULL DEFAULT 1 CHECK (nota >= 1 AND nota <= 10);

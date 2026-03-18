@@ -56,6 +56,7 @@ CREATE TABLE aida.cursadas (
     materia_id INTEGER NOT NULL,
     anio INTEGER NOT NULL,
     cuatrimestre INTEGER NOT NULL,
+    nota INTEGER NOT NULL CHECK (nota >= 1 AND nota <= 10),
     aprobada BOOLEAN DEFAULT FALSE,
     
     CONSTRAINT fk_alumno FOREIGN KEY (lu_alumno) REFERENCES aida.alumnos(lu) ON DELETE CASCADE,
