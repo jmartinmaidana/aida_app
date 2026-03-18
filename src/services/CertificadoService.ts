@@ -10,6 +10,7 @@ export class CertificadoService {
     
 
     private static async generarCertificadoAlumno(filtro: FiltroAlumnos, prefijoArchivo: string): Promise<string[]> {
+
         const alumnos = await AlumnoRepository.obtenerAlumnoQueNecesitaCertificado(filtro);
         
         if (alumnos.length === 0) {
@@ -53,11 +54,13 @@ export class CertificadoService {
     }
 
     static async generarPorLU(lu: string) {
+
         const rutas = await this.generarCertificadoAlumno({ lu: lu }, 'certificado');
         return rutas[0];
     }
 
     static async generarPorFecha(fechaStr: string) {
+        
         const fechaConvertida = fechaStr.includes('-') ? isoAFecha(fechaStr) : textoAFecha(fechaStr);
         return await this.generarCertificadoAlumno({ fecha: fechaConvertida }, 'certificado_fecha'); 
     }

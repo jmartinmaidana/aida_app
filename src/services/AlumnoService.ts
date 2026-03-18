@@ -2,6 +2,7 @@ import { AlumnoRepository } from '../repositories/AlumnosRepository.js';
 import { Alumno } from '../database.js'; // O de donde mueva la interfaz
 
 export class AlumnoService {
+    
     static async cargarDesdeJson(alumnos: Alumno[]) {
         console.log(`Procesando carga de ${alumnos.length} alumnos desde JSON...`);
         
