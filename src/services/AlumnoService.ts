@@ -1,4 +1,3 @@
-// src/services/AlumnoService.ts
 import { AlumnoRepository } from '../repositories/AlumnosRepository.js';
 import { Alumno } from '../database.js'; // O de donde mueva la interfaz
 

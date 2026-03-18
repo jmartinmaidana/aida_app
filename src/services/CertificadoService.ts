@@ -1,8 +1,8 @@
 import { readFile, writeFile } from 'fs/promises';
 import { Fecha, textoAFecha, isoAFecha, fechaAIsoString } from '../fechas.js';
 import { AlumnoRepository } from '../repositories/AlumnosRepository.js';
-import { tmpdir } from 'os'; // <--- IMPORTANTE: Detecta la carpeta temporal del SO
-import { join, basename } from 'path'; // <--- IMPORTANTE: Une rutas correctamente (\ en Win, / en Linux)
+import { tmpdir } from 'os'; 
+import { join } from 'path'; 
 
 export type FiltroAlumnos = { fecha: Fecha } | { lu: string } | { uno: true };
 
@@ -22,16 +22,13 @@ export class CertificadoService {
         const rutasGeneradas: string[] = []; 
 
         for (const alumno of alumnos) {
-            // --- REGLAS DE NEGOCIO APLICADAS A CADA INDIVIDUO ---
-            // Si no tiene egreso O no tiene título en trámite, saltamos este alumno
             if (!alumno.egreso || !alumno.titulo_en_tramite) {
-                console.warn(`Saltando alumno ${alumno.lu}: No cumple requisitos de egreso o trámite.`);
                 
-                // Si la consulta fue individual (por LU), lanzamos error explícito
+                console.warn(`Saltando alumno ${alumno.lu}: No cumple requisitos de egreso o trámite.`);
                 if ('lu' in filtro) {
                     throw new Error(`El alumno ${alumno.lu} no cumple con los requisitos para emitir el certificado.`);
                 }
-                continue; // Si es masivo, simplemente sigue con el siguiente
+                continue; 
             }
 
             let htmlContent = plantillaHtml;
@@ -48,7 +45,6 @@ export class CertificadoService {
             rutasGeneradas.push(rutaCompleta); 
         }
         
-        // Si después de filtrar no quedó ningún certificado válido
         if (rutasGeneradas.length === 0) {
             throw new Error("Ninguno de los alumnos seleccionados cumple con los requisitos para la emisión.");
         }

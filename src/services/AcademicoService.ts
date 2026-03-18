@@ -1,9 +1,6 @@
-// src/services/AcademicoService.ts
-// src/services/AcademicoService.ts
 import { CursadasRepository } from '../repositories/CursadaRepository.js';
 import { AlumnoRepository } from '../repositories/AlumnosRepository.js'; 
 import { PlanEstudiosRepository } from '../repositories/PlanEstudiosRepository.js'; 
-import { Alumno } from '../database.js'; // O de donde mueva la interfaz
 
 export class AcademicoService {
     
@@ -46,7 +43,7 @@ export class AcademicoService {
                 return true;
             }
     
-            return false; // Aún le faltan materias
+            return false; 
     
         } catch (error: any) {
             console.error("Error al verificar el título:", error.message);

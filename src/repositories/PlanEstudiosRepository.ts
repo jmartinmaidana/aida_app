@@ -1,4 +1,3 @@
-// src/repositories/CursadasRepository.ts
 import { pool } from '../database.js';
 
 export class PlanEstudiosRepository {

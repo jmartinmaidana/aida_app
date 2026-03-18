@@ -1,4 +1,4 @@
-import { pool } from '../database.js'; // Ajuste la ruta según dónde esté aida.ts
+import { pool } from '../database.js'; 
 
 export class CarrerasRepository {
     

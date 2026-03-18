@@ -1,4 +1,3 @@
-// src/repositories/UsuarioRepository.ts
 import { pool } from '../database.js';
 
 export interface Usuario {
@@ -6,12 +5,11 @@ export interface Usuario {
     username: string;
     nombre: string;
     email: string;
-    password_hash?: string; // Es opcional porque al frontend no se lo enviamos
+    password_hash?: string; 
 }
 
 export class UsuariosRepository {
     
-    // Busca un usuario por su nombre de usuario (Ideal para el login)
     static async buscarPorUsername(username: string): Promise<Usuario | null> {
         const query = `SELECT id, username, password_hash, nombre, email FROM aida.usuarios WHERE username = $1;`;
         const resultado = await pool.query(query, [username]);
@@ -20,7 +18,6 @@ export class UsuariosRepository {
         return resultado.rows[0];
     }
 
-    // Guarda el usuario ya con la contraseña encriptada
     static async crearUsuario(username: string, passwordHash: string, nombre: string, email: string): Promise<Usuario> {
         const query = `
             INSERT INTO aida.usuarios (username, password_hash, nombre, email)
