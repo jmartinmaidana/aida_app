@@ -102,15 +102,14 @@ app.post('/api/v0/fecha', requireAuthAPI, catchAsync(async (req: Request, res: R
     // Conectamos la salida del ZIP directo a la respuesta HTTP del usuario
     archive.pipe(res);
 
-    // 4. Metemos cada archivo HTML adentro del ZIP
-    for (const ruta of rutasArchivos) {
-        // Extraemos solo el nombre (ej. certificado_fecha_123_24.html) para que no copie toda la estructura de carpetas temporales
-        const nombreArchivo = ruta.split('/').pop() || 'certificado.html'; 
-        archive.file(ruta, { name: nombreArchivo });
-    }
+        for (const ruta of rutasArchivos) {
+            // Uso de path.basename para extraer el nombre de forma segura en Windows y Linux
+            const nombreArchivo = path.basename(ruta); 
+            archive.file(ruta, { name: nombreArchivo });
+        }
 
-    await archive.finalize();
-}));
+        await archive.finalize();
+    }));
 
 // Endpoint: Devuelve todos los alumnos en la base de datos (se llama al carga la pagina de alumnos y cuando esta hace un fetch?)
 app.get('/api/alumnos', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
