@@ -102,11 +102,11 @@ app.post('/api/v0/fecha', requireAuthAPI, catchAsync(async (req: Request, res: R
     // Conectamos la salida del ZIP directo a la respuesta HTTP del usuario
     archive.pipe(res);
 
-        for (const ruta of rutasArchivos) {
-            // Uso de path.basename para extraer el nombre de forma segura en Windows y Linux
-            const nombreArchivo = path.basename(ruta); 
-            archive.file(ruta, { name: nombreArchivo });
-        }
+    for (const ruta of rutasArchivos) {
+        // Esto extrae "archivo.html" sin importar si la ruta usa \ o /
+        const nombreLimpio = path.basename(ruta); 
+        archive.file(ruta, { name: nombreLimpio });
+    }
 
         await archive.finalize();
     }));
