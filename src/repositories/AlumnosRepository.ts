@@ -13,26 +13,31 @@ export class AlumnoRepository {
         const query = `
             INSERT INTO aida.alumnos (lu, nombres, apellido, carrera_id, titulo, titulo_en_tramite, egreso)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
-            ON CONFLICT (lu) DO UPDATE 
-            SET nombres = EXCLUDED.nombres,
-                apellido = EXCLUDED.apellido,
-                carrera_id = EXCLUDED.carrera_id,
-                titulo = EXCLUDED.titulo,
-                titulo_en_tramite = EXCLUDED.titulo_en_tramite,
-                egreso = EXCLUDED.egreso;
+        `;
+        const valores = [
+            alumno.lu, alumno.nombres, alumno.apellido, alumno.carrera_id,
+            alumno.titulo || null, alumno.titulo_en_tramite || null, alumno.egreso || null
+        ];
+        await pool.query(query, valores);
+    }
+
+    static async crearIgnorandoDuplicados(alumno: any): Promise<boolean> {
+        const query = `
+            INSERT INTO aida.alumnos (lu, nombres, apellido, carrera_id, titulo, titulo_en_tramite, egreso)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            ON CONFLICT (lu) DO NOTHING
+            RETURNING lu; -- Pedimos que nos devuelva el LU solo si logró insertarlo
         `;
         
         const valores = [
-            alumno.lu,
-            alumno.nombres,
-            alumno.apellido,
-            alumno.carrera_id,
-            alumno.titulo || null,
-            alumno.titulo_en_tramite || null,
-            alumno.egreso || null
+            alumno.lu, alumno.nombres, alumno.apellido, alumno.carrera_id,
+            alumno.titulo || null, alumno.titulo_en_tramite || null, alumno.egreso || null
         ];
 
-        await pool.query(query, valores);
+        const res = await pool.query(query, valores);
+        
+        // Retorna 'true' si insertó una fila nueva, 'false' si la ignoró
+        return res.rowCount !== null && res.rowCount > 0;
     }
 
     static async actualizar(lu: string, valores: Alumno) {

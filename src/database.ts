@@ -1,13 +1,13 @@
 import { Pool } from 'pg'; // Cambiamos Client por Pool
-import { AlumnoRepository } from './repositories/AlumnosRepository.js';
 
 import dotenv from 'dotenv';
 dotenv.config(); // Lectura del .env
+// En src/database.ts (dentro de la inicialización de Pool)
+const entornoTest = process.env.NODE_ENV === 'test';
+const urlConexion = entornoTest ? process.env.TEST_DB_URL : process.env.DATABASE_URL;
 
 export const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    max: 20, // Número máximo de conexiones simultáneas en el pool
-    idleTimeoutMillis: 30000, // Cierra las conexiones inactivas después de 30 segundos
+    connectionString: urlConexion,
 });
 
 export interface Alumno {

@@ -287,15 +287,24 @@ async function iniciarServidor() {
 
         const puerto = process.env.PORT || 3000;
 
-        app.listen(puerto, () => {
-            console.log(`Servidor API REST escuchando en el puerto ${puerto}`);
-        });
+        // AL FINAL DE server.ts
+
+        // Solo iniciamos el servidor real si NO estamos testeando
+        if (process.env.NODE_ENV !== 'test') {
+            const PORT = process.env.PORT || 3000;
+            app.listen(PORT, () => {
+                console.log(`Servidor de AIDA corriendo en el puerto ${PORT}`);
+            });
+        }
+
+       
     } catch (error) {
         console.error("Error fatal al arrancar el servidor:", error);
     }
 }
 
-
+// Exportamos la app para que Supertest pueda "simular" peticiones HTTP
+export { app };
 // --- Middleware Global de Errores ---
 // Debe ir siempre al final de todas las rutas definidas en Express
 app.use(manejadorDeErrores);

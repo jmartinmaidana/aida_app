@@ -10,7 +10,9 @@ export const catchAsync = (fn: Function) => {
 
 export const manejadorDeErrores = (err: any, req: Request, res: Response, next: NextFunction) => {  
 
-    console.error("❌ Error detectado en el servidor:", err.message);
+    if (process.env.NODE_ENV !== 'test') { //Solo para hacer mas clara la consola en testing
+        console.error("❌ Error detectado en el servidor:", err.message);
+    }
 
     if (err instanceof ZodError) {
         return res.status(400).json({
@@ -18,6 +20,10 @@ export const manejadorDeErrores = (err: any, req: Request, res: Response, next: 
             mensaje: "Datos de entrada inválidos",
             detalles: err.issues 
         });
+    }
+
+    if (err.message.includes('obligatorio') || err.message.includes('no tiene una carrera')) {
+         return res.status(400).json({ estado: "error", mensaje: err.message });
     }
 
     const statusCode = err.statusCode || 500;

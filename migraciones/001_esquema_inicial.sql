@@ -9,10 +9,19 @@ DROP TABLE IF EXISTS aida.plan_estudio CASCADE;
 DROP TABLE IF EXISTS aida.alumnos CASCADE;
 DROP TABLE IF EXISTS aida.materias CASCADE;
 DROP TABLE IF EXISTS aida.carreras CASCADE;
+DROP TABLE IF EXISTS aida.usuarios CASCADE;
 
 -- =========================================================================
 -- 1. CREACIÓN DE TABLAS CATÁLOGO (Sin dependencias)
 -- =========================================================================
+CREATE TABLE IF NOT EXISTS aida.usuarios (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL
+);
+
 CREATE TABLE aida.carreras (
     id SERIAL PRIMARY KEY,
     nombre TEXT NOT NULL UNIQUE
