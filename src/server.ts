@@ -317,6 +317,13 @@ app.get('/app/login', (req, res) => {
     res.sendFile(path.resolve('./public/login.html'));
 });
 
+app.get('/api/v0/auth/verificar', requireAuthAPI, (req: Request, res: Response) => {
+    res.json({ 
+        estado: "exito", 
+        mensaje: "Sesión activa." 
+    });
+});
+
 // Endpoint: Carga multiples alumnos desde JSON
 app.patch('/api/v0/archivo', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
     const datosAlumnos = req.body;
