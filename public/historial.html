@@ -7,6 +7,17 @@
     <script src="/seguridad.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        /* FORZAR SCROLL HORIZONTAL EN MÓVILES */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto !important; /* El !important obliga al navegador a obedecer */
+            display: block;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .table-responsive table {
+            min-width: 600px !important; /* Si la pantalla mide menos de 600px, activa la barra */
+        }
         :root {
             --primary-color: #2c3e50;
             --accent-color: #3498db;
@@ -134,8 +145,6 @@
 
             <h3>Detalle de Cursadas</h3>
             <div class="table-responsive">
-
-
                 <table>
                     <thead>
                         <tr>
