@@ -33,7 +33,7 @@
             
             <div class="grupo-form">
                 <label for="inputFecha">Fecha de Título en Trámite:</label>
-                <input type="text" id="inputFecha" placeholder="DD/MM/AAAA o AAAA-MM-DD" required>
+                <input type="date" id="inputFecha" required>
             </div>
             
             <button onclick="buscarPorFecha()" class="btn-generar">
@@ -92,7 +92,6 @@
 
         function mostrarMensaje(texto, tipo) {
             const divResultado = document.getElementById('resultado');
-            divResultado.style.display = 'block';
             
             if (tipo === '') {
                 divResultado.className = 'mensaje';
@@ -100,19 +99,16 @@
                 divResultado.style.borderColor = '#e2e8f0';
                 divResultado.style.color = '#475569';
             } else {
-                divResultado.removeAttribute('style'); 
+                // En lugar de removeAttribute('style'), solo limpiamos los colores
+                divResultado.style.backgroundColor = '';
+                divResultado.style.borderColor = '';
+                divResultado.style.color = '';
                 divResultado.className = `mensaje ${tipo}`;
             }
+            
+            // Aseguramos que se muestre al final
+            divResultado.style.display = 'block';
             divResultado.textContent = texto;
-        }
-
-        async function cerrarSesion() {
-            try {
-                await fetch('/api/v0/auth/logout', { method: 'POST' });
-                window.location.href = '/app/login';
-            } catch (error) { 
-                alert("Error al intentar cerrar sesión."); 
-            }
         }
     </script>
 </body>
