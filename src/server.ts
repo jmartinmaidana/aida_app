@@ -13,6 +13,8 @@ import { AlumnoService } from './services/AlumnoService.js';
 import { CertificadoService } from './services/CertificadoService.js';
 import { catchAsync,manejadorDeErrores } from './middlewares/errorHandler.js';
 import archiver from 'archiver';
+import { CursadasRepository } from './repositories/CursadaRepository.js';
+import { PlanEstudiosRepository } from './repositories/PlanEstudiosRepository.js';
 
 
 declare module 'express-session' {
@@ -153,6 +155,48 @@ app.delete('/api/alumnos/:prefijo/:anio', requireAuthAPI, catchAsync(async (req:
     const lu = `${req.params.prefijo}/${req.params.anio}`;
     await AlumnoRepository.eliminar(lu);
     res.json({ estado: "exito", mensaje: "Alumno eliminado correctamente." });
+}));
+
+// GET: Obtener historial académico de un alumno
+// Usamos :lu(*) para que Express entienda LUs con barras (ej: 123/26)
+app.get('/api/v0/historial/:prefijo/:anio', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
+    
+    const lu = `${req.params.prefijo}/${req.params.anio}`;
+    
+    // 1. Verificamos que el alumno exista primero (esto sí es secuencial)
+    const dataAlumno  = await AlumnoRepository.obtenerDatos(lu);
+
+    if (dataAlumno.rows.length === 0) {
+        return res.status(404).json({ estado: "error", mensaje: "Alumno no encontrado." });
+    }
+    const alumno = dataAlumno.rows[0];
+
+    // 2. Ejecutamos todas las consultas independientes EN PARALELO
+    const [cursadas, cantidadAprobadas, promedio, totalMateriasCarrera] = await Promise.all([
+        CursadasRepository.obtenerCursadas(lu),
+        CursadasRepository.cantidadMateriasAprobadas(lu),
+        AcademicoService.calcularPromedioAlumno(lu),
+        PlanEstudiosRepository.cantidadMateriasRequeridas(lu)
+    ]);
+    
+    // 3. Cálculo final
+    const porcentaje = totalMateriasCarrera > 0 
+        ? Math.round((cantidadAprobadas / totalMateriasCarrera) * 100) 
+        : 0;
+
+    // 4. Enviar el paquete de datos
+    res.json({
+        estado: "exito",
+        alumno: `${alumno.nombres} ${alumno.apellido}`,
+        lu: lu,
+        estadisticas: {
+            promedioActual: promedio,
+            porcentajeCompletado: porcentaje,
+            materiasAprobadas: cantidadAprobadas,
+            totalMaterias: totalMateriasCarrera
+        },
+        historial: cursadas
+    });
 }));
 
 // Endpoint: Obtener lista de carreras

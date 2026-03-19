@@ -90,4 +90,12 @@ export class AlumnoRepository {
         const res = await pool.query(query, valores);
         return res.rows; 
     }
+
+    static async obtenerDatos(lu: string){
+        // 1. Obtener datos básicos del alumno
+        const queryAlumno = `SELECT nombres, apellido, carrera_id FROM aida.alumnos WHERE lu = $1`;
+        const resAlumno = await pool.query(queryAlumno, [lu]); 
+    
+        return resAlumno
+    }
 }

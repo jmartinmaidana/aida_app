@@ -23,5 +23,18 @@ export class CursadasRepository {
         const res = await pool.query(query, [lu, idMateria]);
         return res.rows.length > 0;
     }
+    
+    static async obtenerCursadas(lu: string){
+        const queryCursadas = `
+        SELECT m.nombre as materia, c.nota, c.anio, c.cuatrimestre, c.aprobada
+        FROM aida.cursadas c
+        JOIN aida.materias m ON c.materia_id = m.id
+        WHERE c.lu_alumno = $1
+        ORDER BY c.anio DESC, c.cuatrimestre DESC
+    `;
+        const resCursadas = await pool.query(queryCursadas, [lu]);
+        return resCursadas.rows
+    }
+
 
 }

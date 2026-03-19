@@ -62,4 +62,23 @@ export class AcademicoService {
             throw new Error("Fallo en la verificación automática de materias.");
         }
     }
+    static async calcularPromedioAlumno(lu: string) {
+        
+        const cursadas = await CursadasRepository.obtenerCursadas(lu);
+
+        let sumaNotasAprobadas = 0;
+
+        cursadas.forEach(c => {
+            if (c.aprobada) {
+                sumaNotasAprobadas += parseInt(c.nota);
+            }
+        });
+
+        const cantidadAprobadas = await CursadasRepository.cantidadMateriasAprobadas(lu)
+        const promedio = cantidadAprobadas > 0 ? (sumaNotasAprobadas / cantidadAprobadas).toFixed(2) : "0.00";
+
+        return promedio;
+    }
+
+
 }
