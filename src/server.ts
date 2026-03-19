@@ -304,6 +304,11 @@ app.get('/app/cursada', requireAuth, (req, res) => {
     res.sendFile(path.resolve('./public/cursada.html'));
 });
 
+app.get('/app/historial', requireAuth, (req, res) => {
+    res.sendFile(path.resolve('./public/historial.html'));
+});
+
+
 app.get('/app/login', (req, res) => {
     if (req.session.usuario) {
         return res.redirect('/menu');
