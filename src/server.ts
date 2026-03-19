@@ -26,7 +26,7 @@ declare module 'express-session' {
 
 const app = express();
 
-
+app.set('trust proxy', 1); // Confiar en el proxy de Render para las cookies seguras
 
 // Middlewares ------
 // 1. Middleware fundamental: Le dice a Express que procese el body de las peticiones como JSON
