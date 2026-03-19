@@ -74,8 +74,10 @@ export class AcademicoService {
             }
         });
 
-        const cantidadAprobadas = await CursadasRepository.cantidadMateriasAprobadas(lu)
-        const promedio = cantidadAprobadas > 0 ? (sumaNotasAprobadas / cantidadAprobadas).toFixed(2) : "0.00";
+        const cantidadAprobadas = await CursadasRepository.cantidadMateriasAprobadas(lu);
+        
+        // CORRECCIÓN AQUÍ: Envolvemos todo en Number() para que siempre devuelva un valor numérico
+        const promedio = cantidadAprobadas > 0 ? Number((sumaNotasAprobadas / cantidadAprobadas).toFixed(2)) : 0;
 
         return promedio;
     }

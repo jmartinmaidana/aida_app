@@ -5,9 +5,7 @@ import { pool } from '../src/database';
 describe('Suite de Pruebas: Seguridad y Control de Acceso', () => {
     let cookieSesion: string;
 
-    // 1. PREPARACIÓN: Crear un usuario y obtener una cookie válida
     beforeAll(async () => {
-        // Aseguramos que el usuario de prueba exista
         await request(app).post('/api/v0/auth/register').send({
             username: "inspector_seguridad",
             password: "PasswordSegura123!",
@@ -27,7 +25,6 @@ describe('Suite de Pruebas: Seguridad y Control de Acceso', () => {
         await pool.end();
     });
 
-    // --- PRUEBAS DE VISTAS HTML (Redirección 302) ---
 
     it('Debe redirigir al login (HTTP 302) al intentar ver el Historial sin sesión', async () => {
         const respuesta = await request(app).get('/app/historial');
@@ -62,5 +59,38 @@ describe('Suite de Pruebas: Seguridad y Control de Acceso', () => {
         expect(respuesta.status).toBe(200);
         expect(respuesta.body.estado).toBe('exito');
         expect(respuesta.body.mensaje).toBe('Sesión activa.');
+    });
+
+    // --- PRUEBAS DE PROTECCIÓN CONTRA FUERZA BRUTA (Rate Limiting) ---
+
+    it('Debe bloquear la IP con HTTP 429 después de 5 intentos de login (Rate Limit)', async () => {
+        const credencialesFalsas = {
+            username: "hacker_bot",
+            password: "password_adivinada"
+        };
+
+        let statusFinal = 0;
+        let bodyFinal: any = {};
+
+        // 1. Simulamos 6 intentos de login a la velocidad de la luz
+        for (let i = 0; i < 6; i++) {
+            const respuesta = await request(app)
+                .post('/api/v0/auth/login')
+                .send(credencialesFalsas);
+            
+            // Guardamos el resultado del último intento (el número 6)
+            if (i === 5) { 
+                statusFinal = respuesta.status;
+                bodyFinal = respuesta.body;
+            }
+        }
+
+        // 2. Verificamos que el servidor nos haya cortado el rostro en el último intento
+        // HTTP 429 significa "Too Many Requests" (Demasiadas Peticiones)
+        expect(statusFinal).toBe(429); 
+        
+        // 3. Verificamos que el mensaje sea exactamente el que configuramos en server.ts
+        expect(bodyFinal.estado).toBe('error');
+        expect(bodyFinal.mensaje).toContain('Demasiados intentos');
     });
 });

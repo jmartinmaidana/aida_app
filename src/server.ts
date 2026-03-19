@@ -15,7 +15,8 @@ import { catchAsync,manejadorDeErrores } from './middlewares/errorHandler.js';
 import archiver from 'archiver';
 import { CursadasRepository } from './repositories/CursadaRepository.js';
 import { PlanEstudiosRepository } from './repositories/PlanEstudiosRepository.js';
-
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 declare module 'express-session' {
     interface SessionData {
@@ -25,7 +26,9 @@ declare module 'express-session' {
 
 const app = express();
 
-// Middleswares ------
+
+
+// Middlewares ------
 // 1. Middleware fundamental: Le dice a Express que procese el body de las peticiones como JSON
 
 //Un Middleware es una función que intercepta la petición antes de que llegue a nuestras rutas. 
@@ -35,12 +38,38 @@ app.use(express.json());
 
 app.use(express.static('public'));
 
+//Esto configurará automáticamente 11 cabeceras de seguridad que bloquean el Clickjacking, 
+// previenen que el navegador adivine tipos de archivos (MIME Sniffing) y obligan a conexiones seguras.
+// En su server.ts
+// En su server.ts
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            
+            // Permite los scripts normales
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com", "https://cdn.jsdelivr.net"],
+            
+            // NUEVO: Permite los eventos onclick="..." en sus botones
+            scriptSrcAttr: ["'unsafe-inline'"], 
+            
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://unpkg.com", "https://cdn.jsdelivr.net"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://unpkg.com", "https://cdn.jsdelivr.net"],
+            imgSrc: ["'self'", "data:", "https://unpkg.com", "https://cdn.jsdelivr.net"],
+            connectSrc: ["'self'", "https://unpkg.com", "https://cdn.jsdelivr.net"], 
+        },
+    },
+    crossOriginResourcePolicy: { policy: "cross-origin" } 
+}));
+
 app.use(session({
     secret: process.env.SESSION_SECRET || 'mi_secreto_super_seguro_123', //Codigo/clave necesaria para validar una cookie y asi  evitar que  un usuario acceda solo creando su propia cookie
     resave: false, //Si ya hay una cookie creada no la dupliques
     saveUninitialized: false, //Se inicializar sin cookie (debe primero loguearse)
-    cookie: { //Caracteristicas de la cookie
-        secure: false, // En producción con HTTPS esto debe ser true
+    
+    cookie: {
+    // Si estamos en producción, obligamos a que viaje por HTTPS
+        secure: process.env.NODE_ENV === 'production', // En producción con HTTPS esto debe ser true
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24 // La sesión dura 1 día (en milisegundos)
     }
@@ -237,9 +266,23 @@ app.post('/api/v0/auth/register', catchAsync(async (req: Request, res: Response)
     res.json({ estado: "exito", mensaje: "Usuario registrado correctamente." });
 }));
 
-//Endpoint: login del usuario
-app.post('/api/v0/auth/login', catchAsync(async (req: Request, res: Response) => {
+// --- Regla Anti Fuerza Bruta ---
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // Tiempo de memoria: 15 minutos
+    max: 5, // Límite estricto: 5 intentos fallidos o exitosos por IP
+    message: { 
+        estado: "error", 
+        mensaje: "Demasiados intentos de inicio de sesión. Por favor, intente nuevamente en 15 minutos." 
+    },
+    standardHeaders: true, // Le dice al atacante en las cabeceras HTTP cuánto tiempo le queda de castigo
+    legacyHeaders: false,
+});
+
+// Endpoint: login del usuario (AHORA PROTEGIDO)
+// Insertamos "loginLimiter" justo antes de catchAsync
+app.post('/api/v0/auth/login', loginLimiter, catchAsync(async (req: Request, res: Response) => {
     const { username, password } = req.body;
+    
     if (!username || !password) {
         return res.status(400).json({ estado: "error", mensaje: "Usuario y contraseña son obligatorios." });
     }
@@ -337,15 +380,11 @@ app.patch('/api/v0/archivo', requireAuthAPI, catchAsync(async (req: Request, res
 // Arranque del servidor
 async function iniciarServidor() {
     try {
-        // A diferencia del CLI, en un servidor web nos conectamos a la BD UNA sola vez al arrancar
         await conectarBD(); 
         console.log("Conexión a la base de datos establecida.");
 
         const puerto = process.env.PORT || 3000;
 
-        // AL FINAL DE server.ts
-
-        // Solo iniciamos el servidor real si NO estamos testeando
         if (process.env.NODE_ENV !== 'test') {
             const PORT = process.env.PORT || 3000;
             app.listen(PORT, () => {
