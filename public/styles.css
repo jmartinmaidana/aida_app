@@ -161,3 +161,83 @@ tr:hover td { background-color: #f8fafc; }
     color: white;
     box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
 }
+
+/* --- EFECTOS DE CARGA (SPINNERS) --- */
+@keyframes girar {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.icono-cargando {
+    animation: girar 1s linear infinite;
+    display: inline-block;
+}
+
+/* Oscurecemos un poco el botón y cambiamos el cursor cuando está trabajando */
+button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    pointer-events: none; /* Evita dobles clics accidentales */
+}
+
+/* --- RESPONSIVIDAD (MÓVILES) --- */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* Hace que el scroll en iPhone sea suave */
+            margin-top: 15px;
+            border: 1px solid #ecf0f1;
+            border-radius: 8px;
+        }
+
+        /* Cuando la pantalla es pequeña (celulares) */
+        @media (max-width: 600px) {
+            body { padding: 15px 10px; }
+            .container { padding: 20px 15px; }
+            .header-info { 
+                flex-direction: column; /* Apila el título y los datos verticalmente */
+                align-items: flex-start; 
+                gap: 10px;
+            }
+            .header-info h1 { font-size: 22px; }
+            .stat-value { font-size: 28px; }
+        }
+
+        /* =========================================
+   RESPONSIVIDAD GLOBAL (SMARTPHONES Y TABLETS)
+   ========================================= */
+@media (max-width: 768px) {
+    /* 1. La barra de navegación se apila */
+    .navbar { 
+        flex-direction: column; 
+        padding: 15px; 
+        gap: 15px; 
+    }
+    .navbar-links { 
+        flex-wrap: wrap; /* Permite que los links bajen de línea si no caben */
+        justify-content: center; 
+    }
+    .btn-logout { margin-left: 0; width: 100%; justify-content: center; }
+
+    /* 2. Reducimos los márgenes y rellenos gigantes */
+    .contenedor, .contenedor-ancho { 
+        padding: 0 10px; 
+        margin-top: 20px; 
+    }
+    .tarjeta-form { padding: 20px; }
+
+    /* 3. Los formularios de dos columnas pasan a ser de una sola */
+    .fila-doble, .grid-formulario { 
+        grid-template-columns: 1fr; /* Una sola columna que ocupa todo el ancho */
+        gap: 0;
+    }
+
+    /* 4. La cabecera de la tabla de alumnos se adapta */
+    .cabecera-pagina { 
+        flex-direction: column; 
+        align-items: stretch; 
+        gap: 15px; 
+        text-align: center;
+    }
+    .cabecera-pagina h1 { justify-content: center; }
+}

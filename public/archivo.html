@@ -101,17 +101,25 @@
 
             const archivo = inputCsv.files[0];
             const lector = new FileReader();
+            const btnGenerar = document.querySelector('.btn-generar');
 
             mostrarMensaje('Leyendo y convirtiendo archivo...', '');
+
+            // Efecto de carga
+            const contenidoOriginal = btnGenerar.innerHTML;
+            btnGenerar.innerHTML = '<i class="ph ph-spinner icono-cargando"></i> Subiendo alumnos...';
+            btnGenerar.disabled = true;
 
             lector.onload = async function(evento) {
                 const contenido = evento.target.result;
                 const lineas = contenido.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-                
                 const encabezados = lineas[0].split(',');
-                // AHORA EXIGIMOS 7 COLUMNAS
+                
                 if (encabezados.length < 7) {
-                    mostrarMensaje('El archivo CSV no tiene las 7 columnas requeridas (lu, nombres, apellido, carrera_id, titulo, titulo_en_tramite, egreso).', 'error');
+                    mostrarMensaje('El archivo CSV no tiene las 7 columnas requeridas.', 'error');
+                    // Restauramos si falla la validación del CSV
+                    btnGenerar.innerHTML = contenidoOriginal;
+                    btnGenerar.disabled = false;
                     return;
                 }
 
@@ -123,9 +131,7 @@
                             lu: datos[0].trim(),
                             nombres: datos[1].trim(),
                             apellido: datos[2].trim(),
-                            // Convertimos el texto a número. Si está vacío, falla la validación luego.
                             carrera_id: datos[3].trim() ? parseInt(datos[3].trim()) : null, 
-                            // Si los campos de fecha o texto están vacíos, mandamos null al backend
                             titulo: datos[4].trim() || null,
                             titulo_en_tramite: datos[5].trim() || null,
                             egreso: datos[6].trim() || null
@@ -151,6 +157,10 @@
                     }
                 } catch (error) {
                     mostrarMensaje('Error de conexión al enviar los datos al servidor.', 'error');
+                } finally {
+                    // Restauramos el botón al terminar
+                    btnGenerar.innerHTML = contenidoOriginal;
+                    btnGenerar.disabled = false;
                 }
             };
 

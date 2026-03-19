@@ -47,12 +47,19 @@
     <script>
     async function buscarPorFecha() {
         const fechaInput = document.getElementById('inputFecha').value;
+        const btnGenerar = document.querySelector('.btn-generar');
+        
         if (!fechaInput) {
             mostrarMensaje('Por favor, ingrese una fecha.', 'error');
             return;
         }
 
         mostrarMensaje('Generando certificados masivos, por favor espere...', '');
+        
+        // Efecto de carga
+        const contenidoOriginal = btnGenerar.innerHTML;
+        btnGenerar.innerHTML = '<i class="ph ph-spinner icono-cargando"></i> Procesando lote...';
+        btnGenerar.disabled = true;
 
         try {
             const respuesta = await fetch('/api/v0/fecha', {
@@ -62,31 +69,27 @@
             });
 
             if (respuesta.ok) {
-                // 1. Convertimos la respuesta en un "Blob" (objeto binario)
                 const blob = await respuesta.blob();
-                
-                // 2. Creamos una URL temporal para ese objeto
                 const url = window.URL.createObjectURL(blob);
-                
-                // 3. Creamos un enlace invisible y hacemos clic en él automáticamente
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `certificados_${fechaInput.replace(/\//g, '-')}.zip`;
+                a.download = `certificados_${fechaInput}.zip`;
                 document.body.appendChild(a);
                 a.click();
-                
-                // 4. Limpiamos
                 a.remove();
                 window.URL.revokeObjectURL(url);
                 
                 mostrarMensaje('¡Descarga iniciada con éxito!', 'exito');
             } else {
-                // Si hay error, el servidor devuelve JSON, así que lo leemos
                 const datos = await respuesta.json();
                 mostrarMensaje(datos.mensaje || 'Error al generar el lote.', 'error');
             }
         } catch (error) {
             mostrarMensaje('Error de conexión con el servidor.', 'error');
+        } finally {
+            // "finally" se ejecuta SIEMPRE, haya éxito o error. ¡Es perfecto para restaurar el botón!
+            btnGenerar.innerHTML = contenidoOriginal;
+            btnGenerar.disabled = false;
         }
     }
 

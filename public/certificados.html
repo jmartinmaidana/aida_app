@@ -51,10 +51,18 @@
     <script>
         document.getElementById('formCertificado').addEventListener('submit', async (evento) => {
             evento.preventDefault(); 
+            
             const cajaMensaje = document.getElementById('cajaMensaje');
+            const btnGenerar = document.querySelector('.btn-generar');
+            const lu = document.getElementById('lu').value;
+
+            // 1. Ocultar mensajes previos
             cajaMensaje.style.display = 'none'; 
 
-            const lu = document.getElementById('lu').value;
+            // 2. Guardar estado original y activar animación de carga
+            const contenidoOriginal = btnGenerar.innerHTML;
+            btnGenerar.innerHTML = '<i class="ph ph-spinner icono-cargando"></i> Generando constancia...';
+            btnGenerar.disabled = true;
 
             try {
                 const respuesta = await fetch('/api/v0/certificados', {
@@ -64,6 +72,7 @@
                 });
 
                 if (respuesta.ok) {
+                    // Procesar la descarga del archivo
                     const blob = await respuesta.blob();
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -74,20 +83,33 @@
                     a.click();
                     a.remove();
                     
+                    // Mostrar éxito y limpiar input
                     cajaMensaje.style.display = 'block';
                     cajaMensaje.className = 'mensaje exito';
                     cajaMensaje.textContent = "Certificado descargado exitosamente.";
                     document.getElementById('lu').value = '';
+                    
+                    // 3. Restaurar el botón a su estado normal
+                    btnGenerar.innerHTML = contenidoOriginal;
+                    btnGenerar.disabled = false;
                 } else {
                     const json = await respuesta.json();
                     cajaMensaje.style.display = 'block';
                     cajaMensaje.className = 'mensaje error';
                     cajaMensaje.textContent = json.mensaje || "Error al generar certificado.";
+                    
+                    // 3. Restaurar el botón en caso de error
+                    btnGenerar.innerHTML = contenidoOriginal;
+                    btnGenerar.disabled = false;
                 }
             } catch (error) {
                 cajaMensaje.style.display = 'block';
                 cajaMensaje.className = 'mensaje error';
                 cajaMensaje.textContent = "Error de conexión con el servidor.";
+                
+                // 3. Restaurar el botón si se cae el internet
+                btnGenerar.innerHTML = contenidoOriginal;
+                btnGenerar.disabled = false;
             }
         });
 

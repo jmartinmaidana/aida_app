@@ -28,7 +28,6 @@ describe('Suite de Pruebas: Generación de Certificados (ZIP)', () => {
     beforeEach(async () => {
         await pool.query('TRUNCATE TABLE aida.alumnos CASCADE');
 
-        // Insertamos un alumno que ya tiene fecha de egreso Y fecha de trámite
         await pool.query(
             `INSERT INTO aida.alumnos (lu, nombres, apellido, carrera_id, egreso, titulo_en_tramite) 
              VALUES ($1, 'Graduado', 'Ejemplo', 1, '2025-12-01', $2)`,
