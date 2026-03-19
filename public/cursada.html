@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="/seguridad.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/styles.css"> 
     
 </head>
@@ -78,8 +78,14 @@
             const anio = document.getElementById('anio').value;
             const cuatrimestre = document.getElementById('cuatrimestre').value;
             const nota = document.getElementById('nota').value;
+            const btnGenerar = document.querySelector('.btn-generar');
 
             mostrarMensaje('Procesando carga, por favor espere...', '');
+
+            // Efecto de carga
+            const contenidoOriginal = btnGenerar.innerHTML;
+            btnGenerar.innerHTML = '<i class="ph ph-spinner icono-cargando"></i> Guardando...';
+            btnGenerar.disabled = true;
 
             const paqueteDatos = {
                 lu: lu,
@@ -88,6 +94,7 @@
                 cuatrimestre: cuatrimestre,
                 nota: parseInt(nota) 
             };
+            
             try {
                 const respuesta = await fetch('/api/v0/cursada', {
                     method: 'POST',
@@ -105,6 +112,10 @@
                 }
             } catch (error) {
                 mostrarMensaje('Error de conexión con el servidor.', 'error');
+            } finally {
+                // Restauramos el botón
+                btnGenerar.innerHTML = contenidoOriginal;
+                btnGenerar.disabled = false;
             }
         });
 
