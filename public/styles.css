@@ -1,10 +1,16 @@
 /* --- BASE Y TIPOGRAFÍA --- */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+/* --- RESETEO DEL MODELO DE CAJA (La Magia para Móviles) --- */
+* {
+    box-sizing: border-box;
+}
+
 body { 
     font-family: 'Inter', sans-serif; 
     margin: 0; 
     background-color: #f8fafc; 
+    overflow-x: hidden; /* Evita que todo el cuerpo de la página se mueva horizontalmente */
 }
 
 /* --- BARRA DE NAVEGACIÓN COMPLETA --- */
@@ -25,8 +31,9 @@ body {
 .btn-logout:hover { background: rgba(255, 255, 255, 0.15); border-color: white; }
 
 /* --- CONTENEDORES Y TARJETAS --- */
-.contenedor { max-width: 600px; margin: 60px auto; padding: 0 20px; }
-.contenedor-ancho { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+/* Se agregó width: 100% para evitar desbordes */
+.contenedor { max-width: 600px; width: 100%; margin: 60px auto; padding: 0 20px; }
+.contenedor-ancho { max-width: 1100px; width: 100%; margin: 40px auto; padding: 0 20px; }
 
 .tarjeta-form { 
     background: white; padding: 40px; border-radius: 8px; border: 1px solid #e2e8f0; 
@@ -73,6 +80,13 @@ body {
 .input-con-icono i { position: absolute; left: 14px; color: #94a3b8; font-size: 1.2rem; }
 .input-con-icono input { padding-left: 42px; }
 
+/* --- ESTILO DEL BOTÓN DE INICIO DE SESIÓN --- */
+.btn-ingresar {
+    width: 100%; margin-top: 15px; font-size: 1.05rem; padding: 14px; display: flex; justify-content: center; align-items: center; gap: 8px;
+    background-color: transparent; color: #0284c7; border: 2px solid #0284c7; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; transition: all 0.2s ease;
+}
+.btn-ingresar:hover { background-color: #0284c7; color: white; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2); }
+
 /* --- MÓDULO ALUMNOS (TABLAS) --- */
 .cabecera-pagina { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
 .cabecera-pagina h1 { margin: 0; color: #0f172a; font-size: 1.6rem; display: flex; align-items: center; gap: 10px; }
@@ -81,16 +95,9 @@ body {
 
 /* --- AJUSTES DE ESPACIADO EN TABLA --- */
 table { 
-    width: 100%; 
-    border-collapse: collapse; 
-    background: white; 
-    white-space: nowrap; /* Evita que el texto salte de línea y aplaste la tabla */
+    width: 100%; border-collapse: collapse; background: white; white-space: nowrap; 
 }
-th, td { 
-    padding: 16px 24px; /* Aumentamos el relleno para separar bien las columnas */
-    text-align: left; 
-    border-bottom: 1px solid #e2e8f0; 
-}
+th, td { padding: 16px 24px; text-align: left; border-bottom: 1px solid #e2e8f0; }
 th { background-color: #f8fafc; color: #475569; font-weight: 600; cursor: pointer; user-select: none; }
 th:hover { background-color: #f1f5f9; }
 tr:last-child td { border-bottom: none; }
@@ -101,10 +108,26 @@ tr:hover td { background-color: #f8fafc; }
 .btn-mini.editar { background-color: #f59e0b; } .btn-mini.editar:hover { background-color: #d97706; }
 .btn-mini.borrar { background-color: #ef4444; } .btn-mini.borrar:hover { background-color: #dc2626; }
 
-/* --- MÓDULO ARCHIVOS --- */
-.area-carga { border: 2px dashed #cbd5e1; border-radius: 8px; padding: 30px 20px; text-align: center; background-color: #f8fafc; margin-bottom: 25px; transition: all 0.2s ease; }
-.area-carga:hover { border-color: #0284c7; background-color: #f0f9ff; }
-.area-carga input[type="file"] { font-family: 'Inter', sans-serif; color: #475569; font-size: 0.95rem; width: 100%; cursor: pointer; }
+/* --- CONTENEDOR DE TABLA RESPONSIVA --- */
+/* Se agregó display: block para obligar a que respete el contenedor padre */
+/* --- CONTENEDOR DE TABLA RESPONSIVA --- */
+.table-responsive {
+    width: 100%;
+    display: block; 
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; 
+    margin-top: 15px;
+    border: 1px solid #ecf0f1;
+    border-radius: 8px;
+}
+
+/* ¡LA BALA DE PLATA PARA EL SCROLL! */
+/* Obligamos a la tabla a no encogerse más allá de 600px. 
+   Si el celular mide 300px, la barra de scroll aparecerá mágicamente. */
+.table-responsive table {
+    width: 100%;
+    min-width: 650px; 
+}
 
 /* --- MÓDULO ARCHIVOS (DRAG & DROP) --- */
 .area-carga { 
@@ -112,19 +135,15 @@ tr:hover td { background-color: #f8fafc; }
     background-color: #f8fafc; margin-bottom: 25px; transition: all 0.2s ease; 
     display: flex; flex-direction: column; align-items: center; justify-content: center; 
 }
-/* Efecto visual cuando un archivo está flotando sobre la caja */
-.area-carga.drag-over { 
-    border-color: #0284c7; background-color: #e0f2fe; transform: scale(1.02); 
-}
-/* Estética del nuevo botón de selección */
+.area-carga:hover { border-color: #0284c7; background-color: #f0f9ff; }
+.area-carga input[type="file"] { font-family: 'Inter', sans-serif; color: #475569; font-size: 0.95rem; width: 100%; cursor: pointer; }
+.area-carga.drag-over { border-color: #0284c7; background-color: #e0f2fe; transform: scale(1.02); }
 .btn-seleccionar { 
     background-color: white; color: #0284c7; border: 1px solid #0284c7; padding: 10px 20px; 
     border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; 
     display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; 
 }
-.btn-seleccionar:hover { 
-    background-color: #f0f9ff; 
-}
+.btn-seleccionar:hover { background-color: #f0f9ff; }
 
 /* --- MÓDULO MENU --- */
 .grid-menu { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
@@ -134,110 +153,47 @@ tr:hover td { background-color: #f8fafc; }
 .tarjeta-menu h3 { font-size: 1.2rem; font-weight: 600; margin: 0 0 8px 0; color: #1e293b; }
 .tarjeta-menu p { font-size: 0.95rem; color: #64748b; margin: 0; line-height: 1.5; }
 
-/* --- ESTILO DEL BOTÓN DE INICIO DE SESIÓN --- */
-.btn-ingresar {
-    width: 100%; 
-    margin-top: 15px; 
-    font-size: 1.05rem; 
-    padding: 14px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    /* Aplicamos el diseño de contorno similar a "Cerrar Sesión" */
-    background-color: transparent;
-    color: #0284c7;
-    border: 2px solid #0284c7;
-    border-radius: 6px;
-    cursor: pointer;
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
-    transition: all 0.2s ease;
-}
-
-.btn-ingresar:hover {
-    /* Al pasar el ratón, se rellena de color para invitar a la acción */
-    background-color: #0284c7;
-    color: white;
-    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
-}
-
 /* --- EFECTOS DE CARGA (SPINNERS) --- */
 @keyframes girar {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
-
 .icono-cargando {
     animation: girar 1s linear infinite;
     display: inline-block;
 }
-
-/* Oscurecemos un poco el botón y cambiamos el cursor cuando está trabajando */
 button:disabled {
     opacity: 0.7;
     cursor: not-allowed;
-    pointer-events: none; /* Evita dobles clics accidentales */
+    pointer-events: none; 
 }
 
-/* --- RESPONSIVIDAD (MÓVILES) --- */
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch; /* Hace que el scroll en iPhone sea suave */
-            margin-top: 15px;
-            border: 1px solid #ecf0f1;
-            border-radius: 8px;
-        }
-
-        /* Cuando la pantalla es pequeña (celulares) */
-        @media (max-width: 600px) {
-            body { padding: 15px 10px; }
-            .container { padding: 20px 15px; }
-            .header-info { 
-                flex-direction: column; /* Apila el título y los datos verticalmente */
-                align-items: flex-start; 
-                gap: 10px;
-            }
-            .header-info h1 { font-size: 22px; }
-            .stat-value { font-size: 28px; }
-        }
-
-        /* =========================================
+/* =========================================
    RESPONSIVIDAD GLOBAL (SMARTPHONES Y TABLETS)
    ========================================= */
 @media (max-width: 768px) {
     /* 1. La barra de navegación se apila */
-    .navbar { 
-        flex-direction: column; 
-        padding: 15px; 
-        gap: 15px; 
-    }
-    .navbar-links { 
-        flex-wrap: wrap; /* Permite que los links bajen de línea si no caben */
-        justify-content: center; 
-    }
+    .navbar { flex-direction: column; padding: 15px; gap: 15px; }
+    .navbar-links { flex-wrap: wrap; justify-content: center; }
     .btn-logout { margin-left: 0; width: 100%; justify-content: center; }
 
     /* 2. Reducimos los márgenes y rellenos gigantes */
-    .contenedor, .contenedor-ancho { 
-        padding: 0 10px; 
-        margin-top: 20px; 
-    }
+    .contenedor, .contenedor-ancho { padding: 0 10px; margin-top: 20px; }
     .tarjeta-form { padding: 20px; }
 
     /* 3. Los formularios de dos columnas pasan a ser de una sola */
-    .fila-doble, .grid-formulario { 
-        grid-template-columns: 1fr; /* Una sola columna que ocupa todo el ancho */
-        gap: 0;
-    }
+    .fila-doble, .grid-formulario { grid-template-columns: 1fr; gap: 0; }
 
     /* 4. La cabecera de la tabla de alumnos se adapta */
-    .cabecera-pagina { 
-        flex-direction: column; 
-        align-items: stretch; 
-        gap: 15px; 
-        text-align: center;
-    }
+    .cabecera-pagina { flex-direction: column; align-items: stretch; gap: 15px; text-align: center; }
     .cabecera-pagina h1 { justify-content: center; }
+}
+
+@media (max-width: 600px) {
+    /* Ajustes específicos para pantallas muy pequeñas (Ej: vista historial) */
+    body { padding: 15px 10px; }
+    .container { padding: 20px 15px; }
+    .header-info { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .header-info h1 { font-size: 22px; }
+    .stat-value { font-size: 28px; }
 }
