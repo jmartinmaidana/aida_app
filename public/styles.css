@@ -1,16 +1,14 @@
 /* --- BASE Y TIPOGRAFÍA --- */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* --- RESETEO DEL MODELO DE CAJA (La Magia para Móviles) --- */
-* {
-    box-sizing: border-box;
-}
+/* --- RESETEO DEL MODELO DE CAJA --- */
+* { box-sizing: border-box; }
 
 body { 
     font-family: 'Inter', sans-serif; 
     margin: 0; 
     background-color: #f8fafc; 
-    overflow-x: hidden; /* Evita que todo el cuerpo de la página se mueva horizontalmente */
+    overflow-x: hidden; 
 }
 
 /* --- BARRA DE NAVEGACIÓN COMPLETA --- */
@@ -31,9 +29,14 @@ body {
 .btn-logout:hover { background: rgba(255, 255, 255, 0.15); border-color: white; }
 
 /* --- CONTENEDORES Y TARJETAS --- */
-/* Se agregó width: 100% para evitar desbordes */
 .contenedor { max-width: 600px; width: 100%; margin: 60px auto; padding: 0 20px; }
 .contenedor-ancho { max-width: 1100px; width: 100%; margin: 40px auto; padding: 0 20px; }
+
+/* Contenedor específico para el historial */
+.contenedor-historial { 
+    max-width: 1000px; background: white; margin: 40px auto; width: 100%;
+    padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
+}
 
 .tarjeta-form { 
     background: white; padding: 40px; border-radius: 8px; border: 1px solid #e2e8f0; 
@@ -47,7 +50,7 @@ body {
 .grupo-form label { display: block; font-size: 1.15rem; font-weight: 600; color: #1e293b; margin-bottom: 12px; }
 .grupo-form input, .grupo-form select {
     width: 100%; padding: 12px; font-size: 1rem; border: 2px solid #cbd5e1; border-radius: 6px; 
-    box-sizing: border-box; font-family: 'Inter', sans-serif; transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: 'Inter', sans-serif; transition: border-color 0.2s, box-shadow 0.2s;
 }
 .grupo-form input:focus, .grupo-form select:focus { outline: none; border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
 .grupo-form input:disabled { background-color: #f1f5f9; cursor: not-allowed; }
@@ -60,10 +63,11 @@ body {
 }
 .btn-generar:hover, .btn-accion-principal:hover { background-color: #0369a1; }
 
-.btn-cancelar {
-    background-color: white; color: #64748b; border: 1px solid #cbd5e1; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
+.btn-cancelar, .btn-volver {
+    background-color: white; color: #64748b; border: 1px solid #cbd5e1; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; text-decoration: none;
 }
-.btn-cancelar:hover { background-color: #f1f5f9; color: #0f172a; }
+.btn-cancelar:hover, .btn-volver:hover { background-color: #f1f5f9; color: #0f172a; }
+.btn-volver { margin-top: 30px; }
 
 /* --- MENSAJES DE ALERTA --- */
 .mensaje { padding: 12px; border-radius: 5px; margin-top: 20px; display: none; font-weight: 500; text-align: center; }
@@ -72,127 +76,114 @@ body {
 
 /* --- MÓDULO LOGIN --- */
 .login-wrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-.tarjeta-login { background: white; padding: 40px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); width: 100%; max-width: 400px; box-sizing: border-box; }
+.tarjeta-login { background: white; padding: 40px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
 .cabecera-login { text-align: center; margin-bottom: 35px; }
 .cabecera-login h1 { margin: 0; color: #0284c7; font-size: 2rem; display: flex; align-items: center; justify-content: center; gap: 12px; letter-spacing: -0.5px; }
 .cabecera-login p { color: #64748b; margin: 10px 0 0 0; font-size: 1rem; }
 .input-con-icono { position: relative; display: flex; align-items: center; }
 .input-con-icono i { position: absolute; left: 14px; color: #94a3b8; font-size: 1.2rem; }
 .input-con-icono input { padding-left: 42px; }
-
-/* --- ESTILO DEL BOTÓN DE INICIO DE SESIÓN --- */
 .btn-ingresar {
     width: 100%; margin-top: 15px; font-size: 1.05rem; padding: 14px; display: flex; justify-content: center; align-items: center; gap: 8px;
     background-color: transparent; color: #0284c7; border: 2px solid #0284c7; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; transition: all 0.2s ease;
 }
 .btn-ingresar:hover { background-color: #0284c7; color: white; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2); }
 
-/* --- MÓDULO ALUMNOS (TABLAS) --- */
+/* --- TABLAS (Globales) --- */
 .cabecera-pagina { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
 .cabecera-pagina h1 { margin: 0; color: #0f172a; font-size: 1.6rem; display: flex; align-items: center; gap: 10px; }
-.grid-formulario { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .contenedor-tabla { background: white; border-radius: 8px; border: 1px solid #e2e8f0; overflow-x: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 
-/* --- AJUSTES DE ESPACIADO EN TABLA --- */
-table { 
-    width: 100%; border-collapse: collapse; background: white; white-space: nowrap; 
-}
+table { width: 100%; border-collapse: collapse; background: white; white-space: nowrap; }
 th, td { padding: 16px 24px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-th { background-color: #f8fafc; color: #475569; font-weight: 600; cursor: pointer; user-select: none; }
-th:hover { background-color: #f1f5f9; }
+th { background-color: #f8fafc; color: #475569; font-weight: 600; cursor: pointer; user-select: none; transition: background-color 0.2s; }
+th:hover { background-color: #f1f5f9; color: #0284c7; }
 tr:last-child td { border-bottom: none; }
 tr:hover td { background-color: #f8fafc; }
 .acciones-tabla { display: flex; gap: 6px; }
-.btn-mini { border: none; border-radius: 4px; padding: 6px 10px; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; transition: background-color 0.2s; font-size: 1.1rem; }
+.btn-mini { border: none; border-radius: 4px; padding: 6px 10px; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem; }
 .btn-mini.tramite { background-color: #10b981; } .btn-mini.tramite:hover { background-color: #059669; }
 .btn-mini.editar { background-color: #f59e0b; } .btn-mini.editar:hover { background-color: #d97706; }
 .btn-mini.borrar { background-color: #ef4444; } .btn-mini.borrar:hover { background-color: #dc2626; }
 
-/* --- CONTENEDOR DE TABLA RESPONSIVA --- */
-/* Se agregó display: block para obligar a que respete el contenedor padre */
-/* --- CONTENEDOR DE TABLA RESPONSIVA --- */
+/* Contenedor de Tabla Responsiva (Scroll Mágico) */
 .table-responsive {
-    width: 100%;
-    display: block; 
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch; 
-    margin-top: 15px;
-    border: 1px solid #ecf0f1;
-    border-radius: 8px;
+    width: 100%; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; 
+    margin-top: 15px; border: 1px solid #ecf0f1; border-radius: 8px;
 }
+.table-responsive table { width: 100%; min-width: 650px; }
 
-/* ¡LA BALA DE PLATA PARA EL SCROLL! */
-/* Obligamos a la tabla a no encogerse más allá de 600px. 
-   Si el celular mide 300px, la barra de scroll aparecerá mágicamente. */
-.table-responsive table {
-    width: 100%;
-    min-width: 650px; 
-}
+/* --- ESTILOS ESPECÍFICOS: HISTORIAL --- */
+.header-info { border-bottom: 2px solid #ecf0f1; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; }
+.header-info h1 { margin: 0; color: #0f172a; font-size: 28px; }
+.header-info h2 { margin: 10px 0 0 0; color: #0284c7; font-size: 22px; }
+.header-info p { margin: 5px 0 0 0; color: #64748b; font-size: 16px; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
+.stat-card { background: #f8fafc; padding: 25px 20px; border-radius: 10px; text-align: center; border: 1px solid #e2e8f0; transition: transform 0.2s; }
+.stat-card:hover { transform: translateY(-5px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-color: #0284c7; }
+.stat-title { color: #64748b; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+.stat-value { font-size: 36px; font-weight: bold; color: #0f172a; margin: 15px 0; }
+.progress-bg { background: #e2e8f0; border-radius: 10px; height: 12px; width: 100%; overflow: hidden; margin-top: 10px; }
+.progress-fill { background: #10b981; height: 100%; width: 0%; transition: width 1s ease-in-out; }
+
+.nota-destacada { font-size: 18px; font-weight: bold; color: #0f172a; }
+.badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; text-align: center; min-width: 80px;}
+.badge-aprobada { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;}
+.badge-desaprobada { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca;}
 
 /* --- MÓDULO ARCHIVOS (DRAG & DROP) --- */
 .area-carga { 
-    border: 2px dashed #cbd5e1; border-radius: 8px; padding: 40px 20px; text-align: center; 
-    background-color: #f8fafc; margin-bottom: 25px; transition: all 0.2s ease; 
-    display: flex; flex-direction: column; align-items: center; justify-content: center; 
-}
+    border: 2px dashed #cbd5e1; border-radius: 8px; padding: 40px 20px; text-align: center; background-color: #f8fafc; 
+    margin-bottom: 25px; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .area-carga:hover { border-color: #0284c7; background-color: #f0f9ff; }
-.area-carga input[type="file"] { font-family: 'Inter', sans-serif; color: #475569; font-size: 0.95rem; width: 100%; cursor: pointer; }
+.area-carga input[type="file"] { display: none; }
 .area-carga.drag-over { border-color: #0284c7; background-color: #e0f2fe; transform: scale(1.02); }
 .btn-seleccionar { 
-    background-color: white; color: #0284c7; border: 1px solid #0284c7; padding: 10px 20px; 
-    border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; 
-    display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; 
+    background-color: white; 
+    color: #0284c7; 
+    border: 1px solid #0284c7; 
+    padding: 10px 20px; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    font-family: 'Inter', sans-serif; /* <-- ¡Aquí estaba el error arreglado! */
+    font-weight: 600; 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 8px; 
 }
-.btn-seleccionar:hover { background-color: #f0f9ff; }
 
 /* --- MÓDULO MENU --- */
 .grid-menu { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+.grid-menu a {
+    text-decoration: none;
+    color: inherit; /* Le dice al enlace: "Usa el color original de la tarjeta, no el violeta" */
+}
 .tarjeta-menu { text-align: left; padding: 24px; transition: all 0.2s ease; border: 1px solid #e2e8f0; border-radius: 8px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 100%; box-sizing: border-box; }
 .tarjeta-menu:hover { transform: translateY(-3px); border-color: #0284c7; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
 .icono-contenedor { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; background-color: #f0f9ff; color: #0284c7; border-radius: 8px; margin-bottom: 20px; font-size: 26px; }
 .tarjeta-menu h3 { font-size: 1.2rem; font-weight: 600; margin: 0 0 8px 0; color: #1e293b; }
 .tarjeta-menu p { font-size: 0.95rem; color: #64748b; margin: 0; line-height: 1.5; }
 
-/* --- EFECTOS DE CARGA (SPINNERS) --- */
-@keyframes girar {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-.icono-cargando {
-    animation: girar 1s linear infinite;
-    display: inline-block;
-}
-button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-    pointer-events: none; 
-}
+/* --- SPINNERS --- */
+@keyframes girar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.icono-cargando { animation: girar 1s linear infinite; display: inline-block; }
+button:disabled { opacity: 0.7; cursor: not-allowed; pointer-events: none; }
+.loading { text-align: center; padding: 50px; color: #64748b; font-size: 1.2rem; }
+.hidden { display: none !important; }
 
 /* =========================================
-   RESPONSIVIDAD GLOBAL (SMARTPHONES Y TABLETS)
+   RESPONSIVIDAD GLOBAL (SMARTPHONES)
    ========================================= */
 @media (max-width: 768px) {
-    /* 1. La barra de navegación se apila */
     .navbar { flex-direction: column; padding: 15px; gap: 15px; }
     .navbar-links { flex-wrap: wrap; justify-content: center; }
     .btn-logout { margin-left: 0; width: 100%; justify-content: center; }
-
-    /* 2. Reducimos los márgenes y rellenos gigantes */
-    .contenedor, .contenedor-ancho { padding: 0 10px; margin-top: 20px; }
-    .tarjeta-form { padding: 20px; }
-
-    /* 3. Los formularios de dos columnas pasan a ser de una sola */
+    .contenedor, .contenedor-ancho, .contenedor-historial { padding: 0 10px; margin-top: 20px; }
+    .tarjeta-form, .contenedor-historial { padding: 20px; }
     .fila-doble, .grid-formulario { grid-template-columns: 1fr; gap: 0; }
-
-    /* 4. La cabecera de la tabla de alumnos se adapta */
     .cabecera-pagina { flex-direction: column; align-items: stretch; gap: 15px; text-align: center; }
     .cabecera-pagina h1 { justify-content: center; }
-}
-
-@media (max-width: 600px) {
-    /* BORRAMOS la línea de 'body { padding... }' para no romper el Login */
-    
-    .container { padding: 20px 15px; }
     .header-info { flex-direction: column; align-items: flex-start; gap: 10px; }
     .header-info h1 { font-size: 22px; }
     .stat-value { font-size: 28px; }

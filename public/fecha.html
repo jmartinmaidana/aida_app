@@ -15,7 +15,9 @@
 </head>
 <body>
     <nav class="navbar">
-        <h1 class="navbar-brand"><i class="ph ph-graduation-cap"></i> Sistema AIDA</h1>
+        <h1 class="navbar-brand" onclick="window.location.href='/menu'" style="cursor: pointer;" title="Volver al Inicio">
+            <i class="ph ph-graduation-cap"></i> Sistema AIDA
+        </h1>
         <div class="navbar-links">
             <a href="/menu"><i class="ph ph-squares-four"></i> Inicio</a>
             <a href="/app/alumnos"><i class="ph ph-users"></i> Alumnos</a>
@@ -112,6 +114,14 @@
             // Aseguramos que se muestre al final
             divResultado.style.display = 'block';
             divResultado.textContent = texto;
+        }
+        async function cerrarSesion() {
+            try {
+                await fetch('/api/v0/auth/logout', { method: 'POST' });
+                window.location.href = '/app/login';
+            } catch (error) { 
+                alert("Error al intentar cerrar sesión."); 
+            }
         }
     </script>
 </body>

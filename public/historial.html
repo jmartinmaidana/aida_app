@@ -4,117 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historial Académico - AIDA</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="/seguridad.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        /* FORZAR SCROLL HORIZONTAL EN MÓVILES */
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto !important; /* El !important obliga al navegador a obedecer */
-            display: block;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .table-responsive table {
-            min-width: 600px !important; /* Si la pantalla mide menos de 600px, activa la barra */
-        }
-        :root {
-            --primary-color: #2c3e50;
-            --accent-color: #3498db;
-            --success-color: #2ecc71;
-            --danger-color: #e74c3c;
-            --bg-color: #f4f7f6;
-            --card-bg: #ffffff;
-            --text-main: #333333;
-            --text-muted: #7f8c8d;
-        }
-
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: var(--bg-color); 
-            color: var(--text-main);
-            margin: 0; 
-            padding: 30px 20px; 
-        }
-
-        .container { 
-            max-width: 1000px; 
-            background: var(--card-bg); 
-            margin: 0 auto; 
-            padding: 30px; 
-            border-radius: 12px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
-        }
-
-        /* Cabecera */
-        .header-info { 
-            border-bottom: 2px solid #ecf0f1; 
-            padding-bottom: 20px; 
-            margin-bottom: 30px; 
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-
-        .header-info h1 { margin: 0; color: var(--primary-color); font-size: 28px; }
-        .header-info h2 { margin: 10px 0 0 0; color: var(--accent-color); font-size: 22px; }
-        .header-info p { margin: 5px 0 0 0; color: var(--text-muted); font-size: 16px; }
-
-        /* Tarjetas de Estadísticas */
-        .stats-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-            gap: 20px; 
-            margin-bottom: 40px; 
-        }
-
-        .stat-card { 
-            background: #f8f9fa; 
-            padding: 25px 20px; 
-            border-radius: 10px; 
-            text-align: center; 
-            border: 1px solid #e9ecef; 
-            transition: transform 0.2s;
-        }
-
-        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .stat-title { color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
-        .stat-value { font-size: 36px; font-weight: bold; color: var(--primary-color); margin: 15px 0; }
-        
-        /* Barra de Progreso */
-        .progress-bg { background: #e9ecef; border-radius: 10px; height: 12px; width: 100%; overflow: hidden; margin-top: 10px; }
-        .progress-fill { background: var(--success-color); height: 100%; width: 0%; transition: width 1s ease-in-out; }
-
-        /* Tabla de Cursadas */
-        h3 { color: var(--primary-color); border-left: 4px solid var(--accent-color); padding-left: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #ecf0f1; }
-        th { background-color: #f8f9fa; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 13px; }
-        tr:hover { background-color: #fdfdfd; }
-        
-        .nota-destacada { font-size: 18px; font-weight: bold; color: var(--primary-color); }
-        
-        /* Etiquetas de estado */
-        .badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; text-align: center; min-width: 80px;}
-        .badge-aprobada { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
-        .badge-desaprobada { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
-
-        /* Utilidades */
-        .btn-volver { display: inline-block; padding: 10px 20px; background: #95a5a6; color: white; text-decoration: none; border-radius: 6px; margin-top: 30px; font-weight: bold; transition: background 0.3s;}
-        .btn-volver:hover { background: #7f8c8d; }
-        .loading { text-align: center; padding: 50px; color: var(--text-muted); font-size: 18px; }
-        .hidden { display: none !important; }
-        .error-msg { color: var(--danger-color); font-weight: bold; text-align: center; padding: 20px; }
-    </style>
+    <link rel="stylesheet" href="/styles.css"> 
 </head>
 <body>
-    <div class="container">
+    <div class="contenedor-historial">
         
         <div id="pantallaCarga" class="loading">
-            ⏳ Cargando historial académico...
+            <i class="ph ph-spinner icono-cargando" style="font-size: 2rem; color: #0284c7; margin-bottom: 10px; display: block;"></i>
+            Cargando historial académico...
         </div>
 
-        <div id="mensajeError" class="error-msg hidden"></div>
+        <div id="mensajeError" class="mensaje error hidden" style="margin-bottom: 20px;"></div>
 
         <div id="contenidoHistorial" class="hidden">
             <div class="header-info">
@@ -123,7 +27,7 @@
                     <h2 id="nombreAlumno">Nombre del Alumno</h2>
                     <p><strong>Libreta Universitaria:</strong> <span id="luAlumno">LU</span></p>
                 </div>
-                </div>
+            </div>
 
             <div class="stats-grid">
                 <div class="stat-card">
@@ -139,20 +43,21 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Materias Aprobadas</div>
-                    <div class="stat-value"><span id="materiasAprobadas">0</span> <span style="font-size: 20px; color:#95a5a6;">/ <span id="totalMaterias">0</span></span></div>
+                    <div class="stat-value"><span id="materiasAprobadas">0</span> <span style="font-size: 20px; color:#94a3b8;">/ <span id="totalMaterias">0</span></span></div>
                 </div>
             </div>
 
-            <h3>Detalle de Cursadas</h3>
+            <h3 style="color: #0f172a; border-left: 4px solid #0284c7; padding-left: 10px; margin-top: 30px;">Detalle de Cursadas</h3>
+            
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
-                            <th>Año</th>
-                            <th>Cuatrimestre</th>
-                            <th>Materia</th>
-                            <th>Nota</th>
-                            <th>Estado</th>
+                            <th onclick="ordenarHistorial('anio')">Año <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                            <th onclick="ordenarHistorial('cuatrimestre')">Cuatrimestre <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                            <th onclick="ordenarHistorial('materia')">Materia <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                            <th onclick="ordenarHistorial('nota')">Nota <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                            <th onclick="ordenarHistorial('aprobada')">Estado <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
                         </tr>
                     </thead>
                     <tbody id="tablaHistorial">
@@ -161,17 +66,19 @@
             </div>
         </div>
 
-        <a href="javascript:history.back()" class="btn-volver">← Volver al listado</a>
+        <a href="javascript:history.back()" class="btn-volver"><i class="ph ph-arrow-left"></i> Volver al listado</a>
     </div>
 
     <script>
+        // Variables globales para el ordenamiento
+        let historialLocal = [];
+        let columnaOrdenActual = '';
+        let ordenAscendente = true;
+
         document.addEventListener("DOMContentLoaded", async () => {
-            
             const pantallaCarga = document.getElementById('pantallaCarga');
             const contenidoHistorial = document.getElementById('contenidoHistorial');
-            const mensajeError = document.getElementById('mensajeError');
 
-            // 1. Obtener la LU de la URL (Ej: historial.html?lu=123/26)
             const params = new URLSearchParams(window.location.search);
             const luCompleta = params.get('lu');
 
@@ -180,18 +87,14 @@
                 return;
             }
 
-            // 2. Separar la LU para usar su nueva estructura de rutas (/prefijo/anio)
             const partesLu = luCompleta.split('/');
             if (partesLu.length !== 2) {
                 mostrarError("El formato de la Libreta Universitaria es incorrecto.");
                 return;
             }
             
-            const [prefijo, anio] = partesLu;
-
-            // 3. Consultar a la API
             try {
-                const response = await fetch(`/api/v0/historial/${prefijo}/${anio}`);
+                const response = await fetch(`/api/v0/historial/${partesLu[0]}/${partesLu[1]}`);
                 const data = await response.json();
 
                 if (!response.ok || data.estado !== "exito") {
@@ -199,14 +102,12 @@
                     return;
                 }
 
-                // 4. Llenar los datos en la pantalla
+                // Cargar estadísticas
                 document.getElementById('nombreAlumno').textContent = data.alumno;
                 document.getElementById('luAlumno').textContent = data.lu;
-
                 document.getElementById('promedioValor').textContent = data.estadisticas.promedioActual;
                 document.getElementById('progresoTexto').textContent = data.estadisticas.porcentajeCompletado + '%';
                 
-                // Pequeño delay para que se vea la animación de la barra
                 setTimeout(() => {
                     document.getElementById('progresoBarra').style.width = data.estadisticas.porcentajeCompletado + '%';
                 }, 100);
@@ -214,45 +115,79 @@
                 document.getElementById('materiasAprobadas').textContent = data.estadisticas.materiasAprobadas;
                 document.getElementById('totalMaterias').textContent = data.estadisticas.totalMaterias;
 
-                // 5. Generar la tabla de cursadas
-                const tbody = document.getElementById('tablaHistorial');
+                // Guardar datos de cursadas para poder ordenarlos
+                historialLocal = data.historial;
                 
-                if (data.historial.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: #7f8c8d;">El alumno no tiene cursadas registradas.</td></tr>`;
-                } else {
-                    data.historial.forEach(cursada => {
-                        const tr = document.createElement('tr');
-                        
-                        const estadoClase = cursada.aprobada ? 'badge-aprobada' : 'badge-desaprobada';
-                        const estadoTexto = cursada.aprobada ? 'Aprobada' : 'Desaprobada';
+                // Mostrar la tabla por primera vez
+                renderizarTablaHistorial();
 
-                        tr.innerHTML = `
-                            <td>${cursada.anio}</td>
-                            <td>${cursada.cuatrimestre}º</td>
-                            <td><strong>${cursada.materia}</strong></td>
-                            <td class="nota-destacada">${cursada.nota}</td>
-                            <td><span class="badge ${estadoClase}">${estadoTexto}</span></td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                }
-
-                // Ocultar carga y mostrar contenido
+                // Cambiar visibilidad
                 pantallaCarga.classList.add('hidden');
                 contenidoHistorial.classList.remove('hidden');
 
             } catch (error) {
-                console.error("Error de red:", error);
-                mostrarError("No se pudo conectar con el servidor. Verifique su conexión o intente más tarde.");
-            }
-
-            // Función auxiliar para mostrar errores
-            function mostrarError(texto) {
-                pantallaCarga.classList.add('hidden');
-                mensajeError.textContent = "❌ " + texto;
-                mensajeError.classList.remove('hidden');
+                mostrarError("No se pudo conectar con el servidor. Verifique su conexión.");
             }
         });
+
+        // Función para renderizar el HTML de la tabla
+        function renderizarTablaHistorial() {
+            const tbody = document.getElementById('tablaHistorial');
+            tbody.innerHTML = ''; 
+            
+            if (historialLocal.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px; color: #64748b;">El alumno no tiene cursadas registradas.</td></tr>`;
+                return;
+            }
+
+            historialLocal.forEach(cursada => {
+                const tr = document.createElement('tr');
+                const estadoClase = cursada.aprobada ? 'badge-aprobada' : 'badge-desaprobada';
+                const estadoTexto = cursada.aprobada ? 'Aprobada' : 'Desaprobada';
+
+                tr.innerHTML = `
+                    <td>${cursada.anio}</td>
+                    <td>${cursada.cuatrimestre}º</td>
+                    <td><strong>${cursada.materia}</strong></td>
+                    <td class="nota-destacada">${cursada.nota}</td>
+                    <td><span class="badge ${estadoClase}">${estadoTexto}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Función de ordenamiento al hacer clic en los encabezados (<thead>)
+        function ordenarHistorial(columna) {
+            if (columnaOrdenActual === columna) {
+                ordenAscendente = !ordenAscendente; 
+            } else {
+                columnaOrdenActual = columna;
+                ordenAscendente = true; 
+            }
+
+            historialLocal.sort((a, b) => {
+                let valorA = a[columna];
+                let valorB = b[columna];
+
+                // Convertir a minúsculas si es texto (ej. Materia)
+                if (typeof valorA === 'string') valorA = valorA.toLowerCase();
+                if (typeof valorB === 'string') valorB = valorB.toLowerCase();
+
+                if (valorA < valorB) return ordenAscendente ? -1 : 1;
+                if (valorA > valorB) return ordenAscendente ? 1 : -1;
+                return 0; 
+            });
+
+            renderizarTablaHistorial();
+        }
+
+        function mostrarError(texto) {
+            document.getElementById('pantallaCarga').classList.add('hidden');
+            const msj = document.getElementById('mensajeError');
+            msj.textContent = texto;
+            msj.classList.remove('hidden');
+            msj.style.display = 'block';
+        }
     </script>
 </body>
 </html>
