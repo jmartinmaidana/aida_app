@@ -66,7 +66,7 @@ export class AcademicoService {
 
         let sumaNotasAprobadas = 0;
 
-        cursadas.forEach(c => {
+        cursadas.forEach((c: any) => {
             if (c.aprobada) {
                 sumaNotasAprobadas += parseInt(c.nota);
             }
