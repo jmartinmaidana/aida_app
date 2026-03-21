@@ -1,7 +1,6 @@
 import express from 'express';
-import { AlumnoRepository } from './repositories/alumnosRepository.js';
 import { CarrerasRepository } from './repositories/carrerasRepository.js';
-import { pool, conectarBD} from './database.js';
+import { conectarBD} from './database.js';
 import path from 'path'; 
 import session from 'express-session';
 import { Request, Response, NextFunction } from 'express';
@@ -14,6 +13,7 @@ import { HistorialController } from './controllers/historialController.js';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { CursadaController } from './controllers/cursadaController.js';
+import { noCache } from './middlewares/noCache.js';
 
 declare module 'express-session' {
     interface SessionData {
@@ -105,11 +105,10 @@ app.put('/api/alumnos/:prefijo/:anio', requireAuthAPI, catchAsync(AlumnoControll
 app.delete('/api/alumnos/:prefijo/:anio', requireAuthAPI, catchAsync(AlumnoController.eliminarAlumnoController));
 app.patch('/api/v0/archivo', requireAuthAPI, catchAsync(AlumnoController.cargarArchivoAlumnoController));
 
-// GET: Obtener historial académico de un alumno
-// Usamos :lu(*) para que Express entienda LUs con barras (ej: 123/26)// GET: Obtener historial académico de un alumno
+// ---- Endpoints de Gestión de Alumnos (Historial) ----
 app.get('/api/v0/historial/:prefijo/:anio', requireAuthAPI, catchAsync(HistorialController.obtener));
 
-// Endpoint: Obtener lista de carreras
+// ---- Endpoints de Obtencion de Carreras ----
 app.get('/api/v0/carreras', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
     const carreras = await CarrerasRepository.obtenerCarreras();
     res.json(carreras);
@@ -120,12 +119,8 @@ app.get('/api/v0/carreras', requireAuthAPI, catchAsync(async (req: Request, res:
 // Añadir cursada
 app.post('/api/v0/cursada', requireAuthAPI, catchAsync(CursadaController.registrar));
 
-// ---- Ednpoints de Autenticación ----
-
-// --- Regla Anti Fuerza Bruta ---
-// --- Regla Anti Fuerza Bruta (Rate Limiting) ---
-// Solo aplicamos el límite si NO estamos en entorno de testing
-const aplicarRateLimit = process.env.NODE_ENV !== 'test';
+// ---- Recursos y Endpoints de Autenticación y Usuarios ----
+const aplicarRateLimit = process.env.NODE_ENV !== 'test'; // Solo aplicamos el límite si NO estamos en entorno de testing
 
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, 
@@ -138,17 +133,11 @@ const loginLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-
-// ---- Endpoints de Autenticación y Usuarios ----
 app.post('/api/v0/auth/register', catchAsync(AuthenticationController.registrarAuthController));
 app.post('/api/v0/auth/login', loginLimiter, catchAsync(AuthenticationController.loginAuthController));
 app.post('/api/v0/auth/logout', AuthenticationController.logoutAuthController);
 app.get('/api/v0/auth/verificar', requireAuthAPI, AuthenticationController.verificarAuthController);
 
-
-// Endpoint: login del usuario (AHORA PROTEGIDO)
-
-// --- Rutas del Frontend ---
 
 // Ruta raíz: Redirige automáticamente a la pantalla de login
 app.get('/', (req, res) => {
@@ -156,31 +145,31 @@ app.get('/', (req, res) => {
 });
 
 // Rutas del Frontend
-app.get('/menu', requireAuth, (req, res) => {
+app.get('/menu', noCache, requireAuth, (req, res) => {
     res.sendFile(path.resolve('./public/menu.html'));
 });
 
-app.get('/app/certificados', requireAuth, (req, res) => {
+app.get('/app/certificados',noCache, requireAuth, (req, res) => {
     res.sendFile(path.resolve('./public/certificados.html'));
 });
 
-app.get('/app/fecha', requireAuth, (req, res) => {
+app.get('/app/fecha',noCache, requireAuth, (req, res) => {
     res.sendFile(path.resolve('./public/fecha.html'));
 });
 
-app.get('/app/archivo', requireAuth, (req, res) => {
+app.get('/app/archivo',noCache, requireAuth, (req, res) => {
     res.sendFile(path.resolve('./public/archivo.html'));
 });
 
-app.get('/app/alumnos', requireAuth, (req, res) => {
+app.get('/app/alumnos',noCache, requireAuth, (req, res) => {
     res.sendFile(path.resolve('./public/alumnos.html'));
 });
 
-app.get('/app/cursada', requireAuth, (req, res) => {
+app.get('/app/cursada',noCache, requireAuth, (req, res) => {
     res.sendFile(path.resolve('./public/cursada.html'));
 });
 
-app.get('/app/historial', requireAuth, (req, res) => {
+app.get('/app/historial',noCache, requireAuth, (req, res) => {
     res.sendFile(path.resolve('./public/historial.html'));
 });
 
@@ -216,6 +205,7 @@ async function iniciarServidor() {
 
 // Exportamos la app para que Supertest pueda "simular" peticiones HTTP
 export { app };
+
 // --- Middleware Global de Errores ---
 // Debe ir siempre al final de todas las rutas definidas en Express
 app.use(manejadorDeErrores);
