@@ -1,6 +1,6 @@
 import { pool, Alumno } from '../database.js';
 import { Fecha, textoAFecha, fechaAIsoString } from '../fechas.js';
-import { FiltroAlumnos } from '../services/CertificadoService.js';
+import { FiltroAlumnos } from '../services/certificadoService.js';
 export class AlumnoRepository {
     
     static async obtenerTodos() {

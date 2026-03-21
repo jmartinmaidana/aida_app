@@ -1,5 +1,5 @@
-import { AlumnoRepository } from '../repositories/AlumnosRepository.js';
-import { CarrerasRepository } from '../repositories/CarrerasRepository.js';
+import { AlumnoRepository } from '../repositories/alumnosRepository.js';
+import { CarrerasRepository } from '../repositories/carrerasRepository.js';
 import { Alumno } from '../database.js';
 
 export class AlumnoService {

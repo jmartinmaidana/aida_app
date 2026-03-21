@@ -1,6 +1,5 @@
 import bcrypt from 'bcrypt';
-import { UsuariosRepository, Usuario } from '../repositories/UsuariosRepository.js';
-
+import { UsuariosRepository, Usuario } from '../repositories/usuariosRepository.js';
 const SALT_ROUNDS = 10;
 
 export class AuthenticationService {

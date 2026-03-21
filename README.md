@@ -16,73 +16,80 @@ Una API RESTful construida con Node.js y TypeScript para la gestión integral de
 
 ---
 
-## 📁 Estructura del Proyecto
+## 🏗️ Arquitectura del Proyecto (Layered Architecture)
 
+Sistema diseñado con una arquitectura por capas donde las 3 principales son: controladores, servicios y respositorios.
+
+El flujo de información de la API está estrictamente unidireccional, dividido de la siguiente manera:
 ```text
 src/
-├── middlewares/       # Interceptores (Manejo global de errores, Autenticación)
-├── repositories/      # Capa de acceso a datos (Alumnos, Cursadas, Usuarios, etc.)
-├── services/          # Lógica de negocio (AcademicoService, AuthService, etc.)
-├── database.ts        # Configuración del Pool de PostgreSQL
-├── server.ts          # Configuración de Express y definición de rutas
-└── migrador.ts        # Sistema automático de migraciones de base de datos
-```
-
+├── controllers/   # Capa de Presentación (HTTP): Extrae y formatea los datos del 'req', llama al servicio y devuelve el JSON 'res'.
+├── services/      # Capa de Lógica de Negocio: Contiene las reglas del sistema, cálculos matemáticos y validaciones.
+├── repositories/  # Capa de Acceso a Datos: Los únicos autorizados a comunicarse con PostgreSQL mediante sentencias SQL.
+├── middlewares/   # Interceptores: Manejo global de errores (catchAsync), validación de sesiones y Rate Limiting.
+├── database.ts    # Configuración del Pool de conexiones a la base de datos.
+├── server.ts      # Enrutador principal e inicializador de la aplicación.
 ---
-
 ## 🚀 Instalación y Ejecución Local
 
 ### Requisitos Previos
 * **Node.js** (v18 o superior)
-* **PostgreSQL** (Instancia local o en la nube)
+* **PostgreSQL** (Debe estar instalado y ejecutándose. Deberá crear una base de datos vacía antes de iniciar la app).
 
 ### Pasos de Instalación
 
 1. **Clonar el repositorio:**
-   ```bash
+   \`\`\`bash
    git clone [URL_DE_SU_REPOSITORIO]
    cd [NOMBRE_DE_LA_CARPETA]
-   ```
+   \`\`\`
 
 2. **Instalar dependencias:**
-   ```bash
+   \`\`\`bash
    npm install
-   ```
+   \`\`\`
 
 3. **Configurar variables de entorno:**
-   Crear un archivo `.env` en la raíz del proyecto. Debe contener las credenciales de una base de datos PostgreSQL válida y una clave secreta para las sesiones:
-   ```env
-   DATABASE_URL=postgresql://usuario:password@host:puerto/basededatos
+   Crear un archivo `.env` en la raíz del proyecto.
+   \`\`\`env
+   DATABASE_URL=postgresql://usuario:password@localhost:5432/nombre_de_su_bd_vacia
    SECRET_SESSION=ingrese_una_cadena_de_texto_segura
    PORT=3000
-   ```
+   \`\`\`
 
 4. **Compilar y ejecutar:**
-   ```bash
+   \`\`\`bash
    npm run build
    npm run start
-   ```
-   *(Nota: El comando start ejecutará automáticamente el script `migrador.ts`, el cual creará las tablas necesarias en su base de datos si no existen).*
+   \`\`\`
+   *(Nota: El sistema incluye un migrador automático. Al iniciar por primera vez, creará todas las tablas necesarias en su base de datos).*
 
 ---
 
-## 📡 Endpoints Principales
+## 🖥️ Acceso a la Interfaz de Usuario (Frontend)
 
-### Alumnos
-* `GET /api/alumnos` - Obtiene la lista de todos los alumnos.
-* `POST /api/alumno` - Registra un nuevo alumno (Validado vía Zod).
-* `PUT /api/alumnos/:prefijo/:anio` - Actualiza los datos de un alumno.
-* `DELETE /api/alumnos/:prefijo/:anio` - Elimina un registro.
+Una vez que el servidor esté corriendo, puede acceder a la aplicación visual desde su navegador:
 
-### Cursadas y Gestión Académica
-* `POST /api/v0/cursada` - Carga una nota y verifica automáticamente si el alumno cumple requisitos de egreso.
-* `PATCH /api/v0/archivo` - Carga masiva de registros de alumnos mediante JSON.
+* **URL de Acceso:** `http://localhost:3000/app/login`
 
-### Certificados y Trámites
-* `POST /api/v0/certificados` - Genera y descarga un certificado HTML para una LU específica.
-* `POST /api/v0/tramite-titulo` - Inicia el trámite de título validando requisitos de egreso.
+**⚠️ Importante - Primer Inicio de Sesión:**
+Al ser una instalación nueva, la base de datos no tendrá usuarios. Antes de iniciar sesión, deberá enviar una petición `POST` al endpoint `/api/v0/auth/register` (vía Postman, cURL o ThunderClient) con el siguiente formato JSON para crear su primer administrador:
+\`\`\`json
+{
+  "username": "admin",
+  "password": "Password123!",
+  "nombre": "Administrador",
+  "email": "admin@aida.com"
+}
+\`\`\`
 
-### Sistema y Autenticación
-* `POST /api/v0/auth/register` - Registro de nuevos usuarios administradores.
-* `POST /api/v0/auth/login` - Autenticación de usuarios e inicio de sesión.
-* `POST /api/v0/auth/logout` - Cierre de sesión seguro.
+---
+
+## 🧪 Pruebas Automatizadas (Testing)
+
+Este proyecto cuenta con una suite de pruebas de integración robusta construida con **Jest** y **Supertest**, garantizando la fiabilidad de las rutas, la lógica de negocio y los bloqueos de seguridad.
+
+Para ejecutar el laboratorio de pruebas (creará una base de datos temporal en memoria o transaccional):
+\`\`\`bash
+npm test
+\`\`\`

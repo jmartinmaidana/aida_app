@@ -1,10 +1,9 @@
-import { CursadasRepository } from '../repositories/CursadaRepository.js';
-import { AlumnoRepository } from '../repositories/AlumnosRepository.js'; 
-import { PlanEstudiosRepository } from '../repositories/PlanEstudiosRepository.js'; 
-
+import { CursadasRepository } from '../repositories/cursadaRepository.js';
+import { AlumnoRepository } from '../repositories/alumnosRepository.js'; 
+import { PlanEstudiosRepository } from '../repositories/planEstudiosRepository.js';
 export class AcademicoService {
     
-    static async procesarNuevaNota(lu: string, idMateria: string, anio: string, cuatrimestre: string, nota: number) {
+    static async procesarCursadaAprobada(lu: string, idMateria: string, anio: string, cuatrimestre: string, nota: number) {
         
         const idCarrera = await AlumnoRepository.obtenerCarreraDeAlumno(lu);
         
@@ -26,7 +25,6 @@ export class AcademicoService {
 
         await CursadasRepository.guardarCursada(lu, idMateria, anio, cuatrimestre, nota, aprobada);
 
-        // 3. REGLA DE NEGOCIO: Solo verificamos si se recibe en su carrera si acaba de aprobar algo
         if (aprobada) {
             return await this.verificarCarreraAprobada(lu);
         }

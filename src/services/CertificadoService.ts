@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'fs/promises';
 import { Fecha, textoAFecha, isoAFecha, fechaAIsoString } from '../fechas.js';
-import { AlumnoRepository } from '../repositories/AlumnosRepository.js';
+import { AlumnoRepository } from '../repositories/alumnosRepository.js';
 import { tmpdir } from 'os'; 
 import { join } from 'path'; 
 
