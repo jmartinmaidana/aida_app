@@ -17,13 +17,22 @@ describe('Suite de Pruebas: Historial Académico', () => {
 
     beforeAll(async () => {
 
-        await request(app).post('/api/v0/auth/register').send({
+        // Borramos a todos los usuarios y alumnos (en cascada) para garantizar un estado limpio
+        await pool.query('TRUNCATE TABLE aida.usuarios CASCADE');
+        await pool.query('TRUNCATE TABLE aida.alumnos CASCADE');
+
+        // 2. Registramos al usuario
+        const respuestaRegistro = await request(app).post('/api/v0/auth/register').send({
             username: "profe_historial",
             password: "PasswordSegura123!",
             nombre: "Profe Prueba",
-            email: "profe@aida.com"
+            email: "historial@aida.com" // Correo único
         });
 
+        // 3. LA VERIFICACIÓN: Si el registro falla, el test se detiene aquí con un mensaje claro
+        expect(respuestaRegistro.status).toBe(200);
+
+        // 4. Hacemos el Login
         const respuestaLogin = await request(app).post('/api/v0/auth/login').send({
             username: "profe_historial",
             password: "PasswordSegura123!"
@@ -35,12 +44,13 @@ describe('Suite de Pruebas: Historial Académico', () => {
 
         cookieSesion = respuestaLogin.headers['set-cookie'];
 
+        // 5. Preparamos el alumno de prueba
         await request(app)
             .post('/api/alumno')
             .set('Cookie', cookieSesion)
             .send(alumnoPrueba);
 
-        // E) Le cargamos una nota aprobada (ej. un 8)
+        // 6. Le cargamos una nota aprobada (ej. un 8)
         await request(app)
             .post('/api/v0/cursada')
             .set('Cookie', cookieSesion)
