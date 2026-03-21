@@ -11,6 +11,20 @@ jobs:
   verificacion:
     name: Compilación y Verificación
     runs-on: ubuntu-latest
+    
+    # NUEVO: Levantamos una base de datos temporal solo para que los tests pasen
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: aida_test_user
+          POSTGRES_PASSWORD: aida_super_password
+          POSTGRES_DB: aida_test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
     steps:
       - name: Descargar el repositorio
         uses: actions/checkout@v4
@@ -26,8 +40,13 @@ jobs:
       - name: Compilar aplicación (TypeScript a JS)
         run: npx tsc
         
+      # NUEVO: Ejecutamos las pruebas conectándonos a la BD temporal de arriba
       - name: Ejecutar Tests
-        run: echo "Aquí se ejecutarán los tests automáticos en el futuro"
+        env:
+          NODE_ENV: test
+          SESSION_SECRET: secreto_super_seguro
+          TEST_DB_URL: postgresql://aida_test_user:aida_super_password@localhost:5432/aida_test_db
+        run: npm test
 
   # === JOB 2: Publicar en Render (Solo si el Job 1 fue exitoso) ===
   deploy:
