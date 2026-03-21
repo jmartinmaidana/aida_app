@@ -35,7 +35,9 @@ src/
 ├── middlewares/   # Interceptores: Manejo global de errores (catchAsync), validación de sesiones y Rate Limiting.
 ├── database.ts    # Configuración del Pool de conexiones a la base de datos.
 ├── server.ts      # Enrutador principal e inicializador de la aplicación.
+```
 ---
+
 ## 🚀 Instalación y Ejecución Local
 
 ### Requisitos Previos
