@@ -321,12 +321,20 @@
 
                 const json = await respuesta.json();
 
-                if (respuesta.ok) { // Es más seguro validar respuesta.ok que json.estado
+                // ... dentro de guardarNuevoAlumno ...
+                if (respuesta.ok) {
                     alert(json.mensaje);
                     ocultarFormulario();
                     cargarAlumnos(); 
                 } else {
-                    alert('Error al guardar: ' + json.mensaje);
+                    // Si hay detalles (errores de Zod o superRefine), los concatenamos
+                    if (json.detalles && Array.isArray(json.detalles)) {
+                        const mensajesError = json.detalles.map(error => `- ${error.message}`).join('\n');
+                        alert(`${json.mensaje}:\n${mensajesError}`);
+                    } else {
+                        // Si es un error común (como 404 o 500)
+                        alert('Error: ' + json.mensaje);
+                    }
                 }
             } catch (error) {
                 alert('Error de conexión al intentar guardar.');

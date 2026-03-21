@@ -1,6 +1,8 @@
 # 🎓 API REST - Sistema de Gestión Académica (AIDA)
 
 Una API RESTful construida con Node.js y TypeScript para la gestión integral de alumnos, cursadas y emisión de certificados académicos. 
+Esta aplicacion es funcional y se encuentra desplegada utilizando Render y Supabase en: 
+https://aida-app-safp.onrender.com
 
 ---
 
@@ -14,6 +16,10 @@ Una API RESTful construida con Node.js y TypeScript para la gestión integral de
 * **Seguridad:** Bcrypt (Hasheo de contraseñas)
 * **Autenticación:** Sistema basado en Sesiones (`express-session`)
 
+## 🧪 Pruebas Automatizadas y CI/CD
+* **Jest (Test Runner):** Framework principal utilizado para testing.
+* **Supertest:** Para la simulacion en testing de peticiones HTTP
+* **GitHub Actions (CI/CD):** Pipeline configurado para interceptar cada `push` o `pull_request` a la rama `main`. El robot levanta un entorno Linux con Node.js, inicializa un contenedor temporal de PostgreSQL, y ejecuta todas las pruebas. El código solo se despliega a producción en Render si el 100% de la suite pasa con éxito y con la verificaicon de los colaboradores que correspondan.
 ---
 
 ## 🏗️ Arquitectura del Proyecto (Layered Architecture)

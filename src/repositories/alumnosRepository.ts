@@ -40,16 +40,31 @@ export class AlumnoRepository {
         return res.rowCount !== null && res.rowCount > 0;
     }
 
-    static async actualizar(lu: string, valores: Alumno) {
-        const query = "UPDATE aida.alumnos SET nombres = $1, apellido = $2, titulo = $3, titulo_en_tramite = $4, egreso = $5 WHERE lu = $6;";
-        const nuevos_valores = [valores.nombres, valores.apellido, valores.titulo, valores.titulo_en_tramite, valores.egreso, lu];
-        const resultadoUpdate = await pool.query(query, nuevos_valores);
+    static async actualizar(lu: string, datosActualizados: any) {
+        // Actualizamos todos los campos permitiendo que el humano edite las fechas,
+        // pero mantenemos la subconsulta para el 'titulo' para que se autocalcule
+        // sin importar el 'null' que manda el frontend.
+        const query = `
+            UPDATE aida.alumnos 
+            SET nombres = $1, 
+                apellido = $2, 
+                carrera_id = $3,
+                titulo = (SELECT nombre FROM aida.carreras WHERE id = $3),
+                titulo_en_tramite = $4,
+                egreso = $5
+            WHERE lu = $6
+        `;
+        
+        const valores = [
+            datosActualizados.nombres, 
+            datosActualizados.apellido, 
+            datosActualizados.carrera_id, 
+            datosActualizados.titulo_en_tramite,
+            datosActualizados.egreso,
+            lu
+        ];
 
-        if (resultadoUpdate.rowCount && resultadoUpdate.rowCount > 0) {
-            console.log("¡Carrera completada! Fecha de egreso registrada automáticamente.");
-        } else {
-            console.log("El alumno ya se encontraba egresado. La fecha original se mantuvo intacta.");
-        }
+        await pool.query(query, valores);
     }
 
     static async eliminar(lu: string) {
