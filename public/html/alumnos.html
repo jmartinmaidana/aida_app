@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema AIDA - Gestión de Alumnos</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="/seguridad.js"></script>
+    <script src="/shared.js"></script>
+    <script src="/js/alumnos.js" defer></script>
+    <link rel="stylesheet" href="/css/styles.css"> 
+</head>
+<body>
+    <nav class="navbar">
+        <h1 class="navbar-brand" onclick="window.location.href='/menu'" style="cursor: pointer;" title="Volver al Inicio">
+            <i class="ph ph-graduation-cap"></i> Sistema AIDA
+        </h1>
+        <div class="navbar-links">
+            <a href="/menu"><i class="ph ph-squares-four"></i> Inicio</a>
+            <a href="/app/cursada"><i class="ph ph-pencil-line"></i> Carga de Notas</a>
+            <a href="/app/certificados"><i class="ph ph-certificate"></i> Emisión Individual</a>
+            <a href="/app/fecha"><i class="ph ph-files"></i> Emisión por Fecha</a>
+            <a href="/app/archivo"><i class="ph ph-upload-simple"></i> Carga Múltiple (CSV)</a>
+            <button onclick="cerrarSesion()" class="btn-logout"><i class="ph ph-sign-out"></i> Salir</button>
+        </div>
+    </nav>
+
+    <div class="contenedor-ancho">
+        <div class="cabecera-pagina">
+            <h1><i class="ph ph-users"></i> Directorio de Alumnos</h1>
+            <button class="btn-accion-principal" onclick="mostrarFormularioCreacion()" style="background-color: #10b981; width: auto;">
+                <i class="ph ph-user-plus"></i> Registrar Alumno
+            </button>
+        </div>
+
+        <div id="cajaMensajePrincipal" class="mensaje" style="display: none; margin-bottom: 20px;"></div>
+
+        <div class="contenedor-tabla">
+            <table id="tablaAlumnos">
+                <thead>
+                    <tr>
+                        <th onclick="ordenarTabla('lu')">LU <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                        <th onclick="ordenarTabla('apellido')">Apellidos <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                        <th onclick="ordenarTabla('nombres')">Nombres <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                        <th onclick="ordenarTabla('titulo')">Título <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                        <th onclick="ordenarTabla('titulo_en_tramite')" style="text-align: center;">En Trámite <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                        <th onclick="ordenarTabla('egreso')" style="text-align: center;">Egreso <i class="ph ph-arrows-down-up" style="font-size: 0.8rem;"></i></th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTabla">
+                    <tr><td colspan="7" style="text-align: center; padding: 30px; color: #64748b;">Cargando datos del padrón...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="seccionFormulario" class="tarjeta-form" style="display: none; max-width: 800px; margin: 40px auto 0 auto; padding: 30px;">
+            <h3 id="tituloFormulario" style="margin-top: 0; font-size: 1.3rem; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 20px;">Alta de Nuevo Alumno</h3>
+            
+            <div class="grid-formulario">
+                <div class="grupo-form">
+                    <label>LU (ej. 123/24):</label> 
+                    <input type="text" id="inputLu" placeholder="123/24">
+                </div>
+                <div class="grupo-form">
+                    <label>Carrera:</label> 
+                    <select id="inputCarrera" required>
+                        <option value="">-- Seleccione una carrera --</option>
+                    </select>
+                </div>
+                <div class="grupo-form">
+                    <label>Nombres:</label> 
+                    <input type="text" id="inputNombres" placeholder="Nombres del alumno">
+                </div>
+                <div class="grupo-form">
+                    <label>Apellido:</label> 
+                    <input type="text" id="inputApellido" placeholder="Apellidos del alumno">
+                </div>
+                <div class="grupo-form">
+                    <label>Fecha Título en Trámite:</label> 
+                    <input type="date" id="inputTramite">
+                </div>
+                <div class="grupo-form">
+                    <label>Fecha Egreso:</label> 
+                    <input type="date" id="inputEgreso">
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 25px;">
+                <button class="btn-cancelar" onclick="ocultarFormulario()">Cancelar</button>
+                <button class="btn-accion-principal" onclick="guardarNuevoAlumno()" style="width: auto; margin-top: 0;">
+                    <i class="ph ph-floppy-disk"></i> Guardar Datos
+                </button>
+            </div>
+
+            <div id="cajaMensaje" class="mensaje" style="display: none; margin-top: 20px;"></div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema AIDA - Carga Múltiple (CSV)</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/seguridad.js"></script>
+    <script src="/shared.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="/js/archivo.js" defer></script>
+    <link rel="stylesheet" href="/css/styles.css"> 
+</head>
+<body>
+    <nav class="navbar">
+        <h1 class="navbar-brand" onclick="window.location.href='/menu'" style="cursor: pointer;" title="Volver al Inicio">
+            <i class="ph ph-graduation-cap"></i> Sistema AIDA
+        </h1>
+        <div class="navbar-links">
+            <a href="/menu"><i class="ph ph-squares-four"></i> Inicio</a>
+            <a href="/app/alumnos"><i class="ph ph-users"></i> Alumnos</a>
+            <a href="/app/cursada"><i class="ph ph-pencil-line"></i> Carga de Notas</a>
+            <a href="/app/certificados"><i class="ph ph-certificate"></i> Emisión Individual</a>
+            <a href="/app/fecha"><i class="ph ph-files"></i> Emisión por Fecha</a>
+            <button onclick="cerrarSesion()" class="btn-logout"><i class="ph ph-sign-out"></i> Salir</button>
+        </div>
+    </nav>
+
+    <div class="contenedor">
+        <div class="tarjeta-form">
+            <h1><i class="ph ph-file-csv"></i> Carga Múltiple de Alumnos (CSV)</h1>
+            <p>Seleccione un archivo en formato delimitado por comas (.csv) para importar un lote de inscriptos y registrarlos directamente en la base de datos.</p>
+            
+            <div class="area-carga" id="zonaCarga">
+                <i class="ph ph-file-csv" style="font-size: 48px; color: #94a3b8; margin-bottom: 15px;"></i>
+                <p style="margin: 0 0 15px 0; color: #475569; font-size: 0.95rem;">Arrastre y suelte su archivo aquí o</p>
+                
+                <input type="file" id="inputCsv" accept=".csv" style="display: none;">
+                
+                <label for="inputCsv" class="btn-seleccionar">
+                    <i class="ph ph-folder-open"></i> Seleccionar Archivo
+                </label>
+                
+                <p id="nombreArchivo" style="margin: 15px 0 0 0; font-weight: 600; color: #0284c7; display: none; word-break: break-all; font-size: 0.95rem;"></p>
+            </div>
+            
+            <button onclick="procesarYEnviarArchivo()" class="btn-generar">
+                <i class="ph ph-upload-simple"></i> Procesar y Cargar Datos
+            </button>
+
+            <div id="resultado" class="mensaje"></div>
+        </div>
+    </div>
+</body>
+</html>

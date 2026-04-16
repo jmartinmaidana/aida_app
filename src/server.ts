@@ -146,31 +146,31 @@ app.get('/', (req, res) => {
 
 // Rutas del Frontend
 app.get('/menu', noCache, requireAuth, (req, res) => {
-    res.sendFile(path.resolve('./public/menu.html'));
+    res.sendFile(path.resolve('./public/html/menu.html'));
 });
 
 app.get('/app/certificados',noCache, requireAuth, (req, res) => {
-    res.sendFile(path.resolve('./public/certificados.html'));
+    res.sendFile(path.resolve('./public/html/certificados.html'));
 });
 
 app.get('/app/fecha',noCache, requireAuth, (req, res) => {
-    res.sendFile(path.resolve('./public/fecha.html'));
+    res.sendFile(path.resolve('./public/html/fecha.html'));
 });
 
 app.get('/app/archivo',noCache, requireAuth, (req, res) => {
-    res.sendFile(path.resolve('./public/archivo.html'));
+    res.sendFile(path.resolve('./public/html/archivo.html'));
 });
 
 app.get('/app/alumnos',noCache, requireAuth, (req, res) => {
-    res.sendFile(path.resolve('./public/alumnos.html'));
+    res.sendFile(path.resolve('./public/html/alumnos.html'));
 });
 
 app.get('/app/cursada',noCache, requireAuth, (req, res) => {
-    res.sendFile(path.resolve('./public/cursada.html'));
+    res.sendFile(path.resolve('./public/html/cursada.html'));
 });
 
 app.get('/app/historial',noCache, requireAuth, (req, res) => {
-    res.sendFile(path.resolve('./public/historial.html'));
+    res.sendFile(path.resolve('./public/html/historial.html'));
 });
 
 
@@ -179,7 +179,7 @@ app.get('/app/login', (req, res) => {
         return res.redirect('/menu');
     }
     
-    res.sendFile(path.resolve('./public/login.html'));
+    res.sendFile(path.resolve('./public/html/login.html'));
 });
 
 // Arranque del servidor
@@ -211,4 +211,3 @@ export { app };
 app.use(manejadorDeErrores);
 
 iniciarServidor();
-
