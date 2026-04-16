@@ -43,13 +43,13 @@ async function resetearDatosGestion() {
         // Relacionamos los IDs según la lógica de cada carrera
         console.log("Asociando materias a planes de estudio...");
         await pool.query(`
-            INSERT INTO aida.plan_estudio (carrera_id, materia_id) VALUES 
+            INSERT INTO aida.plan_estudio (carrera_id, materia_id, anio_cursada, cuatrimestre_cursada) VALUES 
             -- Tecnicatura Web (ID 1)
-            (1, 1), (1, 2), (1, 5),
+            (1, 1, 1, 1), (1, 2, 1, 2), (1, 5, 2, 1),
             -- Ingeniería en Software (ID 2)
-            (2, 1), (2, 2), (2, 3), (2, 4), (2, 6),
+            (2, 1, 1, 1), (2, 2, 1, 2), (2, 3, 2, 1), (2, 4, 2, 2), (2, 6, 3, 1),
             -- Licenciatura en Sistemas (ID 3)
-            (3, 1), (3, 2), (3, 4), (3, 6);
+            (3, 1, 1, 1), (3, 2, 1, 2), (3, 4, 2, 1), (3, 6, 2, 2);
         `);
 
         console.log("✅ Reseteo y carga inicial completada.");

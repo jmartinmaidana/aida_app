@@ -2,19 +2,17 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema AIDA - Emisión Individual</title>
+    <title>Sistema AIDA - Planes de Estudio</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="/js/seguridad.js"></script>
     <script src="/js/shared.js"></script>
-    <script src="/js/certificados.js" defer></script>
-
+    <script src="/js/planes.js" defer></script>
     <link rel="stylesheet" href="/css/styles.css"> 
-
 </head>
 <body>
     <nav class="navbar">
@@ -24,31 +22,21 @@
         <div class="navbar-links">
             <a href="/menu"><i class="ph ph-squares-four"></i> Inicio</a>
             <a href="/app/alumnos"><i class="ph ph-users"></i> Alumnos</a>
-            <a href="/app/planes"><i class="ph ph-books"></i> Planes de Estudio</a>
             <a href="/app/cursada"><i class="ph ph-pencil-line"></i> Carga de Notas</a>
+            <a href="/app/certificados"><i class="ph ph-certificate"></i> Emisión Individual</a>
             <a href="/app/fecha"><i class="ph ph-files"></i> Emisión por Fecha</a>
             <a href="/app/archivo"><i class="ph ph-upload-simple"></i> Carga Múltiple (CSV)</a>
             <button onclick="cerrarSesion()" class="btn-logout"><i class="ph ph-sign-out"></i> Salir</button>
         </div>
     </nav>
 
-    <div class="contenedor">
-        <div class="tarjeta-form">
-            <h1><i class="ph ph-certificate"></i> Emisión Individual por LU</h1>
-            <p>Ingrese la Libreta Universitaria del alumno para generar y descargar inmediatamente su constancia de título en formato seguro.</p>
-            
-            <form id="formCertificado">
-                <div class="grupo-form">
-                    <label for="lu">Libreta Universitaria (LU):</label>
-                    <input type="text" id="lu" name="lu" placeholder="Ej: 901/24" required>
-                </div>
-                
-                <button type="submit" class="btn-generar">
-                    <i class="ph ph-download-simple"></i> Generar y Descargar Constancia
-                </button>
-            </form>
+    <div class="contenedor-ancho">
+        <div class="cabecera-pagina">
+            <h1><i class="ph ph-books"></i> Planes de Estudio por Carrera</h1>
+        </div>
 
-            <div id="cajaMensaje" class="mensaje"></div>
+        <div id="contenedor-planes">
+            <div class="loading" style="margin-top: 40px;">Cargando planes de estudio...</div>
         </div>
     </div>
 </body>

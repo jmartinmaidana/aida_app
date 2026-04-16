@@ -20,4 +20,32 @@ export class PlanEstudiosRepository {
         return res.rows.length > 0;
     }
 
+    static async obtenerPlanesCompletos() {
+        const query = `
+            SELECT
+                c.id,
+                c.nombre,
+                c.nombre as titulo_otorgado,
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'id', m.id,
+                                'nombre', m.nombre
+                            ) ORDER BY m.nombre
+                        )
+                        FROM aida.plan_estudio pe
+                        JOIN aida.materias m ON pe.materia_id = m.id
+                        WHERE pe.carrera_id = c.id
+                    ),
+                    '[]'::json
+                ) as materias
+            FROM
+                aida.carreras c
+            ORDER BY
+                c.id;
+        `;
+        const res = await pool.query(query);
+        return res.rows;
+    }
 }

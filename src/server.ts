@@ -11,6 +11,7 @@ import { CertificadoController } from './controllers/certificadoController.js';
 import { catchAsync,manejadorDeErrores } from './middlewares/errorHandler.js';
 import { HistorialController } from './controllers/historialController.js';
 import helmet from 'helmet';
+import { PlanEstudiosController } from './controllers/planEstudiosController.js';
 import rateLimit from 'express-rate-limit';
 import { CursadaController } from './controllers/cursadaController.js';
 import { noCache } from './middlewares/noCache.js';
@@ -114,6 +115,9 @@ app.get('/api/v0/carreras', requireAuthAPI, catchAsync(async (req: Request, res:
     res.json(carreras);
 }));
 
+// ---- Endpoints de Planes de Estudio ----
+app.get('/api/v0/planes-estudio', requireAuthAPI, catchAsync(PlanEstudiosController.obtenerPlanesCompletosController));
+
 // ----Endpoints para Funcionalidad de cursada----
 
 // Añadir cursada
@@ -171,6 +175,10 @@ app.get('/app/cursada',noCache, requireAuth, (req, res) => {
 
 app.get('/app/historial',noCache, requireAuth, (req, res) => {
     res.sendFile(path.resolve('./public/html/historial.html'));
+});
+
+app.get('/app/planes', noCache, requireAuth, (req, res) => {
+    res.sendFile(path.resolve('./public/html/planes.html'));
 });
 
 
