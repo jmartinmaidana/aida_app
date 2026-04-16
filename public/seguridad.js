@@ -14,3 +14,11 @@
         window.location.replace('/app/login');
     }
 })();
+
+window.addEventListener('pageshow', function (event) {
+    // event.persisted es TRUE si el navegador sacó la página de su memoria "fotográfica"
+    if (event.persisted) {
+        // Obligamos al navegador a destruir la foto y pedirle la página al servidor real
+        window.location.reload(); 
+    }
+});

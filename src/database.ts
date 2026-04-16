@@ -2,7 +2,7 @@ import { Pool } from 'pg'; // Cambiamos Client por Pool
 
 import dotenv from 'dotenv';
 dotenv.config(); // Lectura del .env
-// En src/database.ts (dentro de la inicialización de Pool)
+
 const entornoTest = process.env.NODE_ENV === 'test';
 const urlConexion = entornoTest ? process.env.TEST_DB_URL : process.env.DATABASE_URL;
 

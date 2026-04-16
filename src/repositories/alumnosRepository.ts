@@ -41,9 +41,6 @@ export class AlumnoRepository {
     }
 
     static async actualizar(lu: string, datosActualizados: any) {
-        // Actualizamos todos los campos permitiendo que el humano edite las fechas,
-        // pero mantenemos la subconsulta para el 'titulo' para que se autocalcule
-        // sin importar el 'null' que manda el frontend.
         const query = `
             UPDATE aida.alumnos 
             SET nombres = $1, 
@@ -101,7 +98,6 @@ export class AlumnoRepository {
             valores.push(fechaAIsoString(filtro.fecha));
         }
         
-        console.log("Ejecutando SQL:", query, "con valores:", valores); 
         const res = await pool.query(query, valores);
         return res.rows; 
     }

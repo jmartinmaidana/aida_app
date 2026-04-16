@@ -34,22 +34,15 @@ export class AcademicoService {
 
 
     static async verificarCarreraAprobada(lu: string) {
-        console.log(`Verificando estado de título para el alumno: ${lu}`);
         
         try {
 
             const totalAprobadas = await CursadasRepository.cantidadMateriasAprobadas(lu);
             const totalRequeridas = await PlanEstudiosRepository.cantidadMateriasRequeridas(lu)
-    
-            console.log(`Progreso académico: ${totalAprobadas} / ${totalRequeridas} materias aprobadas.`);
-    
+        
             if (totalRequeridas > 0 && totalAprobadas >= totalRequeridas) {
                 
-                const registrado = await AlumnoRepository.marcarComoEgresado(lu);
-                if (registrado) {
-                    console.log("¡Carrera completada! Fecha de egreso registrada automáticamente.");
-                }
-                    
+                await AlumnoRepository.marcarComoEgresado(lu);
                 return true;
             }
     
@@ -74,7 +67,6 @@ export class AcademicoService {
 
         const cantidadAprobadas = await CursadasRepository.cantidadMateriasAprobadas(lu);
         
-        // CORRECCIÓN AQUÍ: Envolvemos todo en Number() para que siempre devuelva un valor numérico
         const promedio = cantidadAprobadas > 0 ? Number((sumaNotasAprobadas / cantidadAprobadas).toFixed(2)) : 0;
 
         return promedio;

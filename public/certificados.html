@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/shared.js"></script>
     <title>Sistema AIDA - Emisión Individual</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -57,7 +58,7 @@
             const btnGenerar = document.querySelector('.btn-generar');
             const lu = document.getElementById('lu').value;
 
-            // 1. Ocultar mensajes previos
+            // 1. Ocultar mensajes previos y mostrar estado de carga
             cajaMensaje.style.display = 'none'; 
 
             // 2. Guardar estado original y activar animación de carga
@@ -85,43 +86,20 @@
                     a.remove();
                     
                     // Mostrar éxito y limpiar input
-                    cajaMensaje.style.display = 'block';
-                    cajaMensaje.className = 'mensaje exito';
-                    cajaMensaje.textContent = "Certificado descargado exitosamente.";
+                    mostrarMensaje("Certificado descargado exitosamente.", 'exito');
                     document.getElementById('lu').value = '';
-                    
-                    // 3. Restaurar el botón a su estado normal
-                    btnGenerar.innerHTML = contenidoOriginal;
-                    btnGenerar.disabled = false;
                 } else {
                     const json = await respuesta.json();
-                    cajaMensaje.style.display = 'block';
-                    cajaMensaje.className = 'mensaje error';
-                    cajaMensaje.textContent = json.mensaje || "Error al generar certificado.";
-                    
-                    // 3. Restaurar el botón en caso de error
-                    btnGenerar.innerHTML = contenidoOriginal;
-                    btnGenerar.disabled = false;
+                    mostrarMensaje(json.mensaje || "Error al generar certificado.", 'error');
                 }
             } catch (error) {
-                cajaMensaje.style.display = 'block';
-                cajaMensaje.className = 'mensaje error';
-                cajaMensaje.textContent = "Error de conexión con el servidor.";
-                
-                // 3. Restaurar el botón si se cae el internet
+                mostrarMensaje("Error de conexión con el servidor.", 'error');
+            } finally {
+                // 3. Restaurar el botón SIEMPRE, al final de la operación.
                 btnGenerar.innerHTML = contenidoOriginal;
                 btnGenerar.disabled = false;
             }
         });
-
-        async function cerrarSesion() {
-            try {
-                await fetch('/api/v0/auth/logout', { method: 'POST' });
-                window.location.href = '/app/login';
-            } catch (error) { 
-                alert("Error al intentar cerrar sesión."); 
-            }
-        }
     </script>
 </body>
 </html>

@@ -30,7 +30,7 @@ export class AlumnoService {
 
 // Método para la Carga Masiva (CSV/JSON)
     static async cargarDesdeJson(alumnos: Alumno[]) {
-        console.log(`Procesando carga de ${alumnos.length} alumnos desde JSON...`);
+
         let insertados = 0;
         let ignorados = 0;
         
@@ -48,14 +48,12 @@ export class AlumnoService {
                     insertados++;
                 } else {
                     ignorados++;
-                    console.log(`⚠️ Alumno con LU ${alumno.lu} ignorado (ya existe en el sistema).`);
                 }
             } catch (error: any) {
                 console.error(`❌ Error crítico al procesar la LU ${alumno.lu || 'desconocida'}: ${error.message}`);
             }
         }
         
-        console.log(`Resumen de carga: ${insertados} insertados, ${ignorados} ignorados por duplicidad.`);
         return insertados;
     }
 

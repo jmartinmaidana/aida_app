@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="/seguridad.js"></script>
+    <script src="/shared.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/styles.css"> 
@@ -94,35 +95,6 @@
             btnGenerar.disabled = false;
         }
     }
-
-        function mostrarMensaje(texto, tipo) {
-            const divResultado = document.getElementById('resultado');
-            
-            if (tipo === '') {
-                divResultado.className = 'mensaje';
-                divResultado.style.backgroundColor = '#f1f5f9';
-                divResultado.style.borderColor = '#e2e8f0';
-                divResultado.style.color = '#475569';
-            } else {
-                // En lugar de removeAttribute('style'), solo limpiamos los colores
-                divResultado.style.backgroundColor = '';
-                divResultado.style.borderColor = '';
-                divResultado.style.color = '';
-                divResultado.className = `mensaje ${tipo}`;
-            }
-            
-            // Aseguramos que se muestre al final
-            divResultado.style.display = 'block';
-            divResultado.textContent = texto;
-        }
-        async function cerrarSesion() {
-            try {
-                await fetch('/api/v0/auth/logout', { method: 'POST' });
-                window.location.href = '/app/login';
-            } catch (error) { 
-                alert("Error al intentar cerrar sesión."); 
-            }
-        }
     </script>
 </body>
 </html>

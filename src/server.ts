@@ -25,7 +25,7 @@ const app = express();
 
 app.set('trust proxy', 1); // Confiar en el proxy de Render para las cookies seguras
 
-// Middlewares ------
+// ------ Middlewares ------
 // 1. Middleware fundamental: Le dice a Express que procese el body de las peticiones como JSON
 
 //Un Middleware es una función que intercepta la petición antes de que llegue a nuestras rutas. 

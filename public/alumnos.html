@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="/seguridad.js"></script>
+    <script src="/shared.js"></script>
     <link rel="stylesheet" href="/styles.css"> 
 </head>
 <body>
@@ -34,6 +35,8 @@
                 <i class="ph ph-user-plus"></i> Registrar Alumno
             </button>
         </div>
+
+        <div id="cajaMensajePrincipal" class="mensaje" style="display: none; margin-bottom: 20px;"></div>
 
         <div class="contenedor-tabla">
             <table id="tablaAlumnos">
@@ -86,12 +89,14 @@
                 </div>
             </div>
             
-            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px;">
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 25px;">
                 <button class="btn-cancelar" onclick="ocultarFormulario()">Cancelar</button>
-                <button class="btn-accion-principal" onclick="guardarNuevoAlumno()" style="width: auto;">
+                <button class="btn-accion-principal" onclick="guardarNuevoAlumno()" style="width: auto; margin-top: 0;">
                     <i class="ph ph-floppy-disk"></i> Guardar Datos
                 </button>
             </div>
+
+            <div id="cajaMensaje" class="mensaje" style="display: none; margin-top: 20px;"></div>
         </div>
     </div>
 
@@ -214,13 +219,13 @@
                 });
                 const resultado = await respuesta.json();
                 if (respuesta.ok) {
-                    alert("Trámite iniciado con éxito");
+                    mostrarMensajePrincipal("Trámite iniciado con éxito. La página se recargará.", 'exito');
                     location.reload(); 
                 } else {
-                    alert("Error: " + resultado.mensaje);
+                    mostrarMensajePrincipal("Error: " + resultado.mensaje, 'error');
                 }
             } catch (error) {
-                alert("Error de conexión");
+                mostrarMensajePrincipal("Error de conexión al iniciar el trámite.", 'error');
             }
         }
 
@@ -305,7 +310,7 @@
 
             // La barrera de seguridad del frontend
             if (!datosAlumno.lu || !datosAlumno.apellido || !datosAlumno.nombres || !datosAlumno.carrera_id) {
-                alert("Por favor, complete LU, Nombres, Apellido y seleccione una Carrera.");
+                mostrarMensaje("Por favor, complete LU, Nombres, Apellido y seleccione una Carrera.", 'error');
                 return;
             }
 
@@ -323,21 +328,21 @@
 
                 // ... dentro de guardarNuevoAlumno ...
                 if (respuesta.ok) {
-                    alert(json.mensaje);
+                    mostrarMensaje(json.mensaje, 'exito');
                     ocultarFormulario();
                     cargarAlumnos(); 
                 } else {
                     // Si hay detalles (errores de Zod o superRefine), los concatenamos
                     if (json.detalles && Array.isArray(json.detalles)) {
                         const mensajesError = json.detalles.map(error => `- ${error.message}`).join('\n');
-                        alert(`${json.mensaje}:\n${mensajesError}`);
+                        mostrarMensaje(`${json.mensaje}: ${mensajesError}`, 'error');
                     } else {
                         // Si es un error común (como 404 o 500)
-                        alert('Error: ' + json.mensaje);
+                        mostrarMensaje('Error: ' + json.mensaje, 'error');
                     }
                 }
             } catch (error) {
-                alert('Error de conexión al intentar guardar.');
+                mostrarMensaje('Error de conexión al intentar guardar.', 'error');
             }
         }
 
@@ -355,24 +360,35 @@
                 const json = await respuesta.json();
 
                 if (json.estado === 'exito') {
-                    alert(json.mensaje);
+                    mostrarMensajePrincipal(json.mensaje, 'exito');
                     cargarAlumnos(); 
                 } else {
-                    alert('Error al borrar: ' + json.mensaje);
+                    mostrarMensajePrincipal('Error al borrar: ' + json.mensaje, 'error');
                 }
             } catch (error) {
-                alert('Error de conexión al intentar borrar.');
+                mostrarMensajePrincipal('Error de conexión al intentar borrar.', 'error');
             }
         }
 
-        async function cerrarSesion() {
-            try {
-                await fetch('/api/v0/auth/logout', { method: 'POST' });
-                window.location.href = '/app/login';
-            } catch (error) { 
-                alert("Error al intentar cerrar sesión."); 
+        function mostrarMensajePrincipal(texto, tipo) {
+            const divResultado = document.getElementById('cajaMensajePrincipal');
+            if (!divResultado) return;
+
+            if (tipo === '') {
+                divResultado.className = 'mensaje';
+                divResultado.style.backgroundColor = '#f1f5f9';
+                divResultado.style.borderColor = '#e2e8f0';
+                divResultado.style.color = '#475569';
+            } else {
+                divResultado.style.backgroundColor = '';
+                divResultado.style.borderColor = '';
+                divResultado.style.color = '';
+                divResultado.className = `mensaje ${tipo}`;
             }
+            divResultado.style.display = 'block';
+            divResultado.textContent = texto;
         }
+
     </script>
 </body>
 </html>

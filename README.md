@@ -47,29 +47,30 @@ src/
 ### Pasos de Instalación
 
 1. **Clonar el repositorio:**
-   \`\`\`bash
+   ```
+   bash
    git clone [URL_DE_SU_REPOSITORIO]
    cd [NOMBRE_DE_LA_CARPETA]
-   \`\`\`
+   ```
 
 2. **Instalar dependencias:**
-   \`\`\`bash
-   npm install
-   \`\`\`
+   ```
+   bash npm install
+   ```
 
 3. **Configurar variables de entorno:**
    Crear un archivo `.env` en la raíz del proyecto.
-   \`\`\`env
+   ```env
    DATABASE_URL=postgresql://usuario:password@localhost:5432/nombre_de_su_bd_vacia
    SECRET_SESSION=ingrese_una_cadena_de_texto_segura
    PORT=3000
-   \`\`\`
+   ```
 
 4. **Compilar y ejecutar:**
-   \`\`\`bash
+   ```bash
    npm run build
    npm run start
-   \`\`\`
+   ```
    *(Nota: El sistema incluye un migrador automático. Al iniciar por primera vez, creará todas las tablas necesarias en su base de datos).*
 
 ---
@@ -82,14 +83,14 @@ Una vez que el servidor esté corriendo, puede acceder a la aplicación visual d
 
 **⚠️ Importante - Primer Inicio de Sesión:**
 Al ser una instalación nueva, la base de datos no tendrá usuarios. Antes de iniciar sesión, deberá enviar una petición `POST` al endpoint `/api/v0/auth/register` (vía Postman, cURL o ThunderClient) con el siguiente formato JSON para crear su primer administrador:
-\`\`\`json
+```json
 {
   "username": "admin",
   "password": "Password123!",
   "nombre": "Administrador",
   "email": "admin@aida.com"
 }
-\`\`\`
+```
 
 ---
 
@@ -98,6 +99,6 @@ Al ser una instalación nueva, la base de datos no tendrá usuarios. Antes de in
 Este proyecto cuenta con una suite de pruebas de integración robusta construida con **Jest** y **Supertest**, garantizando la fiabilidad de las rutas, la lógica de negocio y los bloqueos de seguridad.
 
 Para ejecutar el laboratorio de pruebas (creará una base de datos temporal en memoria o transaccional):
-\`\`\`bash
+```bash
 npm test
-\`\`\`
+```

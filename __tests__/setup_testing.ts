@@ -8,7 +8,6 @@ dotenv.config();
 const { Pool } = pg;
 
 export default async function setup() {
-    console.log('\n🧪 [AIDA TEST] Inicializando laboratorio de pruebas...');
     
     // Creamos un pool temporal solo para el setup usando la base de pruebas
     const testPool = new Pool({
