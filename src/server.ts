@@ -1,6 +1,6 @@
 import express from 'express';
 import { CarrerasRepository } from './repositories/carrerasRepository.js';
-import { conectarBD} from './database.js';
+import { pool, conectarBD } from './database.js';
 import path from 'path'; 
 import session from 'express-session';
 import { Request, Response, NextFunction } from 'express';
@@ -15,6 +15,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { CursadaController } from './controllers/cursadaController.js';
 import { noCache } from './middlewares/noCache.js';
+import connectPgSimple from 'connect-pg-simple';
 
 declare module 'express-session' {
     interface SessionData {
@@ -60,7 +61,15 @@ app.use(helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" } 
 }));
 
+const PgStore = connectPgSimple(session);
+
 app.use(session({
+    store: new PgStore({
+        pool: pool,
+        schemaName: 'aida',
+        tableName: 'sesiones',
+        createTableIfMissing: true
+    }),
     secret: process.env.SESSION_SECRET || 'mi_secreto_super_seguro_123', //Codigo/clave necesaria para validar una cookie y asi  evitar que  un usuario acceda solo creando su propia cookie
     resave: false, //Si ya hay una cookie creada no la dupliques
     saveUninitialized: false, //Se inicializar sin cookie (debe primero loguearse)
