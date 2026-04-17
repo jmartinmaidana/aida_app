@@ -1,4 +1,4 @@
-import { AlumnoRepository } from '../repositories/alumnosRepository.js';
+import { AlumnosRepository } from '../repositories/alumnosRepository.js';
 import { CursadasRepository } from '../repositories/cursadaRepository.js';
 import { PlanEstudiosRepository } from '../repositories/planEstudiosRepository.js';
 import { AcademicoService } from './academicoService.js';
@@ -6,7 +6,7 @@ import { AcademicoService } from './academicoService.js';
 export class HistorialService {
     static async obtenerHistorialCompleto(lu: string) {
 
-        const dataAlumno = await AlumnoRepository.obtenerDatos(lu);
+        const dataAlumno = await AlumnosRepository.obtenerDatos(lu);
 
         if (dataAlumno.rows.length === 0) {
             const error: any = new Error("Alumno no encontrado.");

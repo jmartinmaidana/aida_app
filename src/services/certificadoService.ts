@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'fs/promises';
 import { Fecha, textoAFecha, isoAFecha, fechaAIsoString } from '../fechas.js';
-import { AlumnoRepository } from '../repositories/alumnosRepository.js';
+import { AlumnosRepository } from '../repositories/alumnosRepository.js';
 import { tmpdir } from 'os'; 
 import { join } from 'path'; 
 
@@ -11,7 +11,7 @@ export class CertificadoService {
 
     private static async generarCertificadoAlumno(filtro: FiltroAlumnos, prefijoArchivo: string): Promise<string[]> {
 
-        const alumnos = await AlumnoRepository.obtenerAlumnoQueNecesitaCertificado(filtro);
+        const alumnos = await AlumnosRepository.obtenerAlumnoQueNecesitaCertificado(filtro);
         
         if (alumnos.length === 0) {
             throw new Error("No se encontró ningún alumno con los datos proporcionados.");

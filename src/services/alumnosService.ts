@@ -1,8 +1,8 @@
-import { AlumnoRepository } from '../repositories/alumnosRepository.js';
+import { AlumnosRepository } from '../repositories/alumnosRepository.js';
 import { CarrerasRepository } from '../repositories/carrerasRepository.js';
 import { Alumno } from '../database.js';
 
-export class AlumnoService {
+export class AlumnosService {
     
     private static async validarYCompletarAlumno(alumno: Alumno): Promise<Alumno> {
 
@@ -42,7 +42,7 @@ export class AlumnoService {
 
                 const alumnoValidado = await this.validarYCompletarAlumno(alumno);
                 
-                const fueInsertado = await AlumnoRepository.crearIgnorandoDuplicados(alumnoValidado);
+                const fueInsertado = await AlumnosRepository.crearIgnorandoDuplicados(alumnoValidado);
                 
                 if (fueInsertado) {
                     insertados++;
@@ -59,7 +59,7 @@ export class AlumnoService {
 
     static async crearAlumno(alumno: Alumno) {
         const alumnoValidado = await this.validarYCompletarAlumno(alumno);
-        await AlumnoRepository.crear(alumnoValidado);
+        await AlumnosRepository.crear(alumnoValidado);
     }
 
     

@@ -1,11 +1,11 @@
 import { CursadasRepository } from '../repositories/cursadaRepository.js';
-import { AlumnoRepository } from '../repositories/alumnosRepository.js'; 
+import { AlumnosRepository } from '../repositories/alumnosRepository.js'; 
 import { PlanEstudiosRepository } from '../repositories/planEstudiosRepository.js';
 export class AcademicoService {
     
     static async procesarCursadaAprobada(lu: string, idMateria: string, anio: string, cuatrimestre: string, nota: number) {
         
-        const idCarrera = await AlumnoRepository.obtenerCarreraDeAlumno(lu);
+        const idCarrera = await AlumnosRepository.obtenerCarreraDeAlumno(lu);
         
         if (!idCarrera) {
             throw new Error("El alumno no existe o no tiene una carrera asignada.");
@@ -42,7 +42,7 @@ export class AcademicoService {
         
             if (totalRequeridas > 0 && totalAprobadas >= totalRequeridas) {
                 
-                await AlumnoRepository.marcarComoEgresado(lu);
+                await AlumnosRepository.marcarComoEgresado(lu);
                 return true;
             }
     

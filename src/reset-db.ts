@@ -1,7 +1,7 @@
 import { pool, conectarBD, desconectarBD } from './database.js';
 
 async function resetearDatosGestion() {
-    console.log(` ATENCIÓN: Intentando conectar a HOST: ${process.env.DB_HOST}`);
+    console.log(` ATENCIÓN: Iniciando script de reseteo de base de datos...`);
     
     try {
         await conectarBD();
@@ -50,6 +50,19 @@ async function resetearDatosGestion() {
             (2, 1, 1, 1), (2, 2, 1, 2), (2, 3, 2, 1), (2, 4, 2, 2), (2, 6, 3, 1),
             -- Licenciatura en Sistemas (ID 3)
             (3, 1, 1, 1), (3, 2, 1, 2), (3, 4, 2, 1), (3, 6, 2, 2);
+        `);
+
+        // 4. Insertamos Alumnos de prueba para paginación
+        console.log("Insertando alumnos de prueba para probar la paginación...");
+        const alumnosPrueba = [];
+        for (let i = 1; i <= 35; i++) {
+            const carreraId = (i % 3) + 1; // Distribuidos equitativamente entre las 3 carreras
+            alumnosPrueba.push(`('${100 + i}/24', 'Estudiante ${i}', 'Prueba', ${carreraId})`);
+        }
+        
+        await pool.query(`
+            INSERT INTO aida.alumnos (lu, nombres, apellido, carrera_id) VALUES 
+            ${alumnosPrueba.join(', ')}
         `);
 
         console.log("✅ Reseteo y carga inicial completada.");

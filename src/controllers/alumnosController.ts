@@ -1,20 +1,43 @@
 import { Request, Response } from 'express';
-import { AlumnoService } from '../services/alumnoService.js';
-import { AlumnoRepository } from '../repositories/alumnosRepository.js';
+import { AlumnosService } from '../services/alumnosService.js';
+import { AlumnosRepository } from '../repositories/alumnosRepository.js';
 import { alumnoSchema } from '../schemas_validator.js'; 
 
-export class AlumnoController {
+export class AlumnosController {
     
     // GET: Obtener todos
     static async obtenerTodosAlumnoController(req: Request, res: Response) {
-        const alumnos = await AlumnoRepository.obtenerTodos();
+        const alumnos = await AlumnosRepository.obtenerTodos();
         res.status(200).json({ estado: "exito", datos: alumnos });
     }
+
+    static async obtenerTodosAlumnoPorPaginaController(req: Request, res: Response) {
+        // Extraemos los parámetros de la URL (Query Params). Usamos valores seguros por defecto.
+        const pagina = parseInt(req.query.pagina as string) || 1;
+        const limite = parseInt(req.query.limite as string) || 10;
+        const busqueda = (req.query.busqueda as string) || "";
+
+        // Llamamos al repositorio que acabamos de crear
+        const resultado = await AlumnosRepository.obtenerPaginados(pagina, limite, busqueda);
+        
+        const totalPaginas = Math.ceil(resultado.total / limite);
+
+        res.status(200).json({ 
+            estado: "exito", 
+            datos: resultado.alumnos,
+            paginacion: {
+                total: resultado.total,
+                paginaActual: pagina,
+                totalPaginas: totalPaginas === 0 ? 1 : totalPaginas
+            }
+        });
+    }
+
 
     // POST: Crear individual
     static async crearAlumnoController(req: Request, res: Response) {
         const datosValidados = alumnoSchema.parse(req.body); 
-        await AlumnoService.crearAlumno(datosValidados);
+        await AlumnosService.crearAlumno(datosValidados);
         res.status(200).json({ estado: "exito", mensaje: "Alumno creado correctamente." });
     }
 
@@ -22,14 +45,14 @@ export class AlumnoController {
     static async actualizarAlumnoController(req: Request, res: Response) {
         const lu = `${req.params.prefijo}/${req.params.anio}`;
         const datosValidados = alumnoSchema.parse(req.body);
-        await AlumnoRepository.actualizar(lu, datosValidados);
+        await AlumnosRepository.actualizar(lu, datosValidados);
         res.status(200).json({ estado: "exito", mensaje: "Alumno actualizado correctamente." });
     }
 
     // DELETE: Eliminar
     static async eliminarAlumnoController(req: Request, res: Response) {
         const lu = `${req.params.prefijo}/${req.params.anio}`;
-        await AlumnoRepository.eliminar(lu);
+        await AlumnosRepository.eliminar(lu);
         res.status(200).json({ estado: "exito", mensaje: "Alumno eliminado correctamente." });
     }
 
@@ -43,7 +66,7 @@ export class AlumnoController {
             throw error;
         }
 
-        const insertados = await AlumnoService.cargarDesdeJson(datosAlumnos);
+        const insertados = await AlumnosService.cargarDesdeJson(datosAlumnos);
         res.status(200).json({ 
             estado: "exito", 
             mensaje: `Se insertaron ${insertados} alumnos en la base de datos.` 

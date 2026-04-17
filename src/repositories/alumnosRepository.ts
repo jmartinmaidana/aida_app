@@ -1,7 +1,7 @@
 import { pool, Alumno } from '../database.js';
 import { Fecha, textoAFecha, fechaAIsoString } from '../fechas.js';
 import { FiltroAlumnos } from '../services/certificadoService.js';
-export class AlumnoRepository {
+export class AlumnosRepository {
     
     static async obtenerTodos() {
         const query = "SELECT lu, nombres, apellido, titulo, titulo_en_tramite, egreso, carrera_id FROM aida.alumnos ORDER BY lu";
@@ -109,4 +109,39 @@ export class AlumnoRepository {
     
         return resAlumno
     }
+
+    static async obtenerPaginados(pagina: number, limite: number, busqueda: string) {
+        const offset = (pagina - 1) * limite;
+        const params: any[] = [];
+        
+        // CORRECCIÓN: Solucionados los nombres de las columnas e incluidas las faltantes
+        let query = `
+            SELECT a.lu, a.nombres, a.apellido, a.titulo, a.titulo_en_tramite, a.egreso, a.carrera_id, c.nombre as carrera
+            FROM aida.alumnos a
+            LEFT JOIN aida.carreras c ON a.carrera_id = c.id
+        `;
+        let countQuery = `SELECT COUNT(*) FROM aida.alumnos a`;
+
+        // Si el usuario escribió algo, filtramos
+        if (busqueda) {
+            const termino = `%${busqueda}%`;
+            const filtro = ` WHERE a.lu ILIKE $1 OR a.apellido ILIKE $1 OR a.nombres ILIKE $1`;
+            query += filtro;
+            countQuery += filtro;
+            params.push(termino);
+        }
+
+        // Ordenamos y aplicamos la paginación (LIMIT y OFFSET)
+        query += ` ORDER BY a.apellido ASC, a.nombres ASC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+        
+        const resAlumnos = await pool.query(query, [...params, limite, offset]);
+        const resTotal = await pool.query(countQuery, params);
+
+        return {
+            alumnos: resAlumnos.rows,
+            total: parseInt(resTotal.rows[0].count)
+        };
+    }
+
+
 }

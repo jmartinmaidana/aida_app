@@ -61,8 +61,8 @@ async function procesarYEnviarArchivo() {
         const lineas = contenido.split('\n').map(l => l.trim()).filter(l => l.length > 0);
         const encabezados = lineas[0].split(',');
         
-        if (encabezados.length < 7) {
-            mostrarMensaje('El archivo CSV no tiene las 7 columnas requeridas.', 'error');
+        if (encabezados.length < 4) {
+            mostrarMensaje('El archivo CSV debe tener al menos 4 columnas obligatorias (lu, nombres, apellido, carrera_id).', 'error');
             // Restauramos si falla la validación del CSV
             btnGenerar.innerHTML = contenidoOriginal;
             btnGenerar.disabled = false;
@@ -72,15 +72,15 @@ async function procesarYEnviarArchivo() {
         const alumnosJson = [];
         for (let i = 1; i < lineas.length; i++) {
             const datos = lineas[i].split(',');
-            if (datos.length >= 7) {
+            if (datos.length >= 4) {
                 alumnosJson.push({
                     lu: datos[0].trim(),
                     nombres: datos[1].trim(),
                     apellido: datos[2].trim(),
-                    carrera_id: datos[3].trim() ? parseInt(datos[3].trim()) : null, 
-                    titulo: datos[4].trim() || null,
-                    titulo_en_tramite: datos[5].trim() || null,
-                    egreso: datos[6].trim() || null
+                    carrera_id: datos[3] && datos[3].trim() ? parseInt(datos[3].trim()) : null, 
+                    titulo: (datos[4] && datos[4].trim()) || null,
+                    titulo_en_tramite: (datos[5] && datos[5].trim()) || null,
+                    egreso: (datos[6] && datos[6].trim()) || null
                 });
             }
         }

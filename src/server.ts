@@ -6,7 +6,7 @@ import session from 'express-session';
 import { Request, Response, NextFunction } from 'express';
 import { AuthenticationController } from './controllers/authenticationController.js';
 import { Usuario } from './repositories/usuariosRepository.js';
-import { AlumnoController } from './controllers/alumnoController.js';
+import { AlumnosController } from './controllers/alumnosController.js';
 import { CertificadoController } from './controllers/certificadoController.js';
 import { catchAsync,manejadorDeErrores } from './middlewares/errorHandler.js';
 import { HistorialController } from './controllers/historialController.js';
@@ -109,11 +109,11 @@ app.post('/api/v0/tramite-titulo', requireAuthAPI, catchAsync(CertificadoControl
 app.post('/api/v0/fecha', requireAuthAPI, catchAsync(CertificadoController.generarZipPorFechaController));
 
 // ---- Endpoints de Gestión de Alumnos ----
-app.get('/api/alumnos', requireAuthAPI, catchAsync(AlumnoController.obtenerTodosAlumnoController));
-app.post('/api/alumno', requireAuthAPI, catchAsync(AlumnoController.crearAlumnoController));
-app.put('/api/alumnos/:prefijo/:anio', requireAuthAPI, catchAsync(AlumnoController.actualizarAlumnoController));
-app.delete('/api/alumnos/:prefijo/:anio', requireAuthAPI, catchAsync(AlumnoController.eliminarAlumnoController));
-app.patch('/api/v0/archivo', requireAuthAPI, catchAsync(AlumnoController.cargarArchivoAlumnoController));
+app.get('/api/alumnos', requireAuthAPI, catchAsync(AlumnosController.obtenerTodosAlumnoPorPaginaController));
+app.post('/api/alumno', requireAuthAPI, catchAsync(AlumnosController.crearAlumnoController));
+app.put('/api/alumnos/:prefijo/:anio', requireAuthAPI, catchAsync(AlumnosController.actualizarAlumnoController));
+app.delete('/api/alumnos/:prefijo/:anio', requireAuthAPI, catchAsync(AlumnosController.eliminarAlumnoController));
+app.patch('/api/v0/archivo', requireAuthAPI, catchAsync(AlumnosController.cargarArchivoAlumnoController));
 
 // ---- Endpoints de Gestión de Alumnos (Historial) ----
 app.get('/api/v0/historial/:prefijo/:anio', requireAuthAPI, catchAsync(HistorialController.obtener));

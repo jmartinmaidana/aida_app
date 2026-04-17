@@ -2,6 +2,10 @@ let alumnosLocales = [];
 let luEnEdicion = null; 
 let columnaOrdenActual = '';
 let ordenAscendente = true;
+let paginaActual = 1;
+const limitePorPagina = 10;
+let terminoBusqueda = '';
+let temporizadorBusqueda;
 
 function formatoTabla(fechaIso) {
     if (!fechaIso) return ''; 
@@ -36,22 +40,6 @@ async function cargarOpcionesCarreras() {
         }
     } catch (error) {
         console.error("Error al cargar carreras:", error);
-    }
-}
-
-async function cargarAlumnos() {
-    try {
-        const respuesta = await fetch('/api/alumnos');
-        const json = await respuesta.json();
-
-        if (json.estado === 'exito') {
-            alumnosLocales = json.datos;
-            renderizarTabla(); 
-        } else {
-            document.getElementById('cuerpoTabla').innerHTML = `<tr><td colspan="7" style="color: #ef4444; text-align: center; padding: 20px;">Error: ${json.mensaje}</td></tr>`;
-        }
-    } catch (error) {
-        document.getElementById('cuerpoTabla').innerHTML = `<tr><td colspan="7" style="color: #ef4444; text-align: center; padding: 20px;">Error de conexión con el servidor.</td></tr>`;
     }
 }
 
@@ -284,4 +272,51 @@ function mostrarMensajePrincipal(texto, tipo) {
     }
     divResultado.style.display = 'block';
     divResultado.textContent = texto;
+}
+
+async function cargarAlumnos() {
+    const tbody = document.getElementById('cuerpoTabla');
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px; color: #64748b;"><i class="ph ph-spinner icono-cargando"></i> Cargando padrón...</td></tr>';
+    
+    try {
+        // Armamos la URL incluyendo los filtros y la paginación
+        const url = `/api/alumnos?pagina=${paginaActual}&limite=${limitePorPagina}&busqueda=${encodeURIComponent(terminoBusqueda)}`;
+        
+        const respuesta = await fetch(url);
+        if (!respuesta.ok) throw new Error('Error de conexión al obtener alumnos');
+        
+        const json = await respuesta.json();
+        
+        if (json.estado === "exito") {
+            alumnosLocales = json.datos;
+            const pag = json.paginacion;
+
+            // Actualizar la interfaz de la barra inferior
+            document.getElementById('indicadorPagina').textContent = `Página ${pag.paginaActual} de ${pag.totalPaginas} (${pag.total} registros)`;
+            document.getElementById('btnPaginaAnterior').disabled = pag.paginaActual <= 1;
+            document.getElementById('btnPaginaSiguiente').disabled = pag.paginaActual >= pag.totalPaginas;
+
+            // Renderizar la tabla (usando la función que ya tienes)
+            renderizarTabla();
+        } else {
+            throw new Error(json.mensaje);
+        }
+    } catch (error) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #ef4444;">${error.message}</td></tr>`;
+    }
+}
+
+// Nuevas funciones de control (Puedes agregarlas al final de alumnos.js)
+function cambiarPagina(delta) {
+    paginaActual += delta;
+    cargarAlumnos();
+}
+
+function debounceBusqueda() {
+    clearTimeout(temporizadorBusqueda);
+    temporizadorBusqueda = setTimeout(() => {
+        terminoBusqueda = document.getElementById('inputBusqueda').value;
+        paginaActual = 1; // Si buscamos algo nuevo, siempre volvemos a la página 1
+        cargarAlumnos();
+    }, 400); // Espera 400ms después de que el usuario deja de escribir
 }
