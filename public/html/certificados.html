@@ -23,11 +23,17 @@
         </h1>
         <div class="navbar-links">
             <a href="/menu"><i class="ph ph-squares-four"></i> Inicio</a>
-            <a href="/app/alumnos"><i class="ph ph-users"></i> Alumnos</a>
-            <a href="/app/planes"><i class="ph ph-books"></i> Planes de Estudio</a>
-            <a href="/app/cursada"><i class="ph ph-pencil-line"></i> Carga de Notas</a>
-            <a href="/app/fecha"><i class="ph ph-files"></i> Emisión por Fecha</a>
-            <a href="/app/archivo"><i class="ph ph-upload-simple"></i> Carga Múltiple (CSV)</a>
+            <div class="dropdown">
+                <button class="dropbtn"><i class="ph ph-list"></i> Módulos <i class="ph ph-caret-down"></i></button>
+                <div class="dropdown-content">
+                    <a href="/app/alumnos"><i class="ph ph-users"></i> Alumnos</a>
+                    <a href="/app/planes"><i class="ph ph-books"></i> Planes de Estudio</a>
+                    <a href="/app/cursada"><i class="ph ph-pencil-line"></i> Carga de Notas</a>
+                    <a href="/app/certificados"><i class="ph ph-certificate"></i> Emisión Individual</a>
+                    <a href="/app/fecha"><i class="ph ph-files"></i> Emisión por Fecha</a>
+                    <a href="/app/archivo"><i class="ph ph-upload-simple"></i> Carga Múltiple (CSV)</a>
+                </div>
+            </div>
             <button onclick="cerrarSesion()" class="btn-logout"><i class="ph ph-sign-out"></i> Salir</button>
         </div>
     </nav>

@@ -188,3 +188,69 @@ button:disabled { opacity: 0.7; cursor: not-allowed; pointer-events: none; }
     .header-info h1 { font-size: 22px; }
     .stat-value { font-size: 28px; }
 }
+
+/* --- ESTILOS DEL MENÚ DESPLEGABLE (DROPDOWN) --- */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropbtn {
+    background-color: transparent;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.dropbtn:hover {
+    background-color: #f1f5f9;
+    color: #0284c7;
+}
+
+.dropdown-content {
+    display: none; /* Oculto por defecto */
+    position: absolute;
+    background-color: #ffffff;
+    min-width: 240px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    z-index: 100;
+    top: 100%;
+    left: 0;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.dropdown-content a {
+    color: #475569;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.2s;
+    font-size: 0.95rem;
+}
+
+.dropdown-content a i {
+    font-size: 1.1rem;
+}
+
+.dropdown-content a:hover {
+    background-color: #f8fafc;
+    color: #0284c7;
+}
+
+/* Mostrar el contenido cuando se hace hover sobre el contenedor */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
