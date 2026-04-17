@@ -250,7 +250,12 @@ button:disabled { opacity: 0.7; cursor: not-allowed; pointer-events: none; }
     color: #0284c7;
 }
 
-/* Mostrar el contenido cuando se hace hover sobre el contenedor */
-.dropdown:hover .dropdown-content {
+/* Mostrar el contenido en PC (hover) o al hacer clic en móvil (clase activo) */
+@media (hover: hover) {
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+}
+.dropdown.activo .dropdown-content {
     display: block;
 }

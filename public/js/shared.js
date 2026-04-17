@@ -34,3 +34,17 @@ async function cerrarSesion() {
         alert("Error al intentar cerrar sesión.");
     }
 }
+
+// Cierra el menú desplegable en móviles si se toca fuera de él
+document.addEventListener('click', function(event) {
+    // Comprobamos si el elemento tocado NO es parte del menú desplegable
+    const clicDentroDelMenu = event.target.closest('.dropdown');
+    
+    if (!clicDentroDelMenu) {
+        // Buscamos todos los menús que estén abiertos (con la clase 'activo') y los cerramos
+        const menusAbiertos = document.querySelectorAll('.dropdown.activo');
+        menusAbiertos.forEach(function(menu) {
+            menu.classList.remove('activo');
+        });
+    }
+});
