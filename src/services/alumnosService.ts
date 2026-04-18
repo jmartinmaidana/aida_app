@@ -1,6 +1,8 @@
 import { AlumnosRepository } from '../repositories/alumnosRepository.js';
 import { CarrerasRepository } from '../repositories/carrerasRepository.js';
 import { Alumno } from '../database.js';
+import { alumnoSchema } from '../schemas_validator.js';
+import { ZodError } from 'zod';
 
 export class AlumnosService {
     
@@ -30,40 +32,65 @@ export class AlumnosService {
         let cantidadIgnorados = 0;
         const alumnosIgnorados: any[] = [];
         
+        const alumnosValidosParaInsertar: Alumno[] = [];
+        const cacheTitulos = new Map<number, string>();
+
         for (const alumno of alumnos) {
             try {
-                if (!alumno.lu || !alumno.nombres || !alumno.apellido) {
-                    throw new Error(`Faltan datos obligatorios básicos.`);
+                // Reutilizamos Zod para limpiar (sanitizar), formatear y aplicar reglas de negocio estrictas
+                const alumnoLimpio = alumnoSchema.parse(alumno);
+                
+                // Validación de carrera con Caché (Evita problema N+1 consultas a BD)
+                if (!alumnoLimpio.carrera_id) {
+                    throw new Error(`El alumno ${alumnoLimpio.lu} no tiene una carrera asignada.`);
                 }
 
-                // Limitamos estrictamente los datos que se pueden cargar masivamente
-                const alumnoLimpio: Alumno = {
-                    lu: alumno.lu,
-                    nombres: alumno.nombres,
-                    apellido: alumno.apellido,
-                    carrera_id: alumno.carrera_id,
-                    titulo: null,
-                    titulo_en_tramite: null,
-                    egreso: null
+                if (!cacheTitulos.has(alumnoLimpio.carrera_id)) {
+                    const titulo = await CarrerasRepository.obtenerTituloPorId(alumnoLimpio.carrera_id);
+                    if (!titulo) {
+                        throw new Error(`La carrera con ID ${alumnoLimpio.carrera_id} no existe en la base de datos.`);
+                    }
+                    cacheTitulos.set(alumnoLimpio.carrera_id, titulo);
+                }
+
+                const alumnoValidado: Alumno = {
+                    ...(alumnoLimpio as Alumno),
+                    titulo: cacheTitulos.get(alumnoLimpio.carrera_id) || null,
+                    titulo_en_tramite: alumnoLimpio.titulo_en_tramite === "" ? null : alumnoLimpio.titulo_en_tramite,
+                    egreso: alumnoLimpio.egreso === "" ? null : alumnoLimpio.egreso
                 };
-
-                const alumnoValidado = await this.validarYCompletarAlumno(alumnoLimpio);
                 
-                const fueInsertado = await AlumnosRepository.crearIgnorandoDuplicados(alumnoValidado);
+                alumnosValidosParaInsertar.push(alumnoValidado);
                 
-                if (fueInsertado) {
-                    insertados++;
-                } else {
-                    cantidadIgnorados++;
-                    alumnosIgnorados.push({ ...alumno, motivo_error: "El alumno ya existe en la base de datos." });
-                }
             } catch (error: any) {
                 cantidadIgnorados++;
-                alumnosIgnorados.push({ ...alumno, motivo_error: error.message });
-                console.error(`❌ Error crítico al procesar la LU ${alumno.lu || 'desconocida'}: ${error.message}`);
+                
+                let motivo = error.message;
+                if (error instanceof ZodError) {
+                    // Extraemos los mensajes amigables de Zod utilizando 'issues'
+                    motivo = error.issues.map(e => e.message).join(' | ');
+                }
+                
+                alumnosIgnorados.push({ ...alumno, motivo_error: motivo });
+                console.error(`❌ Error al procesar la LU ${alumno.lu || 'desconocida'}: ${motivo}`);
             }
         }
         
+        // Insertamos todo el lote válido de una sola vez en la base de datos
+        if (alumnosValidosParaInsertar.length > 0) {
+            const lusInsertadas = await AlumnosRepository.insertarLote(alumnosValidosParaInsertar);
+            insertados = lusInsertadas.length;
+
+            // Comparamos para ver cuáles fueron ignorados por estar duplicados (ON CONFLICT)
+            const setInsertadas = new Set(lusInsertadas);
+            for (const alumno of alumnosValidosParaInsertar) {
+                if (!setInsertadas.has(alumno.lu)) {
+                    cantidadIgnorados++;
+                    alumnosIgnorados.push({ ...alumno, motivo_error: "El alumno ya existe en la base de datos." });
+                }
+            }
+        }
+
         return { insertados, cantidadIgnorados, alumnosIgnorados };
     }
 

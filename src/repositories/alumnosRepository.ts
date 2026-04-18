@@ -40,6 +40,40 @@ export class AlumnosRepository {
         return res.rowCount !== null && res.rowCount > 0;
     }
 
+    static async insertarLote(alumnos: Alumno[]): Promise<string[]> {
+        if (alumnos.length === 0) return [];
+
+        const values: any[] = [];
+        const placeholders: string[] = [];
+        let index = 1;
+
+        for (const alumno of alumnos) {
+            placeholders.push(`($${index++}, $${index++}, $${index++}, $${index++}, $${index++}, $${index++}, $${index++})`);
+            values.push(
+                alumno.lu,
+                alumno.nombres,
+                alumno.apellido,
+                alumno.carrera_id,
+                alumno.titulo,
+                alumno.titulo_en_tramite,
+                alumno.egreso
+            );
+        }
+
+        // Armamos la consulta de Bulk Insert
+        const query = `
+            INSERT INTO aida.alumnos (lu, nombres, apellido, carrera_id, titulo, titulo_en_tramite, egreso)
+            VALUES ${placeholders.join(', ')}
+            ON CONFLICT (lu) DO NOTHING
+            RETURNING lu;
+        `;
+
+        const resultado = await pool.query(query, values);
+        
+        // Devolvemos solo un array con las LUs que efectivamente se insertaron
+        return resultado.rows.map(row => row.lu);
+    }
+
     static async actualizar(lu: string, datosActualizados: any) {
         const query = `
             UPDATE aida.alumnos 
