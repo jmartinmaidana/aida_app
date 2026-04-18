@@ -171,5 +171,10 @@ describe('Suite de Pruebas: Creación de Alumnos', () => {
 
         const dbOriginal = await pool.query('SELECT apellido FROM aida.alumnos WHERE lu = $1', ['200/26']);
         expect(dbOriginal.rows[0].apellido).toBe("Intocable"); // Sigue intacto
+
+        // Afirmamos que el sistema detectó al alumno duplicado y lo devolvió
+        expect(respuesta.body.alumnosIgnorados).toBeDefined();
+        expect(respuesta.body.alumnosIgnorados.length).toBe(1);
+        expect(respuesta.body.alumnosIgnorados[0].lu).toBe("200/26");
     });
 });

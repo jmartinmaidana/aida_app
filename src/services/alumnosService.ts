@@ -27,7 +27,8 @@ export class AlumnosService {
     static async cargarDesdeJson(alumnos: Alumno[]) {
 
         let insertados = 0;
-        let ignorados = 0;
+        let cantidadIgnorados = 0;
+        const alumnosIgnorados: any[] = [];
         
         for (const alumno of alumnos) {
             try {
@@ -53,15 +54,17 @@ export class AlumnosService {
                 if (fueInsertado) {
                     insertados++;
                 } else {
-                    ignorados++;
+                    cantidadIgnorados++;
+                    alumnosIgnorados.push({ ...alumno, motivo_error: "El alumno ya existe en la base de datos." });
                 }
             } catch (error: any) {
-                ignorados++;
+                cantidadIgnorados++;
+                alumnosIgnorados.push({ ...alumno, motivo_error: error.message });
                 console.error(`❌ Error crítico al procesar la LU ${alumno.lu || 'desconocida'}: ${error.message}`);
             }
         }
         
-        return { insertados, ignorados };
+        return { insertados, cantidadIgnorados, alumnosIgnorados };
     }
 
     static async crearAlumno(alumno: Alumno) {

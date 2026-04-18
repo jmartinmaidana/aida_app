@@ -2,6 +2,7 @@
 const zonaCarga = document.getElementById('zonaCarga');
 const inputCsv = document.getElementById('inputCsv');
 const nombreArchivo = document.getElementById('nombreArchivo');
+let ultimosAlumnosIgnorados = [];
 
 // Cuando el usuario hace clic en el botón y selecciona un archivo tradicionalmente
 inputCsv.addEventListener('change', (e) => {
@@ -101,6 +102,36 @@ async function enviarAlumnosAlBackend(alumnosJson) {
     return datosRespuesta;
 }
 
+function descargarCsvErrores() {
+    if (!ultimosAlumnosIgnorados || ultimosAlumnosIgnorados.length === 0) return;
+    
+    // Creamos las cabeceras incluyendo la nueva columna de motivo
+    const cabeceras = ["lu", "nombres", "apellido", "carrera_id", "motivo_error"];
+    const lineasCsv = [cabeceras.join(",")];
+    
+    ultimosAlumnosIgnorados.forEach(alumno => {
+        const linea = [
+            alumno.lu || "",
+            alumno.nombres || "",
+            alumno.apellido || "",
+            alumno.carrera_id || "",
+            // Envolvemos el motivo en comillas dobles por si tiene comas internas
+            `"${(alumno.motivo_error || "").replace(/"/g, '""')}"` 
+        ];
+        lineasCsv.push(linea.join(","));
+    });
+    
+    // Magia del navegador: Creamos un archivo en memoria y forzamos su descarga
+    const blob = new Blob([lineasCsv.join("\n")], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "alumnos_con_errores.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 async function procesarYEnviarArchivo() {
     if (inputCsv.files.length === 0) {
         mostrarMensaje('Por favor, seleccione o arrastre un archivo CSV.', 'error');
@@ -131,7 +162,12 @@ async function procesarYEnviarArchivo() {
         mostrarMensaje(`Carga finalizada: ${respuesta.insertados} alumnos nuevos insertados exitosamente.`, 'exito');
         
         if (respuesta.ignorados > 0 && divSecundario) {
-            divSecundario.textContent = `Atención: No se pudieron cargar ${respuesta.ignorados} alumnos (registros duplicados, incompletos o con formato incorrecto).`;
+            ultimosAlumnosIgnorados = respuesta.alumnosIgnorados || [];
+            // Usamos innerHTML para poder insertar el botón de descarga
+            divSecundario.innerHTML = `Atención: No se pudieron cargar ${respuesta.ignorados} alumnos (registros duplicados, incompletos o con formato incorrecto).<br><br>
+            <button type="button" onclick="descargarCsvErrores()" class="btn-seleccionar" style="background-color: white; border-color: #fca5a5; color: #b91c1c; padding: 6px 12px; font-size: 0.9rem;">
+                <i class="ph ph-download-simple"></i> Descargar reporte de errores (CSV)
+            </button>`;
             divSecundario.style.display = 'block';
         }
         
