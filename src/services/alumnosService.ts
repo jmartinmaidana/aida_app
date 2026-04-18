@@ -10,19 +10,14 @@ export class AlumnosService {
             throw new Error(`El alumno ${alumno.lu} no tiene una carrera asignada (carrera_id es obligatorio).`);
         }
 
-        let tituloFinal = alumno.titulo === "" ? null : alumno.titulo;
-        
-        if (!tituloFinal) {
-            const tituloPorDefecto = await CarrerasRepository.obtenerTituloPorId(alumno.carrera_id);
-            if (!tituloPorDefecto) {
-                throw new Error(`La carrera con ID ${alumno.carrera_id} no existe en la base de datos.`);
-            }
-            tituloFinal = tituloPorDefecto;
+        const tituloPorDefecto = await CarrerasRepository.obtenerTituloPorId(alumno.carrera_id);
+        if (!tituloPorDefecto) {
+            throw new Error(`La carrera con ID ${alumno.carrera_id} no existe en la base de datos.`);
         }
 
         return {
             ...alumno,
-            titulo: tituloFinal,
+            titulo: tituloPorDefecto,
             titulo_en_tramite: alumno.titulo_en_tramite === "" ? null : alumno.titulo_en_tramite,
             egreso: alumno.egreso === "" ? null : alumno.egreso
         };
@@ -40,7 +35,18 @@ export class AlumnosService {
                     throw new Error(`Faltan datos obligatorios básicos.`);
                 }
 
-                const alumnoValidado = await this.validarYCompletarAlumno(alumno);
+                // Limitamos estrictamente los datos que se pueden cargar masivamente
+                const alumnoLimpio: Alumno = {
+                    lu: alumno.lu,
+                    nombres: alumno.nombres,
+                    apellido: alumno.apellido,
+                    carrera_id: alumno.carrera_id,
+                    titulo: null,
+                    titulo_en_tramite: null,
+                    egreso: null
+                };
+
+                const alumnoValidado = await this.validarYCompletarAlumno(alumnoLimpio);
                 
                 const fueInsertado = await AlumnosRepository.crearIgnorandoDuplicados(alumnoValidado);
                 
@@ -50,11 +56,12 @@ export class AlumnosService {
                     ignorados++;
                 }
             } catch (error: any) {
+                ignorados++;
                 console.error(`❌ Error crítico al procesar la LU ${alumno.lu || 'desconocida'}: ${error.message}`);
             }
         }
         
-        return insertados;
+        return { insertados, ignorados };
     }
 
     static async crearAlumno(alumno: Alumno) {

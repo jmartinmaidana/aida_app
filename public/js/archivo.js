@@ -39,76 +39,108 @@ zonaCarga.addEventListener('drop', (e) => {
 });
 
 // --- LÓGICA DE ENVÍO AL SERVIDOR ---
+function leerArchivoComoTexto(archivo) {
+    return new Promise((resolve, reject) => {
+        const lector = new FileReader();
+        lector.onload = (evento) => resolve(evento.target.result);
+        lector.onerror = () => reject(new Error("Error al leer el archivo físico."));
+        lector.readAsText(archivo);
+    });
+}
+
+function validarEncabezadosCsv(lineas) {
+
+    if (lineas.length === 0) throw new Error('El archivo CSV está vacío.');
+
+    const encabezados = lineas[0].split(',');
+
+    if (encabezados.length < 4) {
+        throw new Error('El archivo CSV debe tener al menos 4 columnas obligatorias (lu, nombres, apellido, carrera_id).');
+    }
+
+    // Validar el nombre exacto de las columnas para evitar errores por desorden
+    const headersLimpios = encabezados.map(h => h.trim().toLowerCase());
+    if (headersLimpios[0] !== 'lu' || headersLimpios[1] !== 'nombres' || 
+        headersLimpios[2] !== 'apellido' || headersLimpios[3] !== 'carrera_id') {
+        throw new Error('Los encabezados deben ser exactamente: lu, nombres, apellido, carrera_id (en ese orden).');
+    }
+}
+
+function parsearDatosCsv(lineas) {
+    const alumnosJson = [];
+    for (let i = 1; i < lineas.length; i++) {
+        const datos = lineas[i].split(',');
+        if (datos.length >= 4) {
+            alumnosJson.push({
+                lu: datos[0].trim(),
+                nombres: datos[1].trim(),
+                apellido: datos[2].trim(),
+                carrera_id: datos[3] && datos[3].trim() ? parseInt(datos[3].trim()) : null,
+                titulo: null,
+                titulo_en_tramite: null,
+                egreso: null
+            });
+        }
+    }
+    return alumnosJson;
+}
+
+async function enviarAlumnosAlBackend(alumnosJson) {
+    const respuesta = await fetch('/api/v0/archivo', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(alumnosJson)
+    });
+
+    const datosRespuesta = await respuesta.json();
+    
+    if (!respuesta.ok || datosRespuesta.estado !== 'exito') {
+        throw new Error(datosRespuesta.mensaje + (datosRespuesta.detalle ? ': ' + datosRespuesta.detalle : ''));
+    }
+    
+    return datosRespuesta;
+}
+
 async function procesarYEnviarArchivo() {
     if (inputCsv.files.length === 0) {
         mostrarMensaje('Por favor, seleccione o arrastre un archivo CSV.', 'error');
         return;
     }
 
-    const archivo = inputCsv.files[0];
-    const lector = new FileReader();
+    const divSecundario = document.getElementById('resultadoSecundario');
+    if (divSecundario) divSecundario.style.display = 'none';
+
     const btnGenerar = document.querySelector('.btn-generar');
-
-    mostrarMensaje('Leyendo y convirtiendo archivo...', '');
-
-    // Efecto de carga
+    mostrarMensaje('Procesando y subiendo archivo...', '');
+    
     const contenidoOriginal = btnGenerar.innerHTML;
     btnGenerar.innerHTML = '<i class="ph ph-spinner icono-cargando"></i> Subiendo alumnos...';
     btnGenerar.disabled = true;
 
-    lector.onload = async function(evento) {
-        const contenido = evento.target.result;
-        const lineas = contenido.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-        const encabezados = lineas[0].split(',');
+    try {
+        const contenidoCsv = await leerArchivoComoTexto(inputCsv.files[0]);
         
-        if (encabezados.length < 4) {
-            mostrarMensaje('El archivo CSV debe tener al menos 4 columnas obligatorias (lu, nombres, apellido, carrera_id).', 'error');
-            // Restauramos si falla la validación del CSV
-            btnGenerar.innerHTML = contenidoOriginal;
-            btnGenerar.disabled = false;
-            return;
+        const lineas = contenidoCsv.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+        validarEncabezadosCsv(lineas);
+        
+        const alumnosJson = parsearDatosCsv(lineas);
+        
+        const respuesta = await enviarAlumnosAlBackend(alumnosJson);
+        
+        mostrarMensaje(`Carga finalizada: ${respuesta.insertados} alumnos nuevos insertados exitosamente.`, 'exito');
+        
+        if (respuesta.ignorados > 0 && divSecundario) {
+            divSecundario.textContent = `Atención: No se pudieron cargar ${respuesta.ignorados} alumnos (registros duplicados, incompletos o con formato incorrecto).`;
+            divSecundario.style.display = 'block';
         }
-
-        const alumnosJson = [];
-        for (let i = 1; i < lineas.length; i++) {
-            const datos = lineas[i].split(',');
-            if (datos.length >= 4) {
-                alumnosJson.push({
-                    lu: datos[0].trim(),
-                    nombres: datos[1].trim(),
-                    apellido: datos[2].trim(),
-                    carrera_id: datos[3] && datos[3].trim() ? parseInt(datos[3].trim()) : null, 
-                    titulo: (datos[4] && datos[4].trim()) || null,
-                    titulo_en_tramite: (datos[5] && datos[5].trim()) || null,
-                    egreso: (datos[6] && datos[6].trim()) || null
-                });
-            }
-        }
-
-        try {
-            const respuesta = await fetch('/api/v0/archivo', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(alumnosJson)
-            });
-
-            const datosRespuesta = await respuesta.json();
-
-            if (datosRespuesta.estado === 'exito') {
-                mostrarMensaje(datosRespuesta.mensaje, 'exito');
-                inputCsv.value = ''; 
-                nombreArchivo.style.display = 'none';
-            } else {
-                mostrarMensaje(datosRespuesta.mensaje + (datosRespuesta.detalle ? ': ' + datosRespuesta.detalle : ''), 'error');
-            }
-        } catch (error) {
-            mostrarMensaje('Error de conexión al enviar los datos al servidor.', 'error');
-        } finally {
-            // Restauramos el botón al terminar
-            btnGenerar.innerHTML = contenidoOriginal;
-            btnGenerar.disabled = false;
-        }
-    };
-
-    lector.readAsText(archivo);
+        
+        inputCsv.value = ''; 
+        nombreArchivo.style.display = 'none';
+    } catch (error) {
+        mostrarMensaje(error.message || 'Ocurrió un error inesperado durante el proceso.', 'error');
+    } finally {
+        btnGenerar.innerHTML = contenidoOriginal;
+        btnGenerar.disabled = false;
+    }
 }

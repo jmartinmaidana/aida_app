@@ -66,10 +66,13 @@ export class AlumnosController {
             throw error;
         }
 
-        const insertados = await AlumnosService.cargarDesdeJson(datosAlumnos);
+        const { insertados, ignorados } = await AlumnosService.cargarDesdeJson(datosAlumnos);
+        
         res.status(200).json({ 
             estado: "exito", 
-            mensaje: `Se insertaron ${insertados} alumnos en la base de datos.` 
+            insertados,
+            ignorados,
+            mensaje: "Carga masiva procesada."
         });
     }
 }

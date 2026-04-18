@@ -163,7 +163,8 @@ describe('Suite de Pruebas: Creación de Alumnos', () => {
 
         expect(respuesta.status).toBe(200);
         
-        expect(respuesta.body.mensaje).toBe("Se insertaron 2 alumnos en la base de datos.");
+        expect(respuesta.body.insertados).toBe(2);
+        expect(respuesta.body.ignorados).toBe(1);
 
         const dbTotal = await pool.query('SELECT COUNT(*) FROM aida.alumnos');
         expect(parseInt(dbTotal.rows[0].count)).toBe(3);

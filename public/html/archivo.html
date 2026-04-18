@@ -41,6 +41,24 @@
             <h1><i class="ph ph-file-csv"></i> Carga Múltiple de Alumnos (CSV)</h1>
             <p>Seleccione un archivo en formato delimitado por comas (.csv) para importar un lote de inscriptos y registrarlos directamente en la base de datos.</p>
             
+            <div class="tooltip-csv">
+                <div class="tooltip-csv-trigger">
+                    <i class="ph ph-info"></i> Formato requerido para el archivo CSV
+                </div>
+                <div class="tooltip-csv-content">
+                    <p style="margin-top: 0; margin-bottom: 8px; font-size: 0.9rem;">El archivo debe contener <strong>al menos 4 columnas</strong> separadas por comas, respetando estrictamente el siguiente orden y formato de nombres:</p>
+                    <ol style="margin: 0; padding-left: 20px; margin-bottom: 8px; font-size: 0.9rem;">
+                        <li><strong>lu</strong> (ej: 123/24)</li>
+                        <li><strong>nombres</strong></li>
+                        <li><strong>apellido</strong></li>
+                        <li><strong>carrera_id</strong> (numérico)</li>
+                    </ol>
+                    <p style="margin: 0; font-size: 0.8rem; color: #94a3b8;">
+                        <em>Nota: La primera fila será ignorada. Las columnas adicionales no se tomarán en cuenta.</em>
+                    </p>
+                </div>
+            </div>
+
             <div class="area-carga" id="zonaCarga">
                 <i class="ph ph-file-csv" style="font-size: 48px; color: #94a3b8; margin-bottom: 15px;"></i>
                 <p style="margin: 0 0 15px 0; color: #475569; font-size: 0.95rem;">Arrastre y suelte su archivo aquí o</p>
@@ -59,6 +77,7 @@
             </button>
 
             <div id="resultado" class="mensaje"></div>
+            <div id="resultadoSecundario" class="mensaje error" style="display: none; margin-top: 15px;"></div>
         </div>
     </div>
 </body>

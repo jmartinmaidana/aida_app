@@ -153,6 +153,49 @@ tr:hover td { background-color: #f8fafc; }
     gap: 8px; 
 }
 
+/* --- TOOLTIP FORMATO CSV --- */
+.tooltip-csv {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 25px;
+}
+.tooltip-csv-trigger {
+    color: #0284c7;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: help;
+    font-weight: 500;
+    font-size: 0.95rem;
+    background-color: #f0f9ff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #bae6fd;
+    transition: background-color 0.2s;
+}
+.tooltip-csv-trigger:hover {
+    background-color: #e0f2fe;
+}
+.tooltip-csv-content {
+    visibility: hidden;
+    opacity: 0;
+    width: 320px;
+    background-color: #fefefe;
+    color: #000000;
+    border-radius: 8px;
+    padding: 15px;
+    position: absolute;
+    z-index: 10;
+    top: 130%;
+    left: 0;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+    transition: opacity 0.2s, visibility 0.2s;
+}
+.tooltip-csv:hover .tooltip-csv-content {
+    visibility: visible;
+    opacity: 1;
+}
+
 /* --- MÓDULO MENU --- */
 .grid-menu { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
 .grid-menu a {
