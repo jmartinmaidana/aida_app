@@ -8,6 +8,7 @@ async function resetearDatosGestion() {
         console.log("Conectado a la base de datos para reseteo...");
 
         const tablasALimpiar = [
+            'aida.auditoria',
             'aida.cursadas',
             'aida.plan_estudio',
             'aida.alumnos',

@@ -3,6 +3,7 @@ import { CertificadoService } from '../services/certificadoService.js';
 import { TituloEnTramiteService } from '../services/tituloEnTramiteService.js';
 import archiver from 'archiver';
 import path from 'path';
+import { AuditoriaRepository } from '../repositories/auditoriaRepository.js';
 
 export class CertificadoController {
 
@@ -17,6 +18,9 @@ export class CertificadoController {
         }
         
         const rutaArchivo = await CertificadoService.generarPorLU(lu);
+        
+        await AuditoriaRepository.registrar(req.session.usuario!.id, 'EMITIR_CERTIFICADO', `Emitió certificado individual para LU: ${lu}`);
+        
         res.download(rutaArchivo, `Certificado_${lu.replace('/', '-')}.html`);
     }
 
@@ -31,6 +35,9 @@ export class CertificadoController {
         }
 
         await TituloEnTramiteService.iniciarTramiteTitulo(lu);
+        
+        await AuditoriaRepository.registrar(req.session.usuario!.id, 'INICIAR_TRAMITE', `Inició trámite de título para LU: ${lu}`);
+        
         res.status(200).json({ estado: "exito", mensaje: "Trámite de título iniciado con la fecha de hoy." });
     }
 
@@ -45,6 +52,8 @@ export class CertificadoController {
         }
 
         const rutasArchivos = await CertificadoService.generarPorFecha(fecha);
+
+        await AuditoriaRepository.registrar(req.session.usuario!.id, 'EMISION_MASIVA_CERTIFICADOS', `Emitió ZIP de certificados para la fecha: ${fecha}`);
 
         // 1. Forzamos los encabezados de descarga ZIP
         res.setHeader('Content-Type', 'application/zip');

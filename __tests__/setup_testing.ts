@@ -15,16 +15,14 @@ export default async function setup() {
     });
 
     try {
-        const sqlPath = path.join(process.cwd(), 'migraciones', '001_esquema_inicial.sql');
-
-        if (!fs.existsSync(sqlPath)) {
-            throw new Error(`No se encontró el archivo SQL en: ${sqlPath}`);
-        }
-
-        const sql = fs.readFileSync(sqlPath, 'utf8');
+        const migracionesDir = path.join(process.cwd(), 'migraciones');
+        const archivos = fs.readdirSync(migracionesDir).filter(f => f.endsWith('.sql')).sort();
         
-        // Ejecutamos el script en la base de TEST
-        await testPool.query(sql);
+        for (const archivo of archivos) {
+            const sqlPath = path.join(migracionesDir, archivo);
+            const sql = fs.readFileSync(sqlPath, 'utf8');
+            await testPool.query(sql);
+        }
         
         console.log('✅ Base de datos de prueba sincronizada y tablas creadas.\n');
     } catch (error) {

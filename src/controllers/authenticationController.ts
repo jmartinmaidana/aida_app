@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { AuthenticationService } from '../services/authenticationService.js';
+import { AuditoriaRepository } from '../repositories/auditoriaRepository.js';
 
 export class AuthenticationController {
     
@@ -37,16 +38,22 @@ export class AuthenticationController {
 
         // Si todo está bien, guardamos la sesión
         req.session.usuario = usuarioValidado;
+        
+        AuditoriaRepository.registrar(usuarioValidado.id, 'INICIO_SESION', 'El usuario inició sesión exitosamente.');
+        
         res.status(200).json({ estado: "exito", mensaje: "Usuario logueado correctamente." });
     }
 
     // POST: Logout
     // Nota: Como req.session.destroy usa un callback tradicional, no usamos catchAsync aquí.
     static logoutAuthController(req: Request, res: Response) {
+        const usuarioId = req.session.usuario?.id;
+        
         req.session.destroy((error) => {
             if (error) {
                 return res.status(500).json({ estado: 'error', mensaje: 'No se pudo cerrar la sesión.' });
             }
+            if (usuarioId) AuditoriaRepository.registrar(usuarioId, 'CIERRE_SESION', 'El usuario cerró sesión.');
             res.clearCookie('connect.sid'); 
             res.status(200).json({ estado: 'exito', mensaje: 'Sesión cerrada correctamente.' });
         });
