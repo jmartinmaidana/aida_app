@@ -12,7 +12,7 @@ export class CertificadoController {
         const { lu } = req.body;
         
         if (!lu) {
-            const error: any = new Error("Falta la LU.");
+            const error = new Error("Falta la LU.") as Error & { statusCode: number };
             error.statusCode = 400;
             throw error;
         }
@@ -29,7 +29,7 @@ export class CertificadoController {
         const { lu } = req.body;
         
         if (!lu) {
-            const error: any = new Error("Falta la LU.");
+            const error = new Error("Falta la LU.") as Error & { statusCode: number };
             error.statusCode = 400;
             throw error;
         }
@@ -46,7 +46,7 @@ export class CertificadoController {
         const { fecha } = req.body;
         
         if (!fecha) {
-            const error: any = new Error("Debe ingresar una fecha válida.");
+            const error = new Error("Debe ingresar una fecha válida.") as Error & { statusCode: number };
             error.statusCode = 400;
             throw error;
         }

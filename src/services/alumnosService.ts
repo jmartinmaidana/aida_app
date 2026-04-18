@@ -30,7 +30,7 @@ export class AlumnosService {
 
         let insertados = 0;
         let cantidadIgnorados = 0;
-        const alumnosIgnorados: any[] = [];
+        const alumnosIgnorados: (Alumno & { motivo_error: string })[] = [];
         
         const alumnosValidosParaInsertar: Alumno[] = [];
         const cacheTitulos = new Map<number, string>();
@@ -62,10 +62,13 @@ export class AlumnosService {
                 
                 alumnosValidosParaInsertar.push(alumnoValidado);
                 
-            } catch (error: any) {
+            } catch (error: unknown) {
                 cantidadIgnorados++;
                 
-                let motivo = error.message;
+                let motivo = "Error desconocido";
+                if (error instanceof Error) {
+                    motivo = error.message;
+                }
                 if (error instanceof ZodError) {
                     // Extraemos los mensajes amigables de Zod utilizando 'issues'
                     motivo = error.issues.map(e => e.message).join(' | ');

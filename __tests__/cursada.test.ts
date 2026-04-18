@@ -1,6 +1,9 @@
 import request from 'supertest';
 import { app } from '../src/server';
 import { pool } from '../src/database';
+import { AlumnosRepository } from '../src/repositories/alumnosRepository.js';
+import { PlanEstudiosRepository } from '../src/repositories/planEstudiosRepository.js';
+import { jest } from '@jest/globals';
 
 describe('Suite de Pruebas: Registro de Cursadas y Notas', () => {
     let cookieSesion: string;
@@ -102,5 +105,38 @@ describe('Suite de Pruebas: Registro de Cursadas y Notas', () => {
 
         expect(respuesta.status).toBe(400);
         expect(respuesta.body.mensaje).toBe("La nota debe ser un número entero entre 1 y 10.");
+    });
+
+    // --- TEST 4: PRUEBA DE TRANSACCIÓN (ROLLBACK) ---
+    it('Debe revertir (Rollback) la cursada si ocurre un error al verificar el egreso', async () => {
+        // 1. ARRANGE: Espiamos el repositorio y forzamos un error justo al final del proceso
+        // Simulamos que la carrera solo requiere 1 materia para que dispare la verificación de egreso
+        const espiaPlan = jest.spyOn(PlanEstudiosRepository, 'cantidadMateriasRequeridas')
+            .mockResolvedValueOnce(1);
+
+        const espia = jest.spyOn(AlumnosRepository, 'marcarComoEgresado')
+            .mockRejectedValueOnce(new Error("Error simulado de base de datos"));
+
+        const nuevaCursada = {
+            lu: LU_PRUEBA,
+            idMateria: ID_MATERIA_PRUEBA,
+            año: 2026,
+            cuatrimestre: 1,
+            nota: 10 // Aprobada, lo que dispara la verificación de egreso
+        };
+
+        // 2. ACT: Enviamos la petición
+        const respuesta = await request(app)
+            .post('/api/v0/cursada')
+            .set('Cookie', cookieSesion)
+            .send(nuevaCursada);
+
+        // 3. ASSERT: Verificamos que el sistema haya abortado y la cursada NO exista
+        expect(respuesta.status).toBe(500); // Tu manejador de errores atrapará el error genérico
+        const dbCheck = await pool.query('SELECT * FROM aida.cursadas WHERE lu_alumno = $1 AND materia_id = $2', [LU_PRUEBA, ID_MATERIA_PRUEBA]);
+        expect(dbCheck.rows.length).toBe(0); // ¡El Rollback funcionó, la tabla está limpia!
+        
+        espiaPlan.mockRestore();
+        espia.mockRestore(); // Limpiamos el espía para no afectar otras pruebas futuras
     });
 });

@@ -2,14 +2,14 @@ import { pool } from '../database.js';
 
 export class PlanEstudiosRepository {
     
-    static async cantidadMateriasRequeridas(lu: string){
+    static async cantidadMateriasRequeridas(lu: string, client: any = pool){
         const queryRequeridas = `
             SELECT COUNT(pe.materia_id) as total_requeridas
             FROM aida.alumnos a
             JOIN aida.plan_estudio pe ON a.carrera_id = pe.carrera_id
             WHERE a.lu = $1;
         `;
-        const resRequeridas = await pool.query(queryRequeridas, [lu]);
+        const resRequeridas = await client.query(queryRequeridas, [lu]);
         const totalRequeridas = parseInt(resRequeridas.rows[0].total_requeridas);
         return totalRequeridas
     }

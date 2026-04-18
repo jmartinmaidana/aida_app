@@ -9,7 +9,7 @@ export class AuthenticationController {
         const { username, password, nombre, email } = req.body;
         
         if (!username || !password || !nombre || !email) {
-            const error: any = new Error("No se ingresaron todos los datos necesarios.");
+            const error = new Error("No se ingresaron todos los datos necesarios.") as Error & { statusCode: number };
             error.statusCode = 400;
             throw error;
         }
@@ -23,7 +23,7 @@ export class AuthenticationController {
         const { username, password } = req.body;
         
         if (!username || !password) {
-            const error: any = new Error("Usuario y contraseña son obligatorios.");
+            const error = new Error("Usuario y contraseña son obligatorios.") as Error & { statusCode: number };
             error.statusCode = 400;
             throw error;
         }
@@ -31,7 +31,7 @@ export class AuthenticationController {
         const usuarioValidado = await AuthenticationService.login(username, password);
         
         if (!usuarioValidado) {
-            const error: any = new Error("Credenciales incorrectas.");
+            const error = new Error("Credenciales incorrectas.") as Error & { statusCode: number };
             error.statusCode = 401; // 401 Unauthorized
             throw error;
         }

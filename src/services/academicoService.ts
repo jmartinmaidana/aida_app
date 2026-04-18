@@ -1,6 +1,7 @@
 import { CursadasRepository } from '../repositories/cursadaRepository.js';
 import { AlumnosRepository } from '../repositories/alumnosRepository.js'; 
 import { PlanEstudiosRepository } from '../repositories/planEstudiosRepository.js';
+import { pool } from '../database.js';
 export class AcademicoService {
     
     static async procesarCursadaAprobada(lu: string, idMateria: string, anio: string, cuatrimestre: string, nota: number) {
@@ -23,26 +24,39 @@ export class AcademicoService {
 
         const aprobada = nota >= 4;
 
-        await CursadasRepository.guardarCursada(lu, idMateria, anio, cuatrimestre, nota, aprobada);
+        // ⏳ Iniciamos la Transacción SQL
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
 
-        if (aprobada) {
-            return await this.verificarCarreraAprobada(lu);
+            await CursadasRepository.guardarCursada(lu, idMateria, anio, cuatrimestre, nota, aprobada, client);
+
+            let egreso = false;
+            if (aprobada) {
+                egreso = await this.verificarCarreraAprobada(lu, client);
+            }
+
+            await client.query('COMMIT'); // 🟢 Confirmar cambios si todo fue exitoso
+            return egreso;
+        } catch (error) {
+            await client.query('ROLLBACK'); // 🔴 Revertir si algo falla
+            throw error;
+        } finally {
+            client.release();
         }
-
-        return false
     }
 
 
-    static async verificarCarreraAprobada(lu: string) {
+    static async verificarCarreraAprobada(lu: string, client: any = pool) {
         
         try {
 
-            const totalAprobadas = await CursadasRepository.cantidadMateriasAprobadas(lu);
-            const totalRequeridas = await PlanEstudiosRepository.cantidadMateriasRequeridas(lu)
+            const totalAprobadas = await CursadasRepository.cantidadMateriasAprobadas(lu, client);
+            const totalRequeridas = await PlanEstudiosRepository.cantidadMateriasRequeridas(lu, client);
         
             if (totalRequeridas > 0 && totalAprobadas >= totalRequeridas) {
                 
-                await AlumnosRepository.marcarComoEgresado(lu);
+                await AlumnosRepository.marcarComoEgresado(lu, client);
                 return true;
             }
     

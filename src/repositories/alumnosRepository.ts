@@ -43,7 +43,7 @@ export class AlumnosRepository {
     static async insertarLote(alumnos: Alumno[]): Promise<string[]> {
         if (alumnos.length === 0) return [];
 
-        const values: any[] = [];
+        const values: unknown[] = [];
         const placeholders: string[] = [];
         let index = 1;
 
@@ -60,7 +60,6 @@ export class AlumnosRepository {
             );
         }
 
-        // Armamos la consulta de Bulk Insert
         const query = `
             INSERT INTO aida.alumnos (lu, nombres, apellido, carrera_id, titulo, titulo_en_tramite, egreso)
             VALUES ${placeholders.join(', ')}
@@ -70,7 +69,6 @@ export class AlumnosRepository {
 
         const resultado = await pool.query(query, values);
         
-        // Devolvemos solo un array con las LUs que efectivamente se insertaron
         return resultado.rows.map(row => row.lu);
     }
 
@@ -109,9 +107,9 @@ export class AlumnosRepository {
         return res.rows.length > 0 ? res.rows[0].carrera_id : null;
     }
 
-    static async marcarComoEgresado(lu: string) {
+    static async marcarComoEgresado(lu: string, client: any = pool) {
         const query = `UPDATE aida.alumnos SET egreso = CURRENT_DATE WHERE lu = $1 AND egreso IS NULL;`;
-        const res = await pool.query(query, [lu]);
+        const res = await client.query(query, [lu]);
         return res.rowCount && res.rowCount > 0; 
     }
     

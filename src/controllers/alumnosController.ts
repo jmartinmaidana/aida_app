@@ -71,7 +71,7 @@ export class AlumnosController {
         const datosAlumnos = req.body;
         
         if (!Array.isArray(datosAlumnos)) {
-            const error: any = new Error("El formato debe ser un arreglo JSON.");
+            const error = new Error("El formato debe ser un arreglo JSON.") as Error & { statusCode: number };
             error.statusCode = 400;
             throw error;
         }
