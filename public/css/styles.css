@@ -19,11 +19,11 @@ body {
 }
 .navbar-brand { display: flex; align-items: center; gap: 10px; font-size: 1.4rem; font-weight: 600; margin: 0; }
 .navbar-links { display: flex; align-items: center; gap: 20px; }
-.navbar-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s; display: flex; align-items: center; gap: 6px; }
+.navbar-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-weight: 500; font-size: 1.1rem; padding: 8px 12px; transition: color 0.2s; display: flex; align-items: center; gap: 8px; }
 .navbar-links a:hover { color: white; }
 .btn-logout { 
     background: transparent; border: 1px solid rgba(255, 255, 255, 0.5); color: white; padding: 8px 16px; 
-    border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.9rem; 
+    border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 1.05rem; 
     display: flex; align-items: center; gap: 8px; transition: all 0.2s; margin-left: 15px; 
 }
 .btn-logout:hover { background: rgba(255, 255, 255, 0.15); border-color: white; }
@@ -105,6 +105,24 @@ tr:hover td { background-color: #f8fafc; }
 .btn-mini.tramite { background-color: #10b981; } .btn-mini.tramite:hover { background-color: #059669; }
 .btn-mini.editar { background-color: #f59e0b; } .btn-mini.editar:hover { background-color: #d97706; }
 .btn-mini.borrar { background-color: #ef4444; } .btn-mini.borrar:hover { background-color: #dc2626; }
+
+/* --- PAGINACIÓN --- */
+.paginacion {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc;
+}
+.paginacion span { color: #475569; font-weight: 500; font-size: 0.95rem; }
+.paginacion-botones { display: flex; gap: 10px; }
+.paginacion-botones button { margin: 0; padding: 8px 16px; }
+
+/* --- BUSCADOR --- */
+.buscador {
+    width: 100%; padding: 10px 10px 10px 38px; border: 1px solid #cbd5e1; border-radius: 6px; 
+    font-family: 'Inter', sans-serif; transition: all 0.2s ease; background-color: white;
+}
+.buscador:focus {
+    outline: none; border-color: #bae6fd; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.08);
+}
 
 /* Contenedor de Tabla Responsiva (Scroll Mágico) */
 .table-responsive {
@@ -220,8 +238,8 @@ button:disabled { opacity: 0.7; cursor: not-allowed; pointer-events: none; }
    ========================================= */
 @media (max-width: 768px) {
     .navbar { flex-direction: column; padding: 15px; gap: 15px; }
-    .navbar-links { flex-wrap: wrap; justify-content: center; }
-    .btn-logout { margin-left: 0; width: 100%; justify-content: center; }
+    .navbar-links { display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .btn-logout { margin-left: 0; width: auto; justify-content: center; margin-top: 0; padding: 8px 12px; }
     .contenedor, .contenedor-ancho, .contenedor-historial { padding: 0 10px; margin-top: 20px; }
     .tarjeta-form, .contenedor-historial { padding: 20px; }
     .fila-doble, .grid-formulario { grid-template-columns: 1fr; gap: 0; }
@@ -230,6 +248,9 @@ button:disabled { opacity: 0.7; cursor: not-allowed; pointer-events: none; }
     .header-info { flex-direction: column; align-items: flex-start; gap: 10px; }
     .header-info h1 { font-size: 22px; }
     .stat-value { font-size: 28px; }
+
+    /* Paginación en móviles: Texto abajo, botones arriba */
+    .paginacion { flex-direction: column-reverse; justify-content: center; gap: 12px; text-align: center; }
 }
 
 /* --- ESTILOS DEL MENÚ DESPLEGABLE (DROPDOWN) --- */
@@ -242,13 +263,13 @@ button:disabled { opacity: 0.7; cursor: not-allowed; pointer-events: none; }
     background-color: transparent;
     color: white;
     font-family: 'Inter', sans-serif;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 500;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     padding: 8px 12px;
     border-radius: 6px;
     transition: all 0.2s ease;

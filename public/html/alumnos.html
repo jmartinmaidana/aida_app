@@ -39,12 +39,12 @@
     <div class="contenedor-ancho">
         <div class="cabecera-pagina">
             <h1><i class="ph ph-users"></i> Directorio de Alumnos</h1>
-                <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap; justify-content: center;">
                     <div class="input-con-icono" style="min-width: 250px;">
                         <i class="ph ph-magnifying-glass"></i>
-                        <input type="text" id="inputBusqueda" placeholder="Buscar por LU o Apellido..." oninput="debounceBusqueda()" style="width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: 'Inter', sans-serif;">
+                        <input type="text" id="inputBusqueda" class="buscador" placeholder="Buscar por LU o Apellido..." oninput="debounceBusqueda()">
                     </div>
-                    <button class="btn-accion-principal" onclick="mostrarFormularioCreacion()" style="background-color: #10b981; width: auto; margin-top: 0;">
+                <button class="btn-accion-principal" onclick="mostrarFormularioCreacion()" style="background-color: #10b981; width: auto; margin-top: 0; padding: 10px 18px; font-size: 1rem;">
                         <i class="ph ph-user-plus"></i> Registrar Alumno
                     </button>
                 </div>
@@ -70,10 +70,12 @@
                 </tbody>
             </table>
                 
-                <div class="paginacion" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc;">
-                    <button class="btn-cancelar" id="btnPaginaAnterior" onclick="cambiarPagina(-1)" style="margin: 0; padding: 8px 12px;"><i class="ph ph-caret-left"></i> Anterior</button>
-                    <span id="indicadorPagina" style="color: #475569; font-weight: 500; font-size: 0.95rem;">Página 1 de 1</span>
-                    <button class="btn-cancelar" id="btnPaginaSiguiente" onclick="cambiarPagina(1)" style="margin: 0; padding: 8px 12px;">Siguiente <i class="ph ph-caret-right"></i></button>
+                <div class="paginacion">
+                    <span id="indicadorPagina">Página 1 de 1</span>
+                    <div class="paginacion-botones">
+                        <button class="btn-cancelar" id="btnPaginaAnterior" onclick="cambiarPagina(-1)"><i class="ph ph-caret-left"></i> Anterior</button>
+                        <button class="btn-cancelar" id="btnPaginaSiguiente" onclick="cambiarPagina(1)">Siguiente <i class="ph ph-caret-right"></i></button>
+                    </div>
                 </div>
         </div>
 
