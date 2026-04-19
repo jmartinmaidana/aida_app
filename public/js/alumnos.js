@@ -115,6 +115,7 @@ async function iniciarTramite(lu) {
 }
 
 function ordenarTabla(columna) {
+    ocultarMensajes();
     if (columnaOrdenActual === columna) {
         ordenAscendente = !ordenAscendente; 
     } else {
@@ -133,6 +134,17 @@ function ordenarTabla(columna) {
 
 // --- MAGIA DE SCROLL SUAVE AÑADIDA AQUÍ ---
 function mostrarFormularioCreacion() {
+    ocultarMensajes();
+    
+    // Forzamos la limpieza del estado por si el formulario quedó abierto en modo edición
+    luEnEdicion = null;
+    document.getElementById('tituloFormulario').textContent = "Alta de Nuevo Alumno";
+    document.getElementById('inputLu').disabled = false; 
+    document.getElementById('inputLu').value = '';
+    document.getElementById('inputNombres').value = '';
+    document.getElementById('inputApellido').value = '';
+    document.getElementById('inputCarrera').value = '';
+
     const form = document.getElementById('seccionFormulario');
     form.style.display = 'block';
     
@@ -144,6 +156,7 @@ function mostrarFormularioCreacion() {
 }
 
 function ocultarFormulario() {
+    ocultarMensajes();
     document.getElementById('seccionFormulario').style.display = 'none';
     luEnEdicion = null;
     document.getElementById('tituloFormulario').textContent = "Alta de Nuevo Alumno";
@@ -171,7 +184,14 @@ function prepararEdicion(lu) {
     document.getElementById('tituloFormulario').textContent = `Editar Alumno: ${lu}`;
     document.getElementById('inputLu').disabled = true; 
     
-    mostrarFormularioCreacion();
+    ocultarMensajes();
+    const form = document.getElementById('seccionFormulario');
+    form.style.display = 'block';
+    
+    setTimeout(() => {
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('inputNombres').focus(); // Foco al nombre ya que la LU está bloqueada
+    }, 50);
 }
 
 async function guardarNuevoAlumno() {
@@ -205,8 +225,8 @@ async function guardarNuevoAlumno() {
 
         // ... dentro de guardarNuevoAlumno ...
         if (respuesta.ok) {
-            mostrarMensaje(json.mensaje, 'exito');
             ocultarFormulario();
+            mostrarMensajePrincipal(json.mensaje, 'exito');
             cargarAlumnos(); 
         } else {
             // Si hay detalles (errores de Zod o superRefine), los concatenamos
@@ -266,6 +286,14 @@ function mostrarMensajePrincipal(texto, tipo) {
     divResultado.textContent = texto;
 }
 
+function ocultarMensajes() {
+    const cajaPrincipal = document.getElementById('cajaMensajePrincipal');
+    if (cajaPrincipal) cajaPrincipal.style.display = 'none';
+    
+    const cajaSecundaria = document.getElementById('cajaMensaje');
+    if (cajaSecundaria) cajaSecundaria.style.display = 'none';
+}
+
 async function cargarAlumnos() {
     const tbody = document.getElementById('cuerpoTabla');
     tbody.innerHTML = '<tr><td colspan="7" style="padding: 30px;"><div class="contenedor-mensaje-tabla" style="color: #64748b;"><i class="ph ph-spinner icono-cargando"></i> Cargando padrón...</div></td></tr>';
@@ -300,6 +328,7 @@ async function cargarAlumnos() {
 
 // Nuevas funciones de control (Puedes agregarlas al final de alumnos.js)
 function cambiarPagina(delta) {
+    ocultarMensajes();
     paginaActual += delta;
     cargarAlumnos();
 }
@@ -307,6 +336,7 @@ function cambiarPagina(delta) {
 function debounceBusqueda() {
     clearTimeout(temporizadorBusqueda);
     temporizadorBusqueda = setTimeout(() => {
+        ocultarMensajes();
         terminoBusqueda = document.getElementById('inputBusqueda').value;
         paginaActual = 1; // Si buscamos algo nuevo, siempre volvemos a la página 1
         cargarAlumnos();
