@@ -29,11 +29,49 @@ function mostrarMensaje(texto, tipo) {
 async function cerrarSesion() {
     try {
         await fetch('/api/v0/auth/logout', { method: 'POST' });
-        window.location.href = '/app/login';
+        navegarConTransicion('/app/login');
     } catch (error) {
         alert("Error al intentar cerrar sesión.");
     }
 }
+
+// --- TRANSICIÓN SUAVE DE PÁGINAS ---
+function navegarConTransicion(url) {
+    document.body.classList.add('saliendo');
+    // Esperamos 200ms (igual que la animación CSS) antes de cambiar la URL
+    setTimeout(() => {
+        window.location.href = url;
+    }, 200); 
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Interceptar todos los enlaces (<a>)
+    document.querySelectorAll('a').forEach(enlace => {
+        enlace.addEventListener('click', function(e) {
+            // Ignorar "abrir en nueva pestaña", clics con Ctrl, o scripts inline
+            if (this.target === '_blank' || e.ctrlKey || e.metaKey || !this.href || this.href.startsWith('javascript:')) return;
+            
+            // Si es un ancla a la misma página (ej. #seccion), ignorar
+            const urlDestino = new URL(this.href, window.location.origin);
+            if (urlDestino.origin === window.location.origin && urlDestino.pathname === window.location.pathname && urlDestino.hash) return;
+
+            e.preventDefault();
+            navegarConTransicion(this.href);
+        });
+    });
+
+    // Reemplazar los eventos inline 'onclick' del logo de la barra de navegación
+    const navbarBrand = document.querySelector('.navbar-brand');
+    if (navbarBrand) {
+        navbarBrand.removeAttribute('onclick');
+        navbarBrand.addEventListener('click', () => navegarConTransicion('/menu'));
+    }
+});
+
+// Limpiar la clase si el usuario navega "hacia atrás" usando la caché del navegador (BFCache)
+window.addEventListener('pageshow', (event) => {
+    if (event.persisted) document.body.classList.remove('saliendo');
+});
 
 // Cierra el menú desplegable en móviles si se toca fuera de él
 document.addEventListener('click', function(event) {

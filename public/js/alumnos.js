@@ -76,7 +76,7 @@ function renderizarTabla() {
             <td>
                 <div class="acciones-tabla">
                     <button class="btn-mini" style="color: #8b5cf6;" 
-                            onclick="window.location.href='/app/historial?lu=${encodeURIComponent(alumno.lu)}'" 
+                            onclick="navegarConTransicion('/app/historial?lu=${encodeURIComponent(alumno.lu)}')" 
                             title="Ver Historial Académico">
                         <i class="ph ph-chart-line-up"></i>
                     </button>
