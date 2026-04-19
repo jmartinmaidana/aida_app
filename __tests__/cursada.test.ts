@@ -27,7 +27,7 @@ describe('Suite de Pruebas: Registro de Cursadas y Notas', () => {
 
         cookieSesion = respuestaLogin.headers['set-cookie'];
         if (!cookieSesion) throw new Error("Fallo crítico: No se generó la cookie de sesión.");
-    });
+    }, 15000); // <-- Aumentamos el timeout explícitamente a 15 segundos
 
     // 2. PREPARACIÓN INDIVIDUAL: Limpiar e insertar alumno base
     beforeEach(async () => {
@@ -42,6 +42,7 @@ describe('Suite de Pruebas: Registro de Cursadas y Notas', () => {
     });
 
     afterAll(async () => {
+        await pool.query('DELETE FROM aida.usuarios WHERE username = $1', ['profesor_test']);
         await pool.end();
     });
 

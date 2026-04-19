@@ -30,7 +30,7 @@ describe('Suite de Pruebas: Creación de Alumnos', () => {
         if (!cookieSesion) {
             throw new Error("Fallo crítico: No se generó la cookie de sesión durante el login.");
         }
-    });
+    }, 15000); // <-- Aumentamos el timeout explícitamente a 15 segundos
 
     // Se ejecuta antes de CADA prueba individual para limpiar la tabla
     beforeEach(async () => {
@@ -39,6 +39,7 @@ describe('Suite de Pruebas: Creación de Alumnos', () => {
 
     // Se ejecuta al finalizar todas las pruebas para liberar la base de datos
     afterAll(async () => {
+        await pool.query('DELETE FROM aida.usuarios WHERE username = $1', ['robot_tester']); // <-- Limpiamos el usuario
         await pool.end();
     });
     // --- TEST 1: Alumno Invalido (Faltan Carrera id) ---

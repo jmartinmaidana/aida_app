@@ -48,7 +48,7 @@ function renderizarTabla() {
     cuerpoTabla.innerHTML = ''; 
 
     if (alumnosLocales.length === 0) {
-        cuerpoTabla.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 30px;">No hay alumnos registrados en el sistema.</td></tr>';
+        cuerpoTabla.innerHTML = '<tr><td colspan="7" style="padding: 30px;"><div class="contenedor-mensaje-tabla" style="color: #64748b;">No hay alumnos registrados en el sistema.</div></td></tr>';
         return;
     }
 
@@ -153,8 +153,6 @@ function ocultarFormulario() {
     document.getElementById('inputNombres').value = '';
     document.getElementById('inputApellido').value = '';
     document.getElementById('inputCarrera').value = ''; 
-    document.getElementById('inputTramite').value = '';
-    document.getElementById('inputEgreso').value = '';
     
     // Si el usuario cancela, volvemos a subir a la tabla de forma suave
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -168,8 +166,6 @@ function prepararEdicion(lu) {
     document.getElementById('inputNombres').value = alumno.nombres;
     document.getElementById('inputApellido').value = alumno.apellido;
     document.getElementById('inputCarrera').value = alumno.carrera_id || '';
-    document.getElementById('inputTramite').value = formatoInput(alumno.titulo_en_tramite);
-    document.getElementById('inputEgreso').value = formatoInput(alumno.egreso);
 
     luEnEdicion = lu;
     document.getElementById('tituloFormulario').textContent = `Editar Alumno: ${lu}`;
@@ -186,11 +182,7 @@ async function guardarNuevoAlumno() {
         lu: luEnEdicion ? luEnEdicion : document.getElementById('inputLu').value,
         nombres: document.getElementById('inputNombres').value,
         apellido: document.getElementById('inputApellido').value,
-        carrera_id: idCarrera,
-        // Le pasamos null explícitamente. ¡El backend se encargará de completarlo!
-        titulo: null, 
-        titulo_en_tramite: document.getElementById('inputTramite').value || null,
-        egreso: document.getElementById('inputEgreso').value || null
+        carrera_id: idCarrera
     };
 
     // La barrera de seguridad del frontend
@@ -276,7 +268,7 @@ function mostrarMensajePrincipal(texto, tipo) {
 
 async function cargarAlumnos() {
     const tbody = document.getElementById('cuerpoTabla');
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px; color: #64748b;"><i class="ph ph-spinner icono-cargando"></i> Cargando padrón...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="padding: 30px;"><div class="contenedor-mensaje-tabla" style="color: #64748b;"><i class="ph ph-spinner icono-cargando"></i> Cargando padrón...</div></td></tr>';
     
     try {
         // Armamos la URL incluyendo los filtros y la paginación
@@ -302,7 +294,7 @@ async function cargarAlumnos() {
             throw new Error(json.mensaje);
         }
     } catch (error) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #ef4444;">${error.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="padding: 30px;"><div class="contenedor-mensaje-tabla" style="color: #ef4444;">${error.message}</div></td></tr>`;
     }
 }
 

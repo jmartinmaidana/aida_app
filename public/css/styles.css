@@ -92,9 +92,13 @@ body {
 /* --- TABLAS (Globales) --- */
 .cabecera-pagina { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
 .cabecera-pagina h1 { margin: 0; color: #0f172a; font-size: 1.6rem; display: flex; align-items: center; gap: 10px; }
-.contenedor-tabla { background: white; border-radius: 8px; border: 1px solid #e2e8f0; overflow-x: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.contenedor-tabla { background: white; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 
 table { width: 100%; border-collapse: collapse; background: white; white-space: nowrap; }
+
+/* Hacemos que solo la tabla maneje el scroll horizontal sin arrastrar a la paginación */
+.contenedor-tabla table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
 th, td { padding: 16px 24px; text-align: left; border-bottom: 1px solid #e2e8f0; }
 th { background-color: #f8fafc; color: #475569; font-weight: 600; cursor: pointer; user-select: none; transition: background-color 0.2s; }
 th:hover { background-color: #f1f5f9; color: #0284c7; }
@@ -130,6 +134,17 @@ tr:hover td { background-color: #f8fafc; }
     margin-top: 15px; border: 1px solid #ecf0f1; border-radius: 8px;
 }
 .table-responsive table { width: 100%; min-width: 650px; }
+
+/* Utilidad para mantener los mensajes centrados en tablas con scroll horizontal en móviles */
+.contenedor-mensaje-tabla {
+    position: sticky;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-block;
+    text-align: center;
+    width: max-content;
+    max-width: 90vw;
+}
 
 /* --- ESTILOS ESPECÍFICOS: HISTORIAL --- */
 .header-info { border-bottom: 2px solid #ecf0f1; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; }

@@ -101,19 +101,12 @@
                     <label>Apellido:</label> 
                     <input type="text" id="inputApellido" placeholder="Apellidos del alumno">
                 </div>
-                <div class="grupo-form">
-                    <label>Fecha Título en Trámite:</label> 
-                    <input type="date" id="inputTramite">
-                </div>
-                <div class="grupo-form">
-                    <label>Fecha Egreso:</label> 
-                    <input type="date" id="inputEgreso">
-                </div>
+
             </div>
             
-            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 25px;">
-                <button class="btn-cancelar" onclick="ocultarFormulario()">Cancelar</button>
-                <button class="btn-accion-principal" onclick="guardarNuevoAlumno()" style="width: auto; margin-top: 0;">
+            <div style="display: flex; justify-content: flex-end; align-items: stretch; gap: 12px; margin-top: 25px;">
+                <button class="btn-cancelar" onclick="ocultarFormulario()" style="font-size: 1.1rem; padding: 14px 18px; white-space: nowrap;">Cancelar</button>
+                <button class="btn-accion-principal" onclick="guardarNuevoAlumno()" style="width: auto; margin-top: 0; padding: 14px 18px; white-space: nowrap;">
                     <i class="ph ph-floppy-disk"></i> Guardar Datos
                 </button>
             </div>

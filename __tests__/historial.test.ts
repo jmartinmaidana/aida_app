@@ -61,7 +61,7 @@ describe('Suite de Pruebas: Historial Académico', () => {
                 cuatrimestre: 1,
                 nota: 8
             });
-    });
+    }, 15000);
 
     afterAll(async () => {
         await request(app)

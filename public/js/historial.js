@@ -64,7 +64,7 @@ function renderizarTablaHistorial() {
     tbody.innerHTML = ''; 
     
     if (historialLocal.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px; color: #64748b;">El alumno no tiene cursadas registradas.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="padding: 30px;"><div class="contenedor-mensaje-tabla" style="color: #64748b;">El alumno no tiene cursadas registradas.</div></td></tr>`;
         return;
     }
 
