@@ -24,12 +24,24 @@ body {
     min-height: 100vh;
 }
 
-/* Animamos solo el contenido, ignorando barra de navegación, footer y scripts ocultos */
-body > *:not(.navbar):not(.footer-site):not(script) {
+/* Animamos solo el contenido, ignorando a los Web Components y scripts ocultos */
+body > *:not(navbar-aida):not(footer-aida):not(script) {
     animation: fadeInPage 0.3s ease-out forwards;
 }
-body.saliendo > *:not(.navbar):not(.footer-site):not(script) {
+body.saliendo > *:not(navbar-aida):not(footer-aida):not(script) {
     animation: fadeOutPage 0.2s ease-in forwards;
+}
+
+/* --- ESTILOS DE COMPONENTES WEB --- */
+navbar-aida {
+    display: block;
+    position: relative;
+    z-index: 1000; /* Asegura que el menú desplegable siempre esté por encima del contenido */
+}
+footer-aida {
+    display: block;
+    margin-top: auto; /* Mantiene la funcionalidad de pegarse al fondo de la pantalla */
+    width: 100%;
 }
 
 /* --- BARRA DE NAVEGACIÓN COMPLETA --- */
@@ -55,7 +67,6 @@ body.saliendo > *:not(.navbar):not(.footer-site):not(script) {
     color: white;
     text-align: center;
     padding: 16px 40px;
-    margin-top: auto;
     font-size: 0.95rem;
     font-weight: 500;
     box-shadow: 0 -2px 4px rgba(0,0,0,0.1);

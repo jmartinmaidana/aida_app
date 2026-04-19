@@ -44,27 +44,55 @@ function navegarConTransicion(url) {
     }, 200); 
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Interceptar todos los enlaces (<a>)
-    document.querySelectorAll('a').forEach(enlace => {
-        enlace.addEventListener('click', function(e) {
-            // Ignorar "abrir en nueva pestaña", clics con Ctrl, o scripts inline
-            if (this.target === '_blank' || e.ctrlKey || e.metaKey || !this.href || this.href.startsWith('javascript:')) return;
-            
-            // Si es un ancla a la misma página (ej. #seccion), ignorar
-            const urlDestino = new URL(this.href, window.location.origin);
-            if (urlDestino.origin === window.location.origin && urlDestino.pathname === window.location.pathname && urlDestino.hash) return;
+// --- COMPONENTES WEB REUTILIZABLES ---
+class NavbarAida extends HTMLElement {
+    connectedCallback() {
+        this.innerHTML = `
+            <nav class="navbar">
+                <a href="/menu" class="navbar-brand" title="Volver al Inicio" style="text-decoration: none; color: white;">
+                    <i class="ph ph-graduation-cap"></i> Sistema AIDA
+                </a>
+                <div class="navbar-links">
+                    <a href="/menu"><i class="ph ph-squares-four"></i> Inicio</a>
+                    <div class="dropdown" onclick="this.classList.toggle('activo')">
+                        <button class="dropbtn"><i class="ph ph-list"></i> Módulos <i class="ph ph-caret-down"></i></button>
+                        <div class="dropdown-content">
+                            <a href="/app/alumnos"><i class="ph ph-users"></i> Alumnos</a>
+                            <a href="/app/planes"><i class="ph ph-books"></i> Planes de Estudio</a>
+                            <a href="/app/cursada"><i class="ph ph-pencil-line"></i> Carga de Notas</a>
+                            <a href="/app/certificados_lu"><i class="ph ph-certificate"></i> Emisión Individual</a>
+                            <a href="/app/certificados_fecha"><i class="ph ph-files"></i> Emisión por Fecha</a>
+                            <a href="/app/archivo"><i class="ph ph-upload-simple"></i> Carga Múltiple (CSV)</a>
+                        </div>
+                    </div>
+                    <button onclick="cerrarSesion()" class="btn-logout"><i class="ph ph-sign-out"></i> Salir</button>
+                </div>
+            </nav>
+        `;
+    }
+}
+customElements.define('navbar-aida', NavbarAida);
 
-            e.preventDefault();
-            navegarConTransicion(this.href);
-        });
-    });
+class FooterAida extends HTMLElement {
+    connectedCallback() {
+        this.innerHTML = `
+            <footer class="footer-site">
+                <p>AIDA - Sistema de Gestión Académica &copy; 2026</p>
+            </footer>
+        `;
+    }
+}
+customElements.define('footer-aida', FooterAida);
 
-    // Reemplazar los eventos inline 'onclick' del logo de la barra de navegación
-    const navbarBrand = document.querySelector('.navbar-brand');
-    if (navbarBrand) {
-        navbarBrand.removeAttribute('onclick');
-        navbarBrand.addEventListener('click', () => navegarConTransicion('/menu'));
+// --- INTERCEPTOR DE NAVEGACIÓN DINÁMICO ---
+document.addEventListener('click', function(e) {
+    const enlace = e.target.closest('a');
+    if (enlace) {
+        if (enlace.target === '_blank' || e.ctrlKey || e.metaKey || !enlace.href || enlace.href.startsWith('javascript:')) return;
+        const urlDestino = new URL(enlace.href, window.location.origin);
+        if (urlDestino.origin === window.location.origin && urlDestino.pathname === window.location.pathname && urlDestino.hash) return;
+        e.preventDefault();
+        navegarConTransicion(enlace.href);
     }
 });
 
