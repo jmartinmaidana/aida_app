@@ -14,7 +14,7 @@ document.getElementById('formCertificado').addEventListener('submit', async (eve
     btnGenerar.disabled = true;
 
     try {
-        const respuesta = await fetch('/api/v0/certificados', {
+        const respuesta = await fetch('/api/v0/certificados_lu', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ lu: lu })

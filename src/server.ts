@@ -104,9 +104,9 @@ function requireAuthAPI(req: Request, res: Response, next: NextFunction) {
 // ----------------ENDPOINTS----------------
 
 // ---- Endpoints de Certificados y Trámites ----
-app.post('/api/v0/certificados', requireAuthAPI, catchAsync(CertificadoController.generarPorLuController));
+app.post('/api/v0/certificados_lu', requireAuthAPI, catchAsync(CertificadoController.generarPorLuController));
 app.post('/api/v0/tramite-titulo', requireAuthAPI, catchAsync(CertificadoController.iniciarTramiteController));
-app.post('/api/v0/fecha', requireAuthAPI, catchAsync(CertificadoController.generarZipPorFechaController));
+app.post('/api/v0/certificados_fecha', requireAuthAPI, catchAsync(CertificadoController.generarZipPorFechaController));
 
 // ---- Endpoints de Gestión de Alumnos ----
 app.get('/api/alumnos', requireAuthAPI, catchAsync(AlumnosController.obtenerTodosAlumnoPorPaginaController));
@@ -162,12 +162,12 @@ app.get('/menu', noCache, requireAuth, (req, res) => {
     res.sendFile(path.resolve('./public/html/menu.html'));
 });
 
-app.get('/app/certificados',noCache, requireAuth, (req, res) => {
-    res.sendFile(path.resolve('./public/html/certificados.html'));
+app.get('/app/certificados_lu',noCache, requireAuth, (req, res) => {
+    res.sendFile(path.resolve('./public/html/certificados_lu.html'));
 });
 
-app.get('/app/fecha',noCache, requireAuth, (req, res) => {
-    res.sendFile(path.resolve('./public/html/fecha.html'));
+app.get('/app/certificados_fecha',noCache, requireAuth, (req, res) => {
+    res.sendFile(path.resolve('./public/html/certificados_fecha.html'));
 });
 
 app.get('/app/archivo',noCache, requireAuth, (req, res) => {

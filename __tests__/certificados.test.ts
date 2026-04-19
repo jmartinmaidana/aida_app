@@ -42,7 +42,7 @@ describe('Suite de Pruebas: Generación de Certificados (ZIP)', () => {
     // --- TEST 1: CAMINO TRISTE (Falta de datos) ---
     it('Debe rechazar la petición (HTTP 400) si no se envía la fecha', async () => {
         const respuesta = await request(app)
-            .post('/api/v0/fecha')
+            .post('/api/v0/certificados_fecha')
             .set('Cookie', cookieSesion)
             .send({}); // Body vacío intencionalmente
 
@@ -53,7 +53,7 @@ describe('Suite de Pruebas: Generación de Certificados (ZIP)', () => {
     // --- TEST 2: CAMINO FELIZ (Descarga del archivo binario) ---
     it('Debe generar y descargar un archivo ZIP (HTTP 200) para una fecha válida', async () => {
         const respuesta = await request(app)
-            .post('/api/v0/fecha')
+            .post('/api/v0/certificados_fecha')
             .set('Cookie', cookieSesion)
             .send({ fecha: FECHA_PRUEBA })
             .responseType('blob'); 

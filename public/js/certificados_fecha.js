@@ -15,7 +15,7 @@ async function buscarPorFecha() {
     btnGenerar.disabled = true;
 
     try {
-        const respuesta = await fetch('/api/v0/fecha', {
+        const respuesta = await fetch('/api/v0/certificados_fecha', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fecha: fechaInput }) 
