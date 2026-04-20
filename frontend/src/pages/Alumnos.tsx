@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, MagnifyingGlass, UserPlus, ArrowsDownUp, CaretLeft, CaretRight, Spinner, ChartLineUp, GraduationCap, PencilSimple, Trash, FloppyDisk } from '@phosphor-icons/react';
 import { Mensaje } from '../components/Mensaje';
-import type { Alumno, Carrera } from '../types';
+import type { Alumno, Carrera } from '../types/index';
 
 // Función utilitaria para formatear fechas
 function formatoTabla(fechaIso?: string) {

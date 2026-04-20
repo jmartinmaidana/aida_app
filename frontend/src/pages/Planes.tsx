@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Books, Spinner, ArrowsDownUp } from '@phosphor-icons/react';
 import { Mensaje } from '../components/Mensaje';
-import type { Materia, Plan } from '../types';
+import type { Materia, Plan } from '../types/index';
 
 export function Planes() {
     const [planes, setPlanes] = useState<Plan[]>([]);

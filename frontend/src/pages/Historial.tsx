@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Spinner, ArrowsDownUp, ArrowLeft } from '@phosphor-icons/react';
 import { Mensaje } from '../components/Mensaje';
-import type { Cursada, DatosHistorial } from '../types';
+import type { Cursada, DatosHistorial } from '../types/index';
 
 export function Historial() {
     const [searchParams] = useSearchParams();
@@ -79,7 +79,6 @@ export function Historial() {
     }, [datos, orden]);
 
     return (
-        <>
             <div className="contenedor-historial">
                 {cargando ? (
                     <div className="loading">
@@ -165,7 +164,5 @@ export function Historial() {
                 </button>
             </div>
 
-            <Footer />
-        </>
     );
 }
