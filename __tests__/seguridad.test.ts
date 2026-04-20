@@ -26,20 +26,9 @@ describe('Suite de Pruebas: Seguridad y Control de Acceso', () => {
     });
 
 
-    it('Debe redirigir al login (HTTP 302) al intentar ver el Historial sin sesión', async () => {
-        const respuesta = await request(app).get('/app/historial');
-        
-        // Verificamos que el servidor responda con una redirección
-        expect(respuesta.status).toBe(302);
-        // Verificamos que el destino de la redirección sea la página de login
-        expect(respuesta.headers.location).toBe('/app/login');
-    });
-
-    it('Debe redirigir al login (HTTP 302) al intentar ver Alumnos sin sesión', async () => {
-        const respuesta = await request(app).get('/app/alumnos'); // O la ruta que use para su HTML
-        expect(respuesta.status).toBe(302);
-        expect(respuesta.headers.location).toBe('/app/login');
-    });
+    // Nota: Las pruebas de redirección 302 del Frontend fueron eliminadas.
+    // En la nueva arquitectura SPA, el servidor siempre devuelve index.html (200 OK)
+    // y el componente <ProtectedRoute /> de React es el responsable de redirigir al login.
 
     // --- PRUEBAS DE API (Rechazo 400/401 JSON) ---
 

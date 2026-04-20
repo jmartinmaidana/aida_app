@@ -154,7 +154,7 @@ app.get('/api/v0/auth/verificar', requireAuthAPI, AuthenticationController.verif
 // --- RUTA CATCH-ALL PARA REACT (SPA) ---
 // Cualquier petición de URL que no haya coincidido con la API, caerá aquí.
 // Se devuelve el index.html principal y React Router dibuja la pantalla que corresponda.
-app.get('*', (req, res) => {
+app.get(/.*/, (req, res) => {
     res.sendFile(path.resolve('./frontend/dist/index.html'));
 });
 
