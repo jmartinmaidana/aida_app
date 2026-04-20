@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Books, Spinner, ArrowsDownUp } from '@phosphor-icons/react';
+import { Books, ArrowsDownUp } from '@phosphor-icons/react';
 import { Mensaje } from '../components/Mensaje';
 import type { Materia, Plan } from '../types/index';
 
