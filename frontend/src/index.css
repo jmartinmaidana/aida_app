@@ -14,34 +14,31 @@
     to { opacity: 0; }
 }
 
+html, body {
+    height: 100%;
+}
+
 body { 
     font-family: 'Inter', sans-serif; 
     margin: 0; 
     background-color: #f8fafc; 
     overflow-x: hidden; 
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
 }
 
-/* Animamos solo el contenido, ignorando a los Web Components y scripts ocultos */
-body > *:not(navbar-aida):not(footer-aida):not(script) {
+/* Ahora #root es el contenedor principal que maneja la estructura Flex */
+#root { 
+    display: flex; 
+    flex-direction: column; 
+    min-height: 100vh; 
+    width: 100%; 
+}
+
+/* Animamos solo el contenido central, ignorando la barra superior y el pie de página */
+#root > *:not(.navbar):not(.footer-site) {
     animation: fadeInPage 0.3s ease-out forwards;
 }
-body.saliendo > *:not(navbar-aida):not(footer-aida):not(script) {
+#root.saliendo > *:not(.navbar):not(.footer-site) {
     animation: fadeOutPage 0.2s ease-in forwards;
-}
-
-/* --- ESTILOS DE COMPONENTES WEB --- */
-navbar-aida {
-    display: block;
-    position: relative;
-    z-index: 1000; /* Asegura que el menú desplegable siempre esté por encima del contenido */
-}
-footer-aida {
-    display: block;
-    margin-top: auto; /* Mantiene la funcionalidad de pegarse al fondo de la pantalla */
-    width: 100%;
 }
 
 /* --- BARRA DE NAVEGACIÓN COMPLETA --- */
@@ -49,6 +46,8 @@ footer-aida {
     display: flex; justify-content: space-between; align-items: center;
     background-color: #0284c7; color: white; padding: 16px 40px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 1000; /* Asegura que el menú desplegable quede sobre el contenido */
 }
 .navbar-brand { display: flex; align-items: center; gap: 10px; font-size: 1.4rem; font-weight: 600; margin: 0; }
 .navbar-links { display: flex; align-items: center; gap: 20px; }
@@ -70,6 +69,8 @@ footer-aida {
     font-size: 0.95rem;
     font-weight: 500;
     box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+    margin-top: auto; /* Magia que empuja el footer al fondo de la pantalla */
+    width: 100%;
 }
 .footer-site p { margin: 0; }
 
@@ -141,8 +142,8 @@ footer-aida {
 
 table { width: 100%; border-collapse: collapse; background: white; white-space: nowrap; }
 
-/* Hacemos que solo la tabla maneje el scroll horizontal sin arrastrar a la paginación */
-.contenedor-tabla table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+/* Envolvemos la tabla para que haga scroll sin romperse */
+.contenedor-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
 th, td { padding: 16px 24px; text-align: left; border-bottom: 1px solid #e2e8f0; }
 th { background-color: #f8fafc; color: #475569; font-weight: 600; cursor: pointer; user-select: none; transition: background-color 0.2s; }

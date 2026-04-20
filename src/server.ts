@@ -35,7 +35,7 @@ app.set('trust proxy', 1); // Confiar en el proxy de Render para las cookies seg
 // verifica si tiene forma de JSON, y si es así, lo convierte en un objeto real de JavaScript para que podamos usarlo directamente.
 app.use(express.json());
 
-app.use(express.static('public'));
+app.use(express.static(path.resolve('./frontend/dist'))); // <-- Ahora servimos los archivos compilados de React
 
 //Esto configurará automáticamente 11 cabeceras de seguridad que bloquean el Clickjacking, 
 // previenen que el navegador adivine tipos de archivos (MIME Sniffing) y obligan a conexiones seguras.
@@ -151,52 +151,11 @@ app.post('/api/v0/auth/login', loginLimiter, catchAsync(AuthenticationController
 app.post('/api/v0/auth/logout', AuthenticationController.logoutAuthController);
 app.get('/api/v0/auth/verificar', requireAuthAPI, AuthenticationController.verificarAuthController);
 
-
-// Ruta raíz: Redirige automáticamente a la pantalla de login
-app.get('/', (req, res) => {
-    res.redirect('/app/login');
-});
-
-// Rutas del Frontend
-app.get('/menu', noCache, requireAuth, (req, res) => {
-    res.sendFile(path.resolve('./public/html/menu.html'));
-});
-
-app.get('/app/certificados_lu',noCache, requireAuth, (req, res) => {
-    res.sendFile(path.resolve('./public/html/certificados_lu.html'));
-});
-
-app.get('/app/certificados_fecha',noCache, requireAuth, (req, res) => {
-    res.sendFile(path.resolve('./public/html/certificados_fecha.html'));
-});
-
-app.get('/app/archivo',noCache, requireAuth, (req, res) => {
-    res.sendFile(path.resolve('./public/html/archivo.html'));
-});
-
-app.get('/app/alumnos',noCache, requireAuth, (req, res) => {
-    res.sendFile(path.resolve('./public/html/alumnos.html'));
-});
-
-app.get('/app/cursada',noCache, requireAuth, (req, res) => {
-    res.sendFile(path.resolve('./public/html/cursada.html'));
-});
-
-app.get('/app/historial',noCache, requireAuth, (req, res) => {
-    res.sendFile(path.resolve('./public/html/historial.html'));
-});
-
-app.get('/app/planes', noCache, requireAuth, (req, res) => {
-    res.sendFile(path.resolve('./public/html/planes.html'));
-});
-
-
-app.get('/app/login', (req, res) => {
-    if (req.session.usuario) {
-        return res.redirect('/menu');
-    }
-    
-    res.sendFile(path.resolve('./public/html/login.html'));
+// --- RUTA CATCH-ALL PARA REACT (SPA) ---
+// Cualquier petición de URL que no haya coincidido con la API, caerá aquí.
+// Se devuelve el index.html principal y React Router dibuja la pantalla que corresponda.
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve('./frontend/dist/index.html'));
 });
 
 // Arranque del servidor

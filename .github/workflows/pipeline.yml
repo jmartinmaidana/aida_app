@@ -40,6 +40,12 @@ jobs:
       - name: Compilar aplicación (TypeScript a JS)
         run: npx tsc
         
+      - name: Instalar y Compilar Frontend (React)
+        run: |
+          cd frontend
+          npm install
+          npm run build
+          
       # NUEVO: Ejecutamos las pruebas conectándonos a la BD temporal de arriba
       - name: Ejecutar Tests
         env:
