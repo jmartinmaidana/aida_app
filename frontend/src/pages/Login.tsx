@@ -2,22 +2,22 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GraduationCap, User, LockKey, SignIn, Spinner } from '@phosphor-icons/react';
-import { Mensaje } from '../components/Mensaje';
+import { useToast } from '../context/ToastContext';
 
 export function Login() {
     // 1. EL ESTADO: En lugar de leer el DOM al final, guardamos lo que el usuario escribe en tiempo real.
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [mensajeError, setMensajeError] = useState('');
     const [cargando, setCargando] = useState(false); // <-- Nuevo estado
     
+    const { mostrarToast } = useToast();
+
     // Herramienta de React Router para cambiar de pantalla
     const navigate = useNavigate();
 
     // 2. LA FUNCIÓN DE SUBMIT: Similar a tu Vanilla JS, pero integrada en el componente
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setMensajeError(''); // Limpiamos errores anteriores
         setCargando(true);   // Encendemos la animación
         
         try {
@@ -31,10 +31,10 @@ export function Login() {
                 navigate('/menu'); // Si el login es exitoso, viajamos al menú
             } else {
                 const datos = await respuesta.json();
-                setMensajeError(datos.mensaje || 'Error al iniciar sesión');
+                mostrarToast(datos.mensaje || 'Error al iniciar sesión', 'error');
             }
         } catch (error) {
-            setMensajeError('Error de conexión con el servidor.');
+            mostrarToast('Error de conexión con el servidor.', 'error');
         } finally {
             setCargando(false); // Apagamos la animación sin importar qué pase
         }
