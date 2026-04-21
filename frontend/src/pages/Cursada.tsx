@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent, ChangeEvent } from 'react';
 import { PencilLine, FloppyDisk, Spinner } from '@phosphor-icons/react';
 import { Mensaje } from '../components/Mensaje';
+import { api } from '../utils/api';
 
 export function Cursada() {
     // Centralizamos todos los campos del formulario en un solo estado
@@ -42,24 +43,12 @@ export function Cursada() {
                 nota: Number(formData.nota)
             };
 
-            const res = await fetch('/api/v0/cursada', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-                setMensaje({ texto: data.mensaje || 'Cursada registrada con éxito.', tipo: 'exito' });
-                // Si fue un éxito, limpiamos el formulario para cargar una nueva nota
-                setFormData({ lu: '', idMateria: '', anio: '', cuatrimestre: '', nota: '' }); 
-            } else {
-                const errorTxt = data.detalles ? data.detalles.map((err: any) => err.message).join(' | ') : data.mensaje;
-                setMensaje({ texto: errorTxt || 'Error al registrar la cursada.', tipo: 'error' });
-            }
-        } catch (error) {
-            setMensaje({ texto: 'Error de conexión con el servidor.', tipo: 'error' });
+            const data = await api.post('/api/v0/cursada', payload);
+            
+            setMensaje({ texto: data.mensaje || 'Cursada registrada con éxito.', tipo: 'exito' });
+            setFormData({ lu: '', idMateria: '', anio: '', cuatrimestre: '', nota: '' }); 
+        } catch (error: any) {
+            setMensaje({ texto: error.message || 'Error de conexión con el servidor.', tipo: 'error' });
         } finally {
             setCargando(false);
         }

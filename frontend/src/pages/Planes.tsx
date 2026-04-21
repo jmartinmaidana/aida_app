@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Books, ArrowsDownUp } from '@phosphor-icons/react';
 import { Mensaje } from '../components/Mensaje';
 import type { Materia, Plan } from '../types/index';
+import { api } from '../utils/api';
 
 export function Planes() {
     const [planes, setPlanes] = useState<Plan[]>([]);
@@ -14,15 +15,10 @@ export function Planes() {
     useEffect(() => {
         const cargarPlanes = async () => {
             try {
-                const res = await fetch('/api/v0/planes-estudio');
-                if (res.ok) {
-                    const data = await res.json();
-                    setPlanes(data.datos || data);
-                } else {
-                    setError('Error al obtener los planes de estudio del servidor.');
-                }
-            } catch (e) {
-                setError('Error de conexión con el servidor.');
+                const data = await api.get('/api/v0/planes-estudio');
+                setPlanes(data.datos || data);
+            } catch (e: any) {
+                setError(e.message || 'Error al obtener los planes de estudio del servidor.');
             } finally {
                 setCargando(false);
             }
@@ -58,26 +54,26 @@ export function Planes() {
     }, [planes, orden]);
 
     return (
+        <div className="contenedor">
+            <div className="tarjeta-form">
+                <h1 style={{ justifyContent: 'center', marginBottom: '30px' }}>
+                    <Books size="1em" style={{ marginRight: '8px' }} /> Planes de Estudio por Carrera
+                </h1>
 
-            <div className="contenedor-ancho">
-                <div className="cabecera-pagina" style={{ justifyContent: 'center' }}>
-                    <h1 style={{ display: 'block', width: '100%', textAlign: 'center' }}>
-                        <Books size="1em" style={{ marginRight: '8px' }} /> Planes de Estudio por Carrera
-                    </h1>
-                </div>
-
-                <div id="contenedor-planes" style={{ marginTop: '40px' }}>
+                <div id="contenedor-planes">
                     {cargando ? null : error ? (
                         <Mensaje texto={error} tipo="error" />
                     ) : planes.length === 0 ? (
                         <Mensaje texto="No hay planes de estudio para mostrar." tipo="" />
                     ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '50px' }}>
                             {planesOrdenados.map((plan, index) => (
-                                <div key={index} className="tarjeta-form">
-                                    <h2 className="titulo-carrera">{plan.nombre}</h2>
-                                    <p className="subtitulo-carrera" style={{ color: '#64748b', marginBottom: '30px', fontSize: '0.95rem', lineHeight: '1.5' }}>
-                                        Título a otorgar: {plan.titulo_otorgado}
+                                <div key={index}>
+                                    <h2 className="titulo-carrera" style={{ color: '#0f172a', borderBottom: '2px solid #e2e8f0', paddingBottom: '10px', marginBottom: '10px' }}>
+                                        {plan.nombre}
+                                    </h2>
+                                    <p className="subtitulo-carrera" style={{ color: '#64748b', marginBottom: '20px', fontSize: '0.95rem' }}>
+                                        Título a otorgar: <strong style={{ color: '#0284c7' }}>{plan.titulo_otorgado}</strong>
                                     </p>
                                     
                                     <div className="table-responsive">
@@ -108,6 +104,7 @@ export function Planes() {
                     )}
                 </div>
             </div>
+        </div>
 
     );
 }

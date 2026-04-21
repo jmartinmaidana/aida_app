@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Users, MagnifyingGlass, UserPlus, ArrowsDownUp, CaretLeft, CaretRight, Spinner, ChartLineUp, GraduationCap, PencilSimple, Trash, FloppyDisk } from '@phosphor-icons/react';
 import { Mensaje } from '../components/Mensaje';
 import type { Alumno, Carrera } from '../types/index';
+import { api } from '../utils/api';
 
 // Función utilitaria para formatear fechas
 function formatoTabla(fechaIso?: string) {
@@ -39,22 +40,17 @@ export function Alumnos() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Cargar las carreras una sola vez para el desplegable del formulario
-        fetch('/api/v0/carreras').then(res => res.ok ? res.json() : []).then(data => setCarreras(data)).catch(() => {});
+        api.get('/api/v0/carreras').then(data => setCarreras(data)).catch(() => {});
 
         const cargarAlumnos = async () => {
             setCargando(true);
             try {
-                // CORRECCIÓN: Los parámetros ahora coinciden exactamente con lo que espera el backend
                 const url = `/api/alumnos?pagina=${pagina}&limite=10${busqueda ? `&busqueda=${encodeURIComponent(busqueda)}` : ''}`;
-                const respuesta = await fetch(url);
+                const data = await api.get(url);
                 
-                if (respuesta.ok) {
-                    const data = await respuesta.json();
-                    if (data.estado === "exito") {
-                        setAlumnos(data.datos);
-                        setPaginacionInfo({ totalPaginas: data.paginacion.totalPaginas, total: data.paginacion.total });
-                    }
+                if (data.estado === "exito") {
+                    setAlumnos(data.datos);
+                    setPaginacionInfo({ totalPaginas: data.paginacion.totalPaginas, total: data.paginacion.total });
                 }
             } catch (error) {
                 console.error("Error al cargar alumnos:", error);
@@ -91,15 +87,10 @@ export function Alumnos() {
     // --- FUNCIONES DE ACCIÓN ---
     const iniciarTramite = async (lu: string) => {
         try {
-            const res = await fetch('/api/v0/tramite-titulo', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lu })
-            });
-            const data = await res.json();
-            if (res.ok) {
-                setMensajePrincipal({ texto: 'Trámite iniciado con éxito.', tipo: 'exito' });
-                setRecargar(prev => prev + 1);
-            } else setMensajePrincipal({ texto: 'Error: ' + data.mensaje, tipo: 'error' });
-        } catch (e) { setMensajePrincipal({ texto: 'Error de conexión al iniciar el trámite.', tipo: 'error' }); }
+            await api.post('/api/v0/tramite-titulo', { lu });
+            setMensajePrincipal({ texto: 'Trámite iniciado con éxito.', tipo: 'exito' });
+            setRecargar(prev => prev + 1);
+        } catch (e: any) { setMensajePrincipal({ texto: e.message || 'Error al iniciar el trámite.', tipo: 'error' }); }
     };
 
     const borrarAlumno = async (lu: string) => {
@@ -107,15 +98,10 @@ export function Alumnos() {
         setMensajePrincipal({ texto: '', tipo: '' });
         try {
             const partes = lu.split('/');
-            const res = await fetch(`/api/alumnos/${partes[0]}/${partes[1]}`, { method: 'DELETE' });
-            const data = await res.json();
-            if (res.ok) {
-                setMensajePrincipal({ texto: data.mensaje || 'Alumno eliminado correctamente.', tipo: 'exito' });
-                setRecargar(prev => prev + 1); // Ahora sí forzamos una recarga real
-            } else {
-                setMensajePrincipal({ texto: 'Error al borrar: ' + data.mensaje, tipo: 'error' });
-            }
-        } catch (e) { setMensajePrincipal({ texto: 'Error de conexión al intentar borrar.', tipo: 'error' }); }
+            const data = await api.delete(`/api/alumnos/${partes[0]}/${partes[1]}`);
+            setMensajePrincipal({ texto: data.mensaje || 'Alumno eliminado correctamente.', tipo: 'exito' });
+            setRecargar(prev => prev + 1); 
+        } catch (e: any) { setMensajePrincipal({ texto: e.message || 'Error al intentar borrar.', tipo: 'error' }); }
     };
 
     // --- FUNCIONES DEL FORMULARIO ---
@@ -150,30 +136,21 @@ export function Alumnos() {
 
         try {
             const url = luEnEdicion ? `/api/alumnos/${luEnEdicion.split('/')[0]}/${luEnEdicion.split('/')[1]}` : '/api/alumno';
-            const method = luEnEdicion ? 'PUT' : 'POST';
+            
+            const body = {
+                lu: luEnEdicion ? luEnEdicion : formData.lu,
+                nombres: formData.nombres,
+                apellido: formData.apellido,
+                carrera_id: Number(formData.carrera_id)
+            };
 
-            const res = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    lu: luEnEdicion ? luEnEdicion : formData.lu,
-                    nombres: formData.nombres,
-                    apellido: formData.apellido,
-                    carrera_id: Number(formData.carrera_id)
-                })
-            });
+            const data = luEnEdicion ? await api.put(url, body) : await api.post(url, body);
 
-            const data = await res.json();
-            if (res.ok) {
-                setMensajePrincipal({ texto: data.mensaje || 'Alumno guardado exitosamente.', tipo: 'exito' });
-                setMostrarForm(false); // Cerramos tras éxito
-                setRecargar(prev => prev + 1);
-            } else {
-                const errorTxt = data.detalles ? data.detalles.map((err: any) => err.message).join(' | ') : data.mensaje;
-                setMensajeForm({ texto: errorTxt, tipo: 'error' });
-            }
-        } catch (error) {
-            setMensajeForm({ texto: 'Error de conexión.', tipo: 'error' });
+            setMensajePrincipal({ texto: data.mensaje || 'Alumno guardado exitosamente.', tipo: 'exito' });
+            setMostrarForm(false); 
+            setRecargar(prev => prev + 1);
+        } catch (error: any) {
+            setMensajeForm({ texto: error.message || 'Error al guardar.', tipo: 'error' });
         } finally {
             setGuardando(false);
         }
@@ -185,13 +162,13 @@ export function Alumnos() {
                 <div className="cabecera-pagina">
                     <h1><Users size="1em" /> Directorio de Alumnos</h1>
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'stretch', justifyContent: 'flex-end', flex: 1 }}>
-                        <div className="input-con-icono" style={{ flex: 1, minWidth: '120px', maxWidth: '350px' }}>
+                        <div className="input-con-icono" style={{ flex: 1, minWidth: '120px', maxWidth: '200px' }}>
                             <MagnifyingGlass size="1.2rem" style={{ position: 'absolute', left: '14px', color: '#94a3b8' }} />
                             <input 
                                 type="text" 
                                 id="inputBusqueda"
                                 className="buscador" 
-                                placeholder="Buscar por LU o Apellido..." 
+                                placeholder="Buscar..." 
                                 value={busqueda}
                                 onChange={(e) => {
                                     setMensajePrincipal({ texto: '', tipo: '' });

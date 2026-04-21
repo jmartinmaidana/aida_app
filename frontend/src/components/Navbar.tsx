@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GraduationCap, SquaresFour, List, CaretDown, Users, Books, PencilLine, Certificate, Files, UploadSimple, SignOut } from '@phosphor-icons/react';
+import { api } from '../utils/api';
 
 export function Navbar() {
     // Estado para controlar si el menú desplegable está abierto o cerrado
@@ -25,7 +26,7 @@ export function Navbar() {
     // Función para cerrar sesión apuntando a tu API de Express
     const cerrarSesion = async () => {
         try {
-            await fetch('/api/v0/auth/logout', { method: 'POST' });
+            await api.post('/api/v0/auth/logout', {});
             navigate('/login');
         } catch (error) {
             alert("Error al intentar cerrar sesión.");

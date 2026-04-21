@@ -1,21 +1,12 @@
 import express from 'express';
-import { CarrerasRepository } from './repositories/carrerasRepository.js';
 import { pool, conectarBD } from './database.js';
 import path from 'path'; 
 import session from 'express-session';
-import { Request, Response, NextFunction } from 'express';
-import { AuthenticationController } from './controllers/authenticationController.js';
 import { Usuario } from './repositories/usuariosRepository.js';
-import { AlumnosController } from './controllers/alumnosController.js';
-import { CertificadoController } from './controllers/certificadoController.js';
-import { catchAsync,manejadorDeErrores } from './middlewares/errorHandler.js';
-import { HistorialController } from './controllers/historialController.js';
-import { PlanEstudiosController } from './controllers/planEstudiosController.js';
+import { manejadorDeErrores } from './middlewares/errorHandler.js';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
-import { CursadaController } from './controllers/cursadaController.js';
-import { noCache } from './middlewares/noCache.js';
 import connectPgSimple from 'connect-pg-simple';
+import apiRoutes from './routes/index.js';
 
 declare module 'express-session' {
     interface SessionData {
@@ -82,74 +73,9 @@ app.use(session({
     }
 }));
 
-// Guardia para las páginas HTML (Redirige al login si no está autenticado)
-function requireAuth(req: Request, res: Response, next: NextFunction) {
-    if (req.session.usuario) {
-        next(); // El usuario tiene permiso, lo dejamos pasar
-    } else {
-        res.redirect('/app/login'); // No tiene permiso, lo enviamos al login
-    }
-}
 
-// Guardia para la API (Devuelve un error JSON si no está autenticado)
-function requireAuthAPI(req: Request, res: Response, next: NextFunction) {
-    if (req.session.usuario) {
-        next();
-    } else {
-        res.status(401).json({ estado: 'error', mensaje: 'No autorizado. Debe iniciar sesión.' });
-    }
-}
-
-
-// ----------------ENDPOINTS----------------
-
-// ---- Endpoints de Certificados y Trámites ----
-app.post('/api/v0/certificados_lu', requireAuthAPI, catchAsync(CertificadoController.generarPorLuController));
-app.post('/api/v0/tramite-titulo', requireAuthAPI, catchAsync(CertificadoController.iniciarTramiteController));
-app.post('/api/v0/certificados_fecha', requireAuthAPI, catchAsync(CertificadoController.generarZipPorFechaController));
-
-// ---- Endpoints de Gestión de Alumnos ----
-app.get('/api/alumnos', requireAuthAPI, catchAsync(AlumnosController.obtenerTodosAlumnoPorPaginaController));
-app.post('/api/alumno', requireAuthAPI, catchAsync(AlumnosController.crearAlumnoController));
-app.put('/api/alumnos/:prefijo/:anio', requireAuthAPI, catchAsync(AlumnosController.actualizarAlumnoController));
-app.delete('/api/alumnos/:prefijo/:anio', requireAuthAPI, catchAsync(AlumnosController.eliminarAlumnoController));
-app.patch('/api/v0/archivo', requireAuthAPI, catchAsync(AlumnosController.cargarArchivoAlumnoController));
-
-// ---- Endpoints de Gestión de Alumnos (Historial) ----
-app.get('/api/v0/historial/:prefijo/:anio', requireAuthAPI, catchAsync(HistorialController.obtener));
-
-// ---- Endpoints de Obtencion de Carreras ----
-app.get('/api/v0/carreras', requireAuthAPI, catchAsync(async (req: Request, res: Response) => {
-    const carreras = await CarrerasRepository.obtenerCarreras();
-    res.json(carreras);
-}));
-
-// ---- Endpoints de Planes de Estudio ----
-app.get('/api/v0/planes-estudio', requireAuthAPI, catchAsync(PlanEstudiosController.obtenerPlanesCompletosController));
-
-// ----Endpoints para Funcionalidad de cursada----
-
-// Añadir cursada
-app.post('/api/v0/cursada', requireAuthAPI, catchAsync(CursadaController.registrar));
-
-// ---- Recursos y Endpoints de Autenticación y Usuarios ----
-const aplicarRateLimit = process.env.NODE_ENV !== 'test'; // Solo aplicamos el límite si NO estamos en entorno de testing
-
-const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, 
-    max: aplicarRateLimit ? 5 : 1000, // Si es test, le damos 1000 intentos para que no moleste
-    message: { 
-        estado: "error", 
-        mensaje: "Demasiados intentos de inicio de sesión. Por favor, intente nuevamente en 15 minutos." 
-    },
-    standardHeaders: true, 
-    legacyHeaders: false,
-});
-
-app.post('/api/v0/auth/register', catchAsync(AuthenticationController.registrarAuthController));
-app.post('/api/v0/auth/login', loginLimiter, catchAsync(AuthenticationController.loginAuthController));
-app.post('/api/v0/auth/logout', AuthenticationController.logoutAuthController);
-app.get('/api/v0/auth/verificar', requireAuthAPI, AuthenticationController.verificarAuthController);
+// ---------------- ENDPOINTS (RUTAS CONSOLIDADAS) ----------------
+app.use('/api', apiRoutes);
 
 // --- RUTA CATCH-ALL PARA REACT (SPA) ---
 // Cualquier petición de URL que no haya coincidido con la API, caerá aquí.

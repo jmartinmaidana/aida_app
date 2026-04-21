@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { api } from '../utils/api';
 
 export function ProtectedRoute() {
     const [autenticado, setAutenticado] = useState<boolean | null>(null);
@@ -7,13 +8,8 @@ export function ProtectedRoute() {
     useEffect(() => {
         const verificarSesion = async () => {
             try {
-                // Replicamos la misma llamada de tu archivo seguridad.js original
-                const res = await fetch('/api/v0/auth/verificar');
-                if (res.ok) {
-                    setAutenticado(true);
-                } else {
-                    setAutenticado(false);
-                }
+                await api.get('/api/v0/auth/verificar');
+                setAutenticado(true);
             } catch (error) {
                 setAutenticado(false);
             }

@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Spinner, ArrowsDownUp, ArrowLeft } from '@phosphor-icons/react';
 import { Mensaje } from '../components/Mensaje';
 import type { Cursada, DatosHistorial } from '../types/index';
+import { api } from '../utils/api';
 
 export function Historial() {
     const [searchParams] = useSearchParams();
@@ -33,22 +34,14 @@ export function Historial() {
             }
 
             try {
-                const response = await fetch(`/api/v0/historial/${partesLu[0]}/${partesLu[1]}`);
-                const data = await response.json();
-
-                if (!response.ok || data.estado !== "exito") {
-                    setError(data.mensaje || "Ocurrió un error al consultar los datos del alumno.");
-                    return;
-                }
+                const data = await api.get(`/api/v0/historial/${partesLu[0]}/${partesLu[1]}`);
 
                 setDatos(data);
-                // Disparamos la animación de la barra de progreso igual que en Vanilla JS
                 setTimeout(() => {
                     setAnchoBarra(data.estadisticas.porcentajeCompletado);
                 }, 100);
-
-            } catch (err) {
-                setError("No se pudo conectar con el servidor. Verifique su conexión.");
+            } catch (err: any) {
+                setError(err.message || "No se pudo conectar con el servidor. Verifique su conexión.");
             } finally {
                 setCargando(false);
             }

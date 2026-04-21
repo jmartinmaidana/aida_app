@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import type { DragEvent, ChangeEvent } from 'react';
 import { FileCsv, Info, FolderOpen, UploadSimple, Spinner, DownloadSimple } from '@phosphor-icons/react';
 import { Mensaje } from '../components/Mensaje';
+import { api } from '../utils/api';
 
 export function CargaCsv() {
     const [archivo, setArchivo] = useState<File | null>(null);
@@ -77,14 +78,9 @@ export function CargaCsv() {
                 }
             }
 
-            const respuesta = await fetch('/api/v0/archivo', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(alumnosJson)
-            });
-
-            const datosRespuesta = await respuesta.json();
-            if (!respuesta.ok || datosRespuesta.estado !== 'exito') throw new Error(datosRespuesta.mensaje + (datosRespuesta.detalle ? ': ' + datosRespuesta.detalle : ''));
+            const datosRespuesta = await api.patch('/api/v0/archivo', alumnosJson);
+            
+            if (datosRespuesta.estado !== 'exito') throw new Error(datosRespuesta.mensaje + (datosRespuesta.detalle ? ': ' + datosRespuesta.detalle : ''));
             
             setMensaje({ texto: `Carga finalizada: ${datosRespuesta.insertados} alumnos nuevos insertados exitosamente.`, tipo: 'exito' });
             
