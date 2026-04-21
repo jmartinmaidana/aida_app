@@ -1,24 +1,25 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Files, PaperPlaneRight, Spinner } from '@phosphor-icons/react';
-import { Mensaje } from '../components/Mensaje';
+import { useToast } from '../context/ToastContext';
 
 export function CertificadosFecha() {
     const [fecha, setFecha] = useState('');
     const [cargando, setCargando] = useState(false);
-    const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
+    
+    const { mostrarToast } = useToast();
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         
         if (!fecha) {
-            setMensaje({ texto: 'Por favor, ingrese una fecha.', tipo: 'error' });
+            mostrarToast('Por favor, ingrese una fecha.', 'error');
             return;
         }
 
         setCargando(true);
         // Tipo vacío '' hará que el cartel se vea gris/neutro, tal como lo tenías programado
-        setMensaje({ texto: 'Generando certificados masivos, por favor espere...', tipo: '' }); 
+        mostrarToast('Generando certificados masivos, por favor espere...', ''); 
 
         try {
             const respuesta = await fetch('/api/v0/certificados_fecha', {
@@ -39,14 +40,14 @@ export function CertificadosFecha() {
                 a.remove();
                 window.URL.revokeObjectURL(url);
                 
-                setMensaje({ texto: '¡Descarga iniciada con éxito!', tipo: 'exito' });
+                mostrarToast('¡Descarga iniciada con éxito!', 'exito');
                 setFecha(''); // Limpiar el input
             } else {
                 const datos = await respuesta.json();
-                setMensaje({ texto: datos.mensaje || 'Error al generar el lote.', tipo: 'error' });
+                mostrarToast(datos.mensaje || 'Error al generar el lote.', 'error');
             }
         } catch (error) {
-            setMensaje({ texto: 'Error de conexión con el servidor.', tipo: 'error' });
+            mostrarToast('Error de conexión con el servidor.', 'error');
         } finally {
             setCargando(false);
         }
@@ -69,8 +70,6 @@ export function CertificadosFecha() {
                             {cargando ? <><Spinner className="icono-cargando" size="1em" /> Procesando lote...</> : <><PaperPlaneRight size="1em" /> Generar Lote de Certificados</>}
                         </button>
                     </form>
-
-                    <Mensaje texto={mensaje.texto} tipo={mensaje.tipo} />
                 </div>
             </div>
 

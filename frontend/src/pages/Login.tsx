@@ -80,8 +80,6 @@ export function Login() {
                         }
                     </button>
                 </form>
-
-                <Mensaje texto={mensajeError} tipo="error" />
             </div>
         </div>
     );

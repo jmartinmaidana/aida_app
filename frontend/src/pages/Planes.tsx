@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Books, ArrowsDownUp } from '@phosphor-icons/react';
-import { Mensaje } from '../components/Mensaje';
 import type { Materia, Plan } from '../types/index';
 import { api } from '../utils/api';
 
@@ -62,9 +61,9 @@ export function Planes() {
 
                 <div id="contenedor-planes">
                     {cargando ? null : error ? (
-                        <Mensaje texto={error} tipo="error" />
+                        <div className="mensaje error" style={{ display: 'block' }}>{error}</div>
                     ) : planes.length === 0 ? (
-                        <Mensaje texto="No hay planes de estudio para mostrar." tipo="" />
+                        <div className="mensaje" style={{ display: 'block' }}>No hay planes de estudio para mostrar.</div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '50px' }}>
                             {planesOrdenados.map((plan, index) => (

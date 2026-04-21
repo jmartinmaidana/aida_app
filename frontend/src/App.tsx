@@ -10,11 +10,13 @@ import { CertificadosLu } from './pages/CertificadosLu';
 import { CertificadosFecha } from './pages/CertificadosFecha';
 import { CargaCsv } from './pages/CargaCsv';
 import { Historial } from './pages/Historial';
+import { ToastProvider } from './context/ToastContext';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <ToastProvider>
+      <BrowserRouter>
+        <Routes>
         <Route path="/login" element={<Login />} />
         
         {/* Capa 1: Guardia de Seguridad (Asegura que estés logueado) */}
@@ -35,6 +37,7 @@ function App() {
         <Route path="*" element={<Navigate to="/login" />} /> {/* Redirige cualquier ruta rara al login */}
       </Routes>
     </BrowserRouter>
+    </ToastProvider>
   );
 }
 

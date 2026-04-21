@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import type { FormEvent, ChangeEvent } from 'react';
 import { PencilLine, FloppyDisk, Spinner } from '@phosphor-icons/react';
-import { Mensaje } from '../components/Mensaje';
 import { api } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 export function Cursada() {
     // Centralizamos todos los campos del formulario en un solo estado
@@ -14,8 +14,9 @@ export function Cursada() {
         nota: ''
     });
     
-    const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
     const [cargando, setCargando] = useState(false);
+    
+    const { mostrarToast } = useToast();
 
     // Función genérica para actualizar cualquier input del formulario
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -25,11 +26,10 @@ export function Cursada() {
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setCargando(true);
-        setMensaje({ texto: '', tipo: '' });
 
         // Barrera de seguridad del Frontend (Evita enviar peticiones vacías)
         if (!formData.lu || !formData.idMateria || !formData.anio || !formData.cuatrimestre || !formData.nota) {
-            setMensaje({ texto: 'Falta completar datos. Verifique todos los campos.', tipo: 'error' });
+            mostrarToast('Falta completar datos. Verifique todos los campos.', 'error');
             setCargando(false);
             return;
         }
@@ -45,10 +45,10 @@ export function Cursada() {
 
             const data = await api.post('/api/v0/cursada', payload);
             
-            setMensaje({ texto: data.mensaje || 'Cursada registrada con éxito.', tipo: 'exito' });
+            mostrarToast(data.mensaje || 'Cursada registrada con éxito.', 'exito');
             setFormData({ lu: '', idMateria: '', anio: '', cuatrimestre: '', nota: '' }); 
         } catch (error: any) {
-            setMensaje({ texto: error.message || 'Error de conexión con el servidor.', tipo: 'error' });
+            mostrarToast(error.message || 'Error de conexión con el servidor.', 'error');
         } finally {
             setCargando(false);
         }
@@ -78,8 +78,6 @@ export function Cursada() {
                         
                         <button type="submit" className="btn-generar" disabled={cargando}>{cargando ? <Spinner className="icono-cargando" size="1em" /> : <FloppyDisk size="1em" />} Guardar Cursada</button>
                     </form>
-
-                    <Mensaje texto={mensaje.texto} tipo={mensaje.tipo} />
                 </div>
             </div>
     );

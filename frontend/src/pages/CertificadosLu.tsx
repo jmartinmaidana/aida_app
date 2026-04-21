@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Certificate, DownloadSimple, Spinner } from '@phosphor-icons/react';
-import { Mensaje } from '../components/Mensaje';
+import { useToast } from '../context/ToastContext';
 
 export function CertificadosLu() {
     const [lu, setLu] = useState('');
     const [cargando, setCargando] = useState(false);
-    const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
+    
+    const { mostrarToast } = useToast();
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setCargando(true);
-        setMensaje({ texto: '', tipo: '' });
 
         try {
             const respuesta = await fetch('/api/v0/certificados_lu', {
@@ -34,14 +34,14 @@ export function CertificadosLu() {
                 a.remove();
                 window.URL.revokeObjectURL(url); // Limpiamos la memoria
                 
-                setMensaje({ texto: 'Certificado descargado exitosamente.', tipo: 'exito' });
+                mostrarToast('Certificado descargado exitosamente.', 'exito');
                 setLu(''); // Limpiar el input para el próximo uso
             } else {
                 const json = await respuesta.json();
-                setMensaje({ texto: json.mensaje || 'Error al generar el certificado.', tipo: 'error' });
+                mostrarToast(json.mensaje || 'Error al generar el certificado.', 'error');
             }
         } catch (error) {
-            setMensaje({ texto: 'Error de conexión con el servidor.', tipo: 'error' });
+            mostrarToast('Error de conexión con el servidor.', 'error');
         } finally {
             setCargando(false);
         }
@@ -64,8 +64,6 @@ export function CertificadosLu() {
                             {cargando ? <><Spinner className="icono-cargando" size="1em" /> Generando constancia...</> : <><DownloadSimple size="1em" /> Generar y Descargar Constancia</>}
                         </button>
                     </form>
-
-                    <Mensaje texto={mensaje.texto} tipo={mensaje.tipo} />
                 </div>
             </div>
 

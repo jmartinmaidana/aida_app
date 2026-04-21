@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, MagnifyingGlass, UserPlus, ArrowsDownUp, CaretLeft, CaretRight, Spinner, ChartLineUp, GraduationCap, PencilSimple, Trash, FloppyDisk } from '@phosphor-icons/react';
-import { Mensaje } from '../components/Mensaje';
 import type { Alumno, Carrera } from '../types/index';
 import { api } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 // Función utilitaria para formatear fechas
 function formatoTabla(fechaIso?: string) {
@@ -20,7 +20,6 @@ export function Alumnos() {
     const [pagina, setPagina] = useState(1);
     const [paginacionInfo, setPaginacionInfo] = useState({ totalPaginas: 1, total: 0 });
     const [recargar, setRecargar] = useState(0); // <-- Gatillo para forzar la recarga
-    const [mensajePrincipal, setMensajePrincipal] = useState({ texto: '', tipo: '' }); // <-- Cartel global
 
     // Estados del Ordenamiento
     const [orden, setOrden] = useState<{ columna: keyof Alumno | '', ascendente: boolean }>({ columna: '', ascendente: true });
@@ -30,7 +29,6 @@ export function Alumnos() {
     const [luEnEdicion, setLuEnEdicion] = useState<string | null>(null);
     const [formData, setFormData] = useState({ lu: '', nombres: '', apellido: '', carrera_id: '' });
     const [carreras, setCarreras] = useState<Carrera[]>([]);
-    const [mensajeForm, setMensajeForm] = useState({ texto: '', tipo: '' });
     const [guardando, setGuardando] = useState(false);
     
     const formRef = useRef<HTMLDivElement>(null);
@@ -38,6 +36,7 @@ export function Alumnos() {
     const inputNombresRef = useRef<HTMLInputElement>(null);
 
     const navigate = useNavigate();
+    const { mostrarToast } = useToast();
 
     useEffect(() => {
         api.get('/api/v0/carreras').then(data => setCarreras(data)).catch(() => {});
@@ -88,28 +87,25 @@ export function Alumnos() {
     const iniciarTramite = async (lu: string) => {
         try {
             await api.post('/api/v0/tramite-titulo', { lu });
-            setMensajePrincipal({ texto: 'Trámite iniciado con éxito.', tipo: 'exito' });
+            mostrarToast('Trámite iniciado con éxito.', 'exito');
             setRecargar(prev => prev + 1);
-        } catch (e: any) { setMensajePrincipal({ texto: e.message || 'Error al iniciar el trámite.', tipo: 'error' }); }
+        } catch (e: any) { mostrarToast(e.message || 'Error al iniciar el trámite.', 'error'); }
     };
 
     const borrarAlumno = async (lu: string) => {
         if (!window.confirm(`¿Está absolutamente seguro de eliminar al alumno ${lu}?`)) return;
-        setMensajePrincipal({ texto: '', tipo: '' });
         try {
             const partes = lu.split('/');
             const data = await api.delete(`/api/alumnos/${partes[0]}/${partes[1]}`);
-            setMensajePrincipal({ texto: data.mensaje || 'Alumno eliminado correctamente.', tipo: 'exito' });
+            mostrarToast(data.mensaje || 'Alumno eliminado correctamente.', 'exito');
             setRecargar(prev => prev + 1); 
-        } catch (e: any) { setMensajePrincipal({ texto: e.message || 'Error al intentar borrar.', tipo: 'error' }); }
+        } catch (e: any) { mostrarToast(e.message || 'Error al intentar borrar.', 'error'); }
     };
 
     // --- FUNCIONES DEL FORMULARIO ---
     const abrirFormCreacion = () => {
         setFormData({ lu: '', nombres: '', apellido: '', carrera_id: '' });
-        setMensajePrincipal({ texto: '', tipo: '' });
         setLuEnEdicion(null);
-        setMensajeForm({ texto: '', tipo: '' });
         setMostrarForm(true);
         setTimeout(() => {
             formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -119,9 +115,7 @@ export function Alumnos() {
 
     const abrirFormEdicion = (alumno: Alumno) => {
         setFormData({ lu: alumno.lu, nombres: alumno.nombres, apellido: alumno.apellido, carrera_id: alumno.carrera_id?.toString() || '' });
-        setMensajePrincipal({ texto: '', tipo: '' });
         setLuEnEdicion(alumno.lu);
-        setMensajeForm({ texto: '', tipo: '' });
         setMostrarForm(true);
         setTimeout(() => {
             formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -132,7 +126,6 @@ export function Alumnos() {
     const guardarAlumno = async (e: React.FormEvent) => {
         e.preventDefault();
         setGuardando(true);
-        setMensajeForm({ texto: '', tipo: '' });
 
         try {
             const url = luEnEdicion ? `/api/alumnos/${luEnEdicion.split('/')[0]}/${luEnEdicion.split('/')[1]}` : '/api/alumno';
@@ -146,11 +139,11 @@ export function Alumnos() {
 
             const data = luEnEdicion ? await api.put(url, body) : await api.post(url, body);
 
-            setMensajePrincipal({ texto: data.mensaje || 'Alumno guardado exitosamente.', tipo: 'exito' });
+            mostrarToast(data.mensaje || 'Alumno guardado exitosamente.', 'exito');
             setMostrarForm(false); 
             setRecargar(prev => prev + 1);
         } catch (error: any) {
-            setMensajeForm({ texto: error.message || 'Error al guardar.', tipo: 'error' });
+            mostrarToast(error.message || 'Error al guardar.', 'error');
         } finally {
             setGuardando(false);
         }
@@ -171,7 +164,6 @@ export function Alumnos() {
                                 placeholder="Buscar..." 
                                 value={busqueda}
                                 onChange={(e) => {
-                                    setMensajePrincipal({ texto: '', tipo: '' });
                                     setBusqueda(e.target.value);
                                     setPagina(1);
                                 }}
@@ -182,8 +174,6 @@ export function Alumnos() {
                         </button>
                     </div>
                 </div>
-
-                <Mensaje texto={mensajePrincipal.texto} tipo={mensajePrincipal.tipo} style={{ marginBottom: '20px' }} />
 
                 <div className="contenedor-tabla">
                     <div className="contenedor-scroll">
@@ -282,8 +272,6 @@ export function Alumnos() {
                                 </button>
                             </div>
                         </form>
-
-                        <Mensaje texto={mensajeForm.texto} tipo={mensajeForm.tipo} style={{ marginTop: '20px' }} />
                     </div>
                 )}
             </div>

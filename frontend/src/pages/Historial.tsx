@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Spinner, ArrowsDownUp, ArrowLeft } from '@phosphor-icons/react';
-import { Mensaje } from '../components/Mensaje';
 import type { Cursada, DatosHistorial } from '../types/index';
 import { api } from '../utils/api';
 
@@ -79,7 +78,7 @@ export function Historial() {
                         Cargando historial académico...
                     </div>
                 ) : error ? (
-                    <Mensaje texto={error} tipo="error" style={{ marginBottom: '20px' }} />
+                    <div className="mensaje error" style={{ display: 'block', marginBottom: '20px' }}>{error}</div>
                 ) : datos ? (
                     <>
                         <div className="header-info">

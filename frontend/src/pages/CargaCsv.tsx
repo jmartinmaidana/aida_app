@@ -1,17 +1,17 @@
 import { useState, useRef } from 'react';
 import type { DragEvent, ChangeEvent } from 'react';
 import { FileCsv, Info, FolderOpen, UploadSimple, Spinner, DownloadSimple } from '@phosphor-icons/react';
-import { Mensaje } from '../components/Mensaje';
 import { api } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 
 export function CargaCsv() {
     const [archivo, setArchivo] = useState<File | null>(null);
     const [dragActivo, setDragActivo] = useState(false);
     const [cargando, setCargando] = useState(false);
-    const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
     const [erroresSecundarios, setErroresSecundarios] = useState<{ ignorados: number, alumnosIgnorados: any[] } | null>(null);
     
     const inputRef = useRef<HTMLInputElement>(null);
+    const { mostrarToast } = useToast();
 
     // --- EVENTOS DRAG & DROP ---
     const handleDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setDragActivo(true); };
@@ -23,9 +23,9 @@ export function CargaCsv() {
             const archivoDroppeado = e.dataTransfer.files[0];
             if (archivoDroppeado.name.endsWith('.csv')) {
                 setArchivo(archivoDroppeado);
-                setMensaje({ texto: '', tipo: '' }); setErroresSecundarios(null);
+                setErroresSecundarios(null);
             } else {
-                setMensaje({ texto: 'Por favor, arrastre únicamente un archivo con extensión .csv', tipo: 'error' });
+                mostrarToast('Por favor, arrastre únicamente un archivo con extensión .csv', 'error');
             }
         }
     };
@@ -33,7 +33,7 @@ export function CargaCsv() {
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             setArchivo(e.target.files[0]);
-            setMensaje({ texto: '', tipo: '' }); setErroresSecundarios(null);
+            setErroresSecundarios(null);
         }
     };
 
@@ -48,10 +48,10 @@ export function CargaCsv() {
     };
 
     const procesarYEnviarArchivo = async () => {
-        if (!archivo) return setMensaje({ texto: 'Por favor, seleccione o arrastre un archivo CSV.', tipo: 'error' });
+        if (!archivo) return mostrarToast('Por favor, seleccione o arrastre un archivo CSV.', 'error');
         
         setCargando(true);
-        setMensaje({ texto: 'Procesando y subiendo archivo...', tipo: '' });
+        mostrarToast('Procesando y subiendo archivo...', '');
         setErroresSecundarios(null);
 
         try {
@@ -82,7 +82,7 @@ export function CargaCsv() {
             
             if (datosRespuesta.estado !== 'exito') throw new Error(datosRespuesta.mensaje + (datosRespuesta.detalle ? ': ' + datosRespuesta.detalle : ''));
             
-            setMensaje({ texto: `Carga finalizada: ${datosRespuesta.insertados} alumnos nuevos insertados exitosamente.`, tipo: 'exito' });
+            mostrarToast(`Carga finalizada: ${datosRespuesta.insertados} alumnos nuevos insertados exitosamente.`, 'exito');
             
             if (datosRespuesta.ignorados > 0) {
                 setErroresSecundarios({ ignorados: datosRespuesta.ignorados, alumnosIgnorados: datosRespuesta.alumnosIgnorados || [] });
@@ -92,7 +92,7 @@ export function CargaCsv() {
             if (inputRef.current) inputRef.current.value = '';
 
         } catch (error: any) {
-            setMensaje({ texto: error.message || 'Ocurrió un error inesperado durante el proceso.', tipo: 'error' });
+            mostrarToast(error.message || 'Ocurrió un error inesperado durante el proceso.', 'error');
         } finally {
             setCargando(false);
         }
@@ -141,18 +141,11 @@ export function CargaCsv() {
                     </div>
                     
                     <button onClick={procesarYEnviarArchivo} className="btn-generar" disabled={cargando}>{cargando ? <><Spinner className="icono-cargando" size="1.2em" /> Procesando y subiendo...</> : <><UploadSimple size="1.2em" /> Procesar y Cargar Datos</>}</button>
-                    <Mensaje texto={mensaje.texto} tipo={mensaje.tipo} />
                     {erroresSecundarios && (
-                        <Mensaje 
-                            tipo="error" 
-                            style={{ marginTop: '15px' }} 
-                            texto={
-                                <>
-                                    Atención: No se pudieron cargar {erroresSecundarios.ignorados} alumnos (registros duplicados, incompletos o con formato incorrecto).<br /><br />
-                                    <button type="button" onClick={descargarCsvErrores} className="btn-seleccionar" style={{ backgroundColor: 'white', borderColor: '#fca5a5', color: '#b91c1c', padding: '6px 12px', fontSize: '0.9rem' }}><DownloadSimple size="1.2em" /> Descargar reporte de errores (CSV)</button>
-                                </>
-                            } 
-                        />
+                        <div className="mensaje error" style={{ display: 'block', marginTop: '15px' }}>
+                            Atención: No se pudieron cargar {erroresSecundarios.ignorados} alumnos (registros duplicados, incompletos o con formato incorrecto).<br /><br />
+                            <button type="button" onClick={descargarCsvErrores} className="btn-seleccionar" style={{ backgroundColor: 'white', borderColor: '#fca5a5', color: '#b91c1c', padding: '6px 12px', fontSize: '0.9rem' }}><DownloadSimple size="1.2em" /> Descargar reporte de errores (CSV)</button>
+                        </div>
                     )}
                 </div>
             </div>
