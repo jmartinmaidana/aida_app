@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { api } from '../utils/api';
+import { api } from '../utils/api.js';
 
 export function ProtectedRoute() {
     const [autenticado, setAutenticado] = useState<boolean | null>(null);

@@ -27,21 +27,20 @@ export class PlanEstudiosRepository {
                 c.nombre,
                 c.nombre as titulo_otorgado,
                 COALESCE(
-                    (
-                        SELECT json_agg(
-                            json_build_object(
-                                'id', m.id,
-                                'nombre', m.nombre
-                            ) ORDER BY m.nombre
-                        )
-                        FROM aida.plan_estudio pe
-                        JOIN aida.materias m ON pe.materia_id = m.id
-                        WHERE pe.carrera_id = c.id
-                    ),
+                    json_agg(
+                        json_build_object(
+                            'id', m.id,
+                            'nombre', m.nombre
+                        ) ORDER BY m.nombre
+                    ) FILTER (WHERE m.id IS NOT NULL),
                     '[]'::json
                 ) as materias
             FROM
                 aida.carreras c
+        LEFT JOIN aida.plan_estudio pe ON c.id = pe.carrera_id
+        LEFT JOIN aida.materias m ON pe.materia_id = m.id
+        GROUP BY
+            c.id, c.nombre
             ORDER BY
                 c.id;
         `;

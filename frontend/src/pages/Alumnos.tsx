@@ -4,6 +4,7 @@ import { Users, MagnifyingGlass, UserPlus, ArrowsDownUp, CaretLeft, CaretRight, 
 import type { Alumno, Carrera } from '../types/index';
 import { api } from '../utils/api';
 import { useToast } from '../context/ToastContext';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 // Función utilitaria para formatear fechas
 function formatoTabla(fechaIso?: string) {
@@ -37,6 +38,9 @@ export function Alumnos() {
 
     const navigate = useNavigate();
     const { mostrarToast } = useToast();
+    
+    // Estado para el modal de eliminación
+    const [modalEliminar, setModalEliminar] = useState({ abierto: false, lu: '' });
 
     useEffect(() => {
         api.get('/api/v0/carreras').then(data => setCarreras(data)).catch(() => {});
@@ -92,10 +96,16 @@ export function Alumnos() {
         } catch (e: any) { mostrarToast(e.message || 'Error al iniciar el trámite.', 'error'); }
     };
 
-    const borrarAlumno = async (lu: string) => {
-        if (!window.confirm(`¿Está absolutamente seguro de eliminar al alumno ${lu}?`)) return;
+    // Prepara la eliminación (Abre el modal)
+    const pedirConfirmacionBorrado = (lu: string) => {
+        setModalEliminar({ abierto: true, lu });
+    };
+
+    // Ejecuta la eliminación real tras confirmar en el modal
+    const confirmarBorrado = async () => {
+        setModalEliminar({ abierto: false, lu: '' }); // Cerramos el modal
         try {
-            const partes = lu.split('/');
+            const partes = modalEliminar.lu.split('/');
             const data = await api.delete(`/api/alumnos/${partes[0]}/${partes[1]}`);
             mostrarToast(data.mensaje || 'Alumno eliminado correctamente.', 'exito');
             setRecargar(prev => prev + 1); 
@@ -216,7 +226,7 @@ export function Alumnos() {
                                                     )}
                                                     
                                                     <button className="btn-mini editar" onClick={() => abrirFormEdicion(alumno)} title="Editar Alumno"><PencilSimple size="1em" /></button>
-                                                    <button className="btn-mini borrar" onClick={() => borrarAlumno(alumno.lu)} title="Borrar Alumno"><Trash size="1em" /></button>
+                                                    <button className="btn-mini borrar" onClick={() => pedirConfirmacionBorrado(alumno.lu)} title="Borrar Alumno"><Trash size="1em" /></button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -274,6 +284,16 @@ export function Alumnos() {
                         </form>
                     </div>
                 )}
+
+                {/* MODAL FLOTANTE DE CONFIRMACIÓN */}
+                <ConfirmModal 
+                    isOpen={modalEliminar.abierto} 
+                    titulo="Eliminar Alumno" 
+                    mensaje={`¿Está absolutamente seguro de que desea eliminar al alumno con LU ${modalEliminar.lu}? Esta acción borrará todas sus calificaciones y no se puede deshacer.`} 
+                    textoConfirmar="Sí, Eliminar"
+                    onConfirm={confirmarBorrado} 
+                    onCancel={() => setModalEliminar({ abierto: false, lu: '' })} 
+                />
             </div>
 
     );

@@ -11,7 +11,7 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "frontend/src/components/ProtectedRoute.tsx", "frontend/src/Context/ToastContext.tsx"],
   "exclude": [
     "node_modules",
     "__tests__",

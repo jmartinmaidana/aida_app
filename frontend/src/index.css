@@ -416,3 +416,26 @@ button:disabled { opacity: 0.7; cursor: not-allowed; pointer-events: none; }
     from { transform: translateX(120%); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
 }
+
+/* --- MODAL DE CONFIRMACIÓN --- */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(2px);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 10000;
+    animation: fadeInPage 0.2s ease-out forwards;
+}
+.modal-content {
+    background: white; padding: 30px; border-radius: 12px;
+    width: 90%; max-width: 430px;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+    animation: slideInModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+@keyframes slideInModal {
+    from { transform: scale(0.95) translateY(10px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+}
+.modal-header { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
+.modal-header h3 { margin: 0; font-size: 1.3rem; color: #0f172a; }
+.modal-content p { color: #475569; margin-bottom: 25px; line-height: 1.5; font-size: 0.95rem; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 12px; }
