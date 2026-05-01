@@ -13,6 +13,7 @@ export class EmailService {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
         },
+        family: 4, // Obliga a Node.js a usar IPv4, solucionando el error ENETUNREACH en Render
     });
 
     static async enviarCorreoActivacion(emailDestino: string, token: string): Promise<boolean> {
