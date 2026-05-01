@@ -28,7 +28,7 @@ export function Alumnos() {
     // Estados del Formulario
     const [mostrarForm, setMostrarForm] = useState(false);
     const [luEnEdicion, setLuEnEdicion] = useState<string | null>(null);
-    const [formData, setFormData] = useState({ lu: '', nombres: '', apellido: '', carrera_id: '' });
+    const [formData, setFormData] = useState({ lu: '', nombres: '', apellido: '', carrera_id: '', email: '' });
     const [carreras, setCarreras] = useState<Carrera[]>([]);
     const [guardando, setGuardando] = useState(false);
     
@@ -114,7 +114,7 @@ export function Alumnos() {
 
     // --- FUNCIONES DEL FORMULARIO ---
     const abrirFormCreacion = () => {
-        setFormData({ lu: '', nombres: '', apellido: '', carrera_id: '' });
+        setFormData({ lu: '', nombres: '', apellido: '', carrera_id: '', email: '' });
         setLuEnEdicion(null);
         setMostrarForm(true);
         setTimeout(() => {
@@ -124,7 +124,7 @@ export function Alumnos() {
     };
 
     const abrirFormEdicion = (alumno: Alumno) => {
-        setFormData({ lu: alumno.lu, nombres: alumno.nombres, apellido: alumno.apellido, carrera_id: alumno.carrera_id?.toString() || '' });
+        setFormData({ lu: alumno.lu, nombres: alumno.nombres, apellido: alumno.apellido, carrera_id: alumno.carrera_id?.toString() || '', email: '' });
         setLuEnEdicion(alumno.lu);
         setMostrarForm(true);
         setTimeout(() => {
@@ -133,7 +133,7 @@ export function Alumnos() {
         }, 50);
     };
 
-    const guardarAlumno = async (e: React.FormEvent) => {
+    const guardarAlumno = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setGuardando(true);
 
@@ -144,7 +144,8 @@ export function Alumnos() {
                 lu: luEnEdicion ? luEnEdicion : formData.lu,
                 nombres: formData.nombres,
                 apellido: formData.apellido,
-                carrera_id: Number(formData.carrera_id)
+                carrera_id: Number(formData.carrera_id),
+                email: formData.email ? formData.email : undefined // Enviamos el email solo si el usuario escribió algo
             };
 
             const data = luEnEdicion ? await api.put(url, body) : await api.post(url, body);
@@ -272,6 +273,18 @@ export function Alumnos() {
                                 <div className="grupo-form">
                                     <label>Apellido:</label> 
                                     <input type="text" required value={formData.apellido} onChange={e => setFormData({...formData, apellido: e.target.value})} placeholder="Apellidos del alumno" />
+                                </div>
+                                <div className="grupo-form" style={{ gridColumn: '1 / -1' }}>
+                                    <label>Correo Electrónico (Opcional):</label> 
+                                    <input 
+                                        type="email" 
+                                        value={formData.email} 
+                                        onChange={e => setFormData({...formData, email: e.target.value})} 
+                                        placeholder="alumno@ejemplo.com" 
+                                        disabled={!!luEnEdicion}
+                                        title={luEnEdicion ? "El correo solo se puede asignar al registrar un alumno nuevo." : ""}
+                                    />
+                                    <p style={{ margin: '5px 0 0 0', fontSize: '0.85rem', color: '#64748b' }}>Si se ingresa un correo, se enviará automáticamente un link de activación.</p>
                                 </div>
                             </div>
                             

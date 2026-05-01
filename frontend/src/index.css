@@ -128,7 +128,22 @@ body {
 .cabecera-login p { color: #64748b; margin: 10px 0 0 0; font-size: 1rem; }
 .input-con-icono { position: relative; display: flex; align-items: center; }
 .input-con-icono i { position: absolute; left: 14px; color: #94a3b8; font-size: 1.2rem; }
-.input-con-icono input { padding-left: 42px; }
+.input-con-icono input { padding-left: 42px; padding-right: 42px; }
+
+/* Botón para mostrar/ocultar contraseña */
+.btn-ojo-password {
+    position: absolute;
+    right: 14px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    color: #94a3b8;
+    transition: color 0.2s;
+}
+.btn-ojo-password:hover { color: #475569; }
 .btn-ingresar {
     width: 100%; margin-top: 15px; font-size: 1.05rem; padding: 14px; display: flex; justify-content: center; align-items: center; gap: 8px;
     background-color: transparent; color: #0284c7; border: 2px solid #0284c7; border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; transition: all 0.2s ease;

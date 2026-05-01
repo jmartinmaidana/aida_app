@@ -3,6 +3,9 @@ import { CarrerasRepository } from '../repositories/carrerasRepository.js';
 import { Alumno } from '../database.js';
 import { alumnoSchema } from '../schemas_validator.js';
 import { ZodError } from 'zod';
+import { UsuariosRepository } from '../repositories/usuariosRepository.js';
+import { EmailService } from './emailService.js';
+import crypto from 'crypto';
 
 export class AlumnosService {
     
@@ -97,9 +100,26 @@ export class AlumnosService {
         return { insertados, cantidadIgnorados, alumnosIgnorados };
     }
 
-    static async crearAlumno(alumno: Alumno) {
+    // Cambiamos 'Alumno' por 'any' temporalmente para permitir que traiga el email extra
+    static async crearAlumno(alumno: any) {
         const alumnoValidado = await this.validarYCompletarAlumno(alumno);
         await AlumnosRepository.crear(alumnoValidado);
+
+        // NUEVO: Si nos enviaron un email, le creamos el usuario y le mandamos el Link Mágico
+        if (alumno.email) {
+            try {
+                const nombreCompleto = `${alumnoValidado.nombres} ${alumnoValidado.apellido}`;
+                
+                const nuevoUsuario = await UsuariosRepository.crearUsuarioAlumno(alumnoValidado.lu, nombreCompleto, alumno.email);
+                
+                const tokenMagico = crypto.randomInt(100000, 1000000).toString(); // Genera un código numérico seguro de 6 dígitos (ej: "482910")
+                await UsuariosRepository.guardarTokenActivacion(nuevoUsuario.id, tokenMagico);
+                
+                await EmailService.enviarCorreoActivacion(alumno.email, tokenMagico);
+            } catch (error) {
+                console.error(`⚠️ El alumno se guardó, pero falló la creación de su cuenta web:`, error);
+            }
+        }
     }
 
     

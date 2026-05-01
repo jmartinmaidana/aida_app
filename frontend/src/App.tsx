@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { AdminRoute } from './components/AdminRoute';
 import { Login } from './pages/Login';
 import { Menu } from './pages/Menu';
 import { Alumnos } from './pages/Alumnos';
@@ -10,6 +11,7 @@ import { CertificadosLu } from './pages/CertificadosLu';
 import { CertificadosFecha } from './pages/CertificadosFecha';
 import { CargaCsv } from './pages/CargaCsv';
 import { Historial } from './pages/Historial';
+import { ActivarCuenta } from './pages/ActivarCuenta';
 import { ToastProvider } from './context/ToastContext';
 
 function App() {
@@ -18,19 +20,24 @@ function App() {
       <BrowserRouter>
         <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/app/activar-cuenta" element={<ActivarCuenta />} /> {/* Ruta Pública */}
         
         {/* Capa 1: Guardia de Seguridad (Asegura que estés logueado) */}
         <Route element={<ProtectedRoute />}>
             {/* Capa 2: Diseño visual compartido (Navbar y Footer) */}
             <Route element={<Layout />}>
                 <Route path="/menu" element={<Menu />} />
-                <Route path="/app/alumnos" element={<Alumnos />} />
-                <Route path="/app/cursada" element={<Cursada />} />
-                <Route path="/app/planes" element={<Planes />} />
-                <Route path="/app/certificados_lu" element={<CertificadosLu />} />
-                <Route path="/app/certificados_fecha" element={<CertificadosFecha />} />
-                <Route path="/app/carga_csv" element={<CargaCsv />} />
                 <Route path="/app/historial" element={<Historial />} />
+                
+                {/* Capa 3: Guardia de Rol (Solo ADMIN) */}
+                <Route element={<AdminRoute />}>
+                    <Route path="/app/alumnos" element={<Alumnos />} />
+                    <Route path="/app/cursada" element={<Cursada />} />
+                    <Route path="/app/planes" element={<Planes />} />
+                    <Route path="/app/certificados_lu" element={<CertificadosLu />} />
+                    <Route path="/app/certificados_fecha" element={<CertificadosFecha />} />
+                    <Route path="/app/carga_csv" element={<CargaCsv />} />
+                </Route>
             </Route>
         </Route>
 

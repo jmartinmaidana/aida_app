@@ -4,6 +4,7 @@ import { pool } from '../src/database';
 
 describe('Suite de Pruebas: Seguridad y Control de Acceso', () => {
     let cookieSesion: string;
+    let cookieAlumno: string;
 
     beforeAll(async () => {
         await request(app).post('/api/v0/auth/register').send({
@@ -19,9 +20,25 @@ describe('Suite de Pruebas: Seguridad y Control de Acceso', () => {
         });
 
         cookieSesion = respuestaLogin.headers['set-cookie'];
+
+        // Creamos un segundo usuario y le forzamos el rol ALUMNO para probar los bloqueos
+        await request(app).post('/api/v0/auth/register').send({
+            username: "alumno_bot",
+            password: "PasswordSegura123!",
+            nombre: "Alumno",
+            email: "alumno@bot.com"
+        });
+        await pool.query("UPDATE aida.usuarios SET rol = 'ALUMNO' WHERE username = 'alumno_bot'");
+        
+        const respuestaLoginAlumno = await request(app).post('/api/v0/auth/login').send({
+            username: "alumno_bot",
+            password: "PasswordSegura123!"
+        });
+        cookieAlumno = respuestaLoginAlumno.headers['set-cookie'];
     });
 
     afterAll(async () => {
+        await pool.query("DELETE FROM aida.usuarios WHERE username IN ('inspector_seguridad', 'alumno_bot')");
         await pool.end();
     });
 
@@ -84,4 +101,14 @@ describe('Suite de Pruebas: Seguridad y Control de Acceso', () => {
         expect(bodyFinal.estado).toBe('error');
         expect(bodyFinal.mensaje).toContain('Demasiados intentos');
     });*/
+
+    it('Debe bloquear el acceso (HTTP 403) a un ALUMNO intentando entrar a rutas de ADMIN', async () => {
+        const respuesta = await request(app)
+            .get('/api/alumnos')
+            .set('Cookie', cookieAlumno); // Usamos la cookie del alumno
+            
+        expect(respuesta.status).toBe(403);
+        expect(respuesta.body.estado).toBe('error');
+        expect(respuesta.body.mensaje).toContain('Acceso denegado');
+    });
 });

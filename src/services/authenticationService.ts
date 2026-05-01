@@ -26,7 +26,32 @@ export class AuthenticationService {
             id: usuarioBD.id,
             username: usuarioBD.username,
             nombre: usuarioBD.nombre,
-            email: usuarioBD.email
+            email: usuarioBD.email,
+            rol: usuarioBD.rol,
+            lu_alumno: usuarioBD.lu_alumno
         };
+    }
+
+    static async activarCuenta(token: string, passwordPlana: string): Promise<boolean> {
+        const tokenBD = await UsuariosRepository.buscarToken(token);
+        
+        if (!tokenBD) {
+            const error: any = new Error("El token es inválido o no existe.");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        if (new Date() > new Date(tokenBD.fecha_expiracion)) {
+            await UsuariosRepository.eliminarToken(tokenBD.id);
+            const error: any = new Error("El token ha expirado. Solicite al administrador que lo registre nuevamente.");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const hash = await bcrypt.hash(passwordPlana, SALT_ROUNDS);
+        await UsuariosRepository.actualizarPassword(tokenBD.usuario_id, hash);
+        await UsuariosRepository.eliminarToken(tokenBD.id);
+        
+        return true;
     }
 }

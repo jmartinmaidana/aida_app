@@ -41,7 +41,11 @@ export class AuthenticationController {
         
         AuditoriaRepository.registrar(usuarioValidado.id, 'INICIO_SESION', 'El usuario inició sesión exitosamente.');
         
-        res.status(200).json({ estado: "exito", mensaje: "Usuario logueado correctamente." });
+        res.status(200).json({ 
+            estado: "exito", 
+            mensaje: "Usuario logueado correctamente.",
+            usuario: usuarioValidado 
+        });
     }
 
     // POST: Logout
@@ -63,4 +67,23 @@ export class AuthenticationController {
     static verificarAuthController(req: Request, res: Response) {
         res.status(200).json({ estado: "exito", mensaje: "Sesión activa." });
     }
+
+    static async activarCuentaController(req: Request, res: Response) {
+        const { token, password } = req.body;
+        
+        if (!token || !password) {
+            return res.status(400).json({ 
+                estado: 'error', 
+                mensaje: 'Faltan datos requeridos. Se necesita el token y la nueva contraseña.' 
+            });
+        }
+
+        await AuthenticationService.activarCuenta(token, password);
+        
+        res.json({ 
+            estado: 'exito', 
+            mensaje: 'Cuenta activada correctamente. Ya puede iniciar sesión.' 
+        });
+    }
+
 }

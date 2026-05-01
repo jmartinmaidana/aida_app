@@ -10,6 +10,7 @@
     "express-rate-limit": "^8.3.1",
     "express-session": "^1.19.0",
     "helmet": "^8.1.0",
+    "nodemailer": "^8.0.7",
     "pg": "^8.20.0",
     "zod": "^4.3.6"
   },
@@ -21,6 +22,7 @@
     "@types/express-session": "^1.18.2",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.4.0",
+    "@types/nodemailer": "^8.0.0",
     "@types/pg": "^8.18.0",
     "@types/supertest": "^7.2.0",
     "cross-env": "^10.1.0",
@@ -32,6 +34,7 @@
   "scripts": {
     "build": "npx tsc && cd frontend && npm install && npm run build",
     "predeploy": "node dist/migrador.js",
+    "prestart": "node dist/migrador.js",
     "start": "node dist/server.js",
     "db:reset": "npx tsc && node dist/reset-db.js",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest --runInBand"

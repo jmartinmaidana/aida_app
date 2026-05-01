@@ -19,5 +19,6 @@ router.post('/register', catchAsync(AuthenticationController.registrarAuthContro
 router.post('/login', loginLimiter, catchAsync(AuthenticationController.loginAuthController));
 router.post('/logout', AuthenticationController.logoutAuthController);
 router.get('/verificar', requireAuthAPI, AuthenticationController.verificarAuthController);
+router.post('/activar', catchAsync(AuthenticationController.activarCuentaController));
 
 export default router;

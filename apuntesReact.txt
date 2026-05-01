@@ -1,0 +1,45 @@
+=========================================
+APUNTES DE REACT Y TYPESCRIPT (AIDA)
+=========================================
+
+1. EL ESTADO: useState
+-----------------------------------------
+Sintaxis: const [variable, setVariable] = useState<Tipo>(valorInicial);
+
+- [variable, setVariable]: React usa "desestructuración". NUNCA se modifica la variable directamente (ej. variable = nuevoValor). Siempre se usa la función modificadora (setVariable) para que React sepa que debe actualizar y redibujar la pantalla.
+- <Tipo>: Es un Genérico de TypeScript. Le indica al compilador qué tipo exacto de datos va a guardar esta variable (ej. <Alumno[]> para un arreglo de alumnos). Salva de errores al escribir código.
+- (valorInicial): Es el valor con el que arranca la variable antes de que el servidor responda (ej. un arreglo vacío [] o un booleano en false).
+
+2. EFECTOS SECUNDARIOS: useEffect
+-----------------------------------------
+Sintaxis: useEffect(() => { ...codigo... }, [dependencias]);
+
+Maneja cosas que ocurren "por fuera" del simple dibujado de HTML, como llamadas a la base de datos (fetch/api) o temporizadores. Su comportamiento cambia radicalmente según el segundo parámetro:
+
+- SIN ARREGLO: 
+  useEffect(() => { ... }) 
+  Peligroso. Se ejecuta cada vez que el componente cambia. Puede causar bucles infinitos.
+- ARREGLO VACÍO: 
+  useEffect(() => { ... }, []) 
+  Se ejecuta UNA SOLA VEZ, cuando la pantalla carga por primera vez. Ideal para cargar datos iniciales.
+- ARREGLO CON VARIABLES: 
+  useEffect(() => { ... }, [busqueda, pagina]) 
+  Reactivo. Se ejecuta al inicio, y VUELVE a ejecutarse únicamente si el valor de alguna de esas variables cambia.
+- FUNCIÓN DE LIMPIEZA (Cleanup): 
+  Si el efecto devuelve (return) una función al final, React la ejecutará antes de volver a correr el efecto. Es vital para limpiar temporizadores (ej. Debounce de un buscador) y evitar sobrecargar la API.
+
+3. CONVENCIONES DE COMPONENTES (.tsx)
+-----------------------------------------
+- PascalCase: Todo componente de React debe empezar con Mayúscula (ej. <Alumnos />). Si empieza con minúscula (ej. <div>), React asume que es una etiqueta HTML normal.
+- Homonimia: El archivo (Alumnos.tsx) y la función exportada (export function Alumnos) deben llamarse exactamente igual. 
+  - ¿Por qué? Facilita la navegación en proyectos grandes.
+  - Permite usar los archivos como verdaderos módulos (bloques de Lego) que se enchufan en otras partes de la app (ej. el App.tsx importando <Alumnos />).
+
+4. TIPOS DE EVENTOS (Event Typing)
+-----------------------------------------
+- Eventos Específicos: Siempre que sea posible, usa el tipo de evento más específico que React ofrece.
+  - onChange en un input: `ChangeEvent<HTMLInputElement>`
+  - onClick en un botón: `MouseEvent<HTMLButtonElement>`
+- El caso de `onSubmit`:
+  - El tipo correcto para el evento `onSubmit` de un formulario es `React.FormEvent<HTMLFormElement>`.
+  - **NOTA:** En versiones recientes de `@types/react`, `FormEvent` está marcado como obsoleto (@deprecated), por lo que se ve tachado. Esto es una inconsistencia conocida, ya que no hay un reemplazo específico y no obsoleto. La práctica recomendada es seguir usando `React.FormEvent<HTMLFormElement>` para obtener el tipado más seguro y simplemente ignorar la advertencia visual.

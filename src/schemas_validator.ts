@@ -16,6 +16,8 @@ export const alumnoSchema = z.object({
         .min(1, "El apellido no puede estar vacío.")
         .transform(sanitizarTexto),
     
+    email: z.string().email("Debe ser un correo electrónico válido.").optional(),
+    
     titulo: z.string().nullable().default(null),
     titulo_en_tramite: z.string().nullable().default(null),
     egreso: z.string().nullable().default(null),

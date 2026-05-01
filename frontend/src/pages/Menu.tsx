@@ -2,15 +2,20 @@ import { Link } from 'react-router-dom';
 import { Users, Books, PencilLine, Certificate, Files, UploadSimple } from '@phosphor-icons/react';
 
 export function Menu() {
+    const rol = localStorage.getItem('usuarioRol') || 'ADMIN';
+    const lu = localStorage.getItem('usuarioLu') || '';
+
     return (
             <div className="contenedor">
                 <div className="header-seccion">
-                    <h2>Panel de Administración</h2>
-                    <p>Seleccione el módulo operativo para comenzar:</p>
+                    <h2>{rol === 'ADMIN' ? 'Panel de Administración' : 'Panel del Alumno'}</h2>
+                    <p>{rol === 'ADMIN' ? 'Seleccione el módulo operativo para comenzar:' : 'Bienvenido a tu portal académico. Selecciona una opción:'}</p>
                 </div>
                 
                 <div className="grid-menu">
-                    <Link to="/app/alumnos" style={{ textDecoration: 'none' }}>
+                    {rol === 'ADMIN' && (
+                        <>
+                        <Link to="/app/alumnos" style={{ textDecoration: 'none' }}>
                         <div className="tarjeta-menu">
                             <div className="icono-contenedor"><Users /></div>
                             <h3>Tabla de Alumnos</h3>
@@ -61,9 +66,18 @@ export function Menu() {
                             <p>Importar nuevos inscriptos mediante archivo delimitado.</p>
                         </div>
                     </Link>
-                    
-                    {/* Puedes agregar aquí el resto de las tarjetas (Emisión Masiva y Carga CSV) de la misma forma */}
-                    
+                        </>
+                    )}
+
+                    {rol === 'ALUMNO' && (
+                        <Link to={`/app/historial?lu=${encodeURIComponent(lu)}`} style={{ textDecoration: 'none' }}>
+                            <div className="tarjeta-menu">
+                                <div className="icono-contenedor"><Certificate /></div>
+                                <h3>Mi Historial Académico</h3>
+                                <p>Visualiza tus notas, promedio y progreso de carrera.</p>
+                            </div>
+                        </Link>
+                    )}
                 </div>
             </div>
     );

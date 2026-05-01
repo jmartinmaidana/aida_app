@@ -1,6 +1,8 @@
 import request from 'supertest';
 import { app } from '../src/server';
 import { pool } from '../src/database';
+import { EmailService } from '../src/services/emailService.js';
+import { jest } from '@jest/globals';
 
 describe('Suite de Pruebas: Creación de Alumnos', () => {
     // Variable global para almacenar la cookie de sesión de nuestras pruebas
@@ -8,6 +10,9 @@ describe('Suite de Pruebas: Creación de Alumnos', () => {
 
     // Se ejecuta UNA SOLA VEZ antes de comenzar todos los tests de este archivo
     beforeAll(async () => {
+
+        // Simulamos el servicio de correos para que Jest NO envíe emails reales 
+        jest.spyOn(EmailService, 'enviarCorreoActivacion').mockResolvedValue(true);
 
         await request(app)
             .post('/api/v0/auth/register')
@@ -39,6 +44,7 @@ describe('Suite de Pruebas: Creación de Alumnos', () => {
 
     // Se ejecuta al finalizar todas las pruebas para liberar la base de datos
     afterAll(async () => {
+        jest.restoreAllMocks(); // Limpiamos el simulador de correos
         await pool.query('DELETE FROM aida.usuarios WHERE username = $1', ['robot_tester']); // <-- Limpiamos el usuario
         await pool.end();
     });
@@ -67,7 +73,8 @@ describe('Suite de Pruebas: Creación de Alumnos', () => {
             lu: "105/26", // Usamos un LU nuevo
             nombres: "María",
             apellido: "García",
-            carrera_id: 1 // Sabemos por el setup que el ID 1 es "Tecnicatura Web"
+            carrera_id: 1, // Sabemos por el setup que el ID 1 es "Tecnicatura Web"
+            email: "maria.test@aida.com" // Añadimos el email para probar el nuevo flujo
         };
 
         // 2. ACT: Enviamos la petición autorizada al servidor
@@ -87,6 +94,12 @@ describe('Suite de Pruebas: Creación de Alumnos', () => {
         expect(dbCheck.rows.length).toBe(1); // Debe haber exactamente 1 registro
         expect(dbCheck.rows[0].nombres).toBe("María"); // El nombre debe coincidir
         expect(dbCheck.rows[0].carrera_id).toBe(1); // La carrera debe haberse guardado
+        
+        // ASSERT EXTRA 2: Verificamos que el sistema haya intentado mandar el correo
+        expect(EmailService.enviarCorreoActivacion).toHaveBeenCalledWith(
+            "maria.test@aida.com",
+            expect.any(String) // El token es aleatorio, así que solo verificamos que sea un texto
+        );
     });
     // --- TEST 3: LU REPETIDA ---
     it('Debe rechazar la creación si la LU ya existe en el sistema', async () => {

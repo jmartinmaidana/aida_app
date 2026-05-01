@@ -15,6 +15,9 @@ export default async function setup() {
     });
 
     try {
+        // Limpiamos el esquema antes de correr las pruebas para asegurar un estado limpio
+        await testPool.query('DROP SCHEMA IF EXISTS aida CASCADE; CREATE SCHEMA aida;');
+
         const migracionesDir = path.join(process.cwd(), 'migraciones');
         const archivos = fs.readdirSync(migracionesDir).filter(f => f.endsWith('.sql')).sort();
         

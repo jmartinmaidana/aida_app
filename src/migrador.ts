@@ -4,15 +4,17 @@ import * as path from 'path';
 import dotenv from 'dotenv';
 dotenv.config();
 
-if (!process.env.DATABASE_URL) {
-    console.error("❌ ERROR FATAL: Falta la variable de entorno DATABASE_URL.");
+// El migrador usará preferentemente MIGRATOR_DATABASE_URL (con permisos altos). 
+// Si no existe, usará DATABASE_URL como respaldo (comportamiento anterior).
+const dbUrl = process.env.MIGRATOR_DATABASE_URL || process.env.DATABASE_URL;
+
+if (!dbUrl) {
+    console.error("❌ ERROR FATAL: Falta la variable de entorno MIGRATOR_DATABASE_URL o DATABASE_URL.");
     console.error("Asegúrese de tener su archivo .env configurado o la variable en Render.");
     process.exit(1);
 }
 
-const clientAdmin = new Client({
-    connectionString: process.env.DATABASE_URL
-});
+const clientAdmin = new Client({ connectionString: dbUrl });
 
 async function ejecutarMigraciones() {
     try {

@@ -1,6 +1,6 @@
 import { createContext, useState, useContext, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import { CheckCircle, XCircle, Info } from '@phosphor-icons/react';
+import { CheckCircle, XCircle, Spinner } from '@phosphor-icons/react';
 
 interface Toast {
     id: string;
@@ -21,8 +21,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         const id = Math.random().toString(36).substring(2, 9);
         setToasts(prev => [...prev, { id, texto, tipo }]);
         
-        // Auto-eliminar después de 3.5 segundos
-        setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3500);
+        // Auto-eliminar después de 5 segundos
+        setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000);
     }, []);
 
     return (
@@ -31,7 +31,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             <div className="toast-container">
                 {toasts.map(toast => (
                     <div key={toast.id} className={`toast ${toast.tipo}`}>
-                        {toast.tipo === 'exito' ? <CheckCircle size="1.5em" color="#10b981" /> : toast.tipo === 'error' ? <XCircle size="1.5em" color="#ef4444" /> : <Info size="1.5em" color="#3b82f6" />}
+                        {toast.tipo === 'exito' ? <CheckCircle size={25} weight="bold" color="#10b981" /> : toast.tipo === 'error' ? <XCircle size={25} weight="bold" color="#ef4444" /> : <Spinner className="icono-cargando" size={25} weight="bold" color="#0284c7" />}
                         <span>{toast.texto}</span>
                     </div>
                 ))}

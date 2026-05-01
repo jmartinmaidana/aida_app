@@ -152,7 +152,7 @@ export function Historial() {
                 ) : null}
 
                 <button onClick={() => navigate(-1)} className="btn-volver" style={{ marginTop: '30px', display: 'inline-flex' }}>
-                    <ArrowLeft size="1em" /> Volver al listado
+                    <ArrowLeft size="1em" /> Volver
                 </button>
             </div>
 

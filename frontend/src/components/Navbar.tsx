@@ -8,6 +8,10 @@ export function Navbar() {
     const [menuActivo, setMenuActivo] = useState(false);
     const navigate = useNavigate();
     const dropdownRef = useRef<HTMLDivElement>(null);
+    
+    // Obtenemos el rol y la LU desde el almacenamiento local
+    const rol = localStorage.getItem('usuarioRol') || 'ADMIN';
+    const lu = localStorage.getItem('usuarioLu') || '';
 
     useEffect(() => {
         const manejarClicFuera = (event: MouseEvent) => {
@@ -27,6 +31,8 @@ export function Navbar() {
     const cerrarSesion = async () => {
         try {
             await api.post('/api/v0/auth/logout', {});
+            localStorage.removeItem('usuarioRol');
+            localStorage.removeItem('usuarioLu');
             navigate('/login');
         } catch (error) {
             alert("Error al intentar cerrar sesión.");
@@ -46,13 +52,20 @@ export function Navbar() {
                 <div className={`dropdown ${menuActivo ? 'activo' : ''}`} ref={dropdownRef} onClick={() => setMenuActivo(!menuActivo)}>
                     <button className="dropbtn"><List /> Módulos <CaretDown /></button>
                     <div className="dropdown-content">
-                        {/* Usamos 'Link' en lugar de 'a' para aprovechar el enrutador de React sin recargar */}
-                        <Link to="/app/alumnos"><Users /> Alumnos</Link>
-                        <Link to="/app/planes"><Books /> Planes de Estudio</Link>
-                        <Link to="/app/cursada"><PencilLine /> Carga de Notas</Link>
-                        <Link to="/app/certificados_lu"><Certificate /> Emisión Individual</Link>
-                        <Link to="/app/certificados_fecha"><Files /> Emisión por Fecha</Link>
-                        <Link to="/app/carga_csv"><UploadSimple /> Carga Múltiple (CSV)</Link>
+                        {rol === 'ADMIN' && (
+                            <>
+                                <Link to="/app/alumnos"><Users /> Alumnos</Link>
+                                <Link to="/app/planes"><Books /> Planes de Estudio</Link>
+                                <Link to="/app/cursada"><PencilLine /> Carga de Notas</Link>
+                                <Link to="/app/certificados_lu"><Certificate /> Emisión Individual</Link>
+                                <Link to="/app/certificados_fecha"><Files /> Emisión por Fecha</Link>
+                                <Link to="/app/carga_csv"><UploadSimple /> Carga Múltiple (CSV)</Link>
+                            </>
+                        )}
+                        
+                        {rol === 'ALUMNO' && (
+                            <Link to={`/app/historial?lu=${encodeURIComponent(lu)}`}><Certificate /> Mi Historial Académico</Link>
+                        )}
                     </div>
                 </div>
                 

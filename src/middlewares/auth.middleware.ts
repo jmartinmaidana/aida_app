@@ -17,3 +17,20 @@ export function requireAuthAPI(req: Request, res: Response, next: NextFunction) 
         res.status(401).json({ estado: 'error', mensaje: 'No autorizado. Debe iniciar sesión.' });
     }
 }
+
+// NUEVO: Guardia de Control de Roles (RBAC)
+export function requireRole(rolesPermitidos: string[]) {
+    return (req: Request, res: Response, next: NextFunction) => {
+        const usuario = req.session?.usuario;
+
+        if (!usuario) {
+            return res.status(401).json({ estado: 'error', mensaje: 'No autenticado.' });
+        }
+
+        if (!rolesPermitidos.includes(usuario.rol)) {
+            return res.status(403).json({ estado: 'error', mensaje: 'Acceso denegado. Permisos insuficientes para realizar esta acción.' });
+        }
+
+        next();
+    };
+}
