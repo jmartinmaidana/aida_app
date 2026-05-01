@@ -13,8 +13,8 @@ export class EmailService {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
         },
-        family: 4, // Obliga a Node.js a usar IPv4, solucionando el error ENETUNREACH en Render
-    });
+        family: 4, 
+    } as any); // "as any" evita que TypeScript bloquee la compilación por la propiedad 'family'
 
     static async enviarCorreoActivacion(emailDestino: string, token: string): Promise<boolean> {
         try {
