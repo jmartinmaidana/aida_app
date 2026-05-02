@@ -52,6 +52,7 @@ jobs:
           NODE_ENV: test
           SESSION_SECRET: secreto_super_seguro
           TEST_DB_URL: postgresql://aida_test_user:aida_super_password@localhost:5432/aida_test_db
+          RESEND_API_KEY: re_123456789_dummy_key_for_testing
         run: npm test
 
   # === JOB 2: Publicar en Render (Solo si el Job 1 fue exitoso) ===
