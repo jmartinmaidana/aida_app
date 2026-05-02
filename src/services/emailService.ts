@@ -1,30 +1,26 @@
-import nodemailer from 'nodemailer';
+// c:\Users\Martin\Escritorio\TPBDD\src\services\emailService.ts
+
+import { Resend } from 'resend';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-export class EmailService {
-    // Configuramos el "transporte" (el servidor de correo que usaremos, por defecto Gmail)
-    private static transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-        port: Number(process.env.EMAIL_PORT) || 587,
-        secure: Number(process.env.EMAIL_PORT) === 465, // Automáticamente true si usamos el puerto 465
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-        family: 4, 
-    } as any); // "as any" evita que TypeScript bloquee la compilación por la propiedad 'family'
+// Inicializamos el cliente de Resend con la clave de entorno
+const resend = new Resend(process.env.RESEND_API_KEY);
 
+export class EmailService {
     static async enviarCorreoActivacion(emailDestino: string, token: string): Promise<boolean> {
         try {
-            // URL base de tu aplicación (localhost en tu PC, o la URL de Render en producción)
+            // URL base de tu aplicación
             const urlApp = process.env.APP_URL || 'http://localhost:3000';
             const linkActivacion = `${urlApp}/app/activar-cuenta`;
 
-            const mailOptions = {
-                from: `"Sistema AIDA" <${process.env.EMAIL_USER}>`,
-                to: emailDestino,
+            // Enviamos el correo usando la API de Resend
+            const { data, error } = await resend.emails.send({
+                // Nota: Resend proporciona un email de prueba (onboarding@resend.dev) 
+                // Puedes usar tu propio dominio una vez verificado.
+                from: `"Sistema AIDA" <onboarding@resend.dev>`, 
+                to: [emailDestino],
                 subject: 'Bienvenido a AIDA - Activa tu cuenta',
                 html: `
                     <h2>¡Bienvenido al Sistema de Gestión Académica AIDA!</h2>
@@ -35,12 +31,18 @@ export class EmailService {
                     <a href="${linkActivacion}" style="background-color: #0284c7; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">Ir a la página de activación</a>
                     <p style="margin-top: 20px; color: #64748b; font-size: 14px;"><i>Este código expirará en 24 horas.</i></p>
                 `,
-            };
+            });
 
-            await this.transporter.sendMail(mailOptions);
+            if (error) {
+                console.error("❌ Error de la API de Resend:", error);
+                return false;
+            }
+
+            console.log("✅ Correo de activación enviado con éxito (ID:", data?.id, ")");
             return true;
+            
         } catch (error) {
-            console.error("Error al enviar correo de activación:", error);
+            console.error("❌ Excepción al enviar correo de activación:", error);
             return false;
         }
     }
