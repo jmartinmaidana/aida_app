@@ -15,10 +15,18 @@ const loginLimiter = rateLimit({
     legacyHeaders: false,
 });
 
+const activarLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: aplicarRateLimit ? 5 : 1000, // Máximo 5 intentos para adivinar el token
+    message: { estado: "error", mensaje: "Demasiados intentos de activación. Por favor, intente nuevamente en 15 minutos." },
+    standardHeaders: true, 
+    legacyHeaders: false,
+});
+
 router.post('/register', catchAsync(AuthenticationController.registrarAuthController));
 router.post('/login', loginLimiter, catchAsync(AuthenticationController.loginAuthController));
 router.post('/logout', AuthenticationController.logoutAuthController);
 router.get('/verificar', requireAuthAPI, AuthenticationController.verificarAuthController);
-router.post('/activar', catchAsync(AuthenticationController.activarCuentaController));
+router.post('/activar', activarLimiter, catchAsync(AuthenticationController.activarCuentaController));
 
 export default router;
