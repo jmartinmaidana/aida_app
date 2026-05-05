@@ -28,8 +28,17 @@ export interface Cursada {
     anio: number;
     cuatrimestre: number;
     materia: string;
-    nota: number;
+    nota: number | null;
     aprobada: boolean;
+    estado: 'CURSANDO' | 'APROBADA' | 'DESAPROBADA'; // <-- ¡Agrega esta línea!
+}
+
+export interface Final {
+    id: number;
+    materia: string;
+    nota: number;
+    aprobado: boolean;
+    fecha: string;
 }
 
 export interface DatosHistorial {
@@ -42,4 +51,5 @@ export interface DatosHistorial {
         totalMaterias: number;
     };
     historial: Cursada[];
+    finales: Final[];
 }

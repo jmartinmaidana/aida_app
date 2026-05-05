@@ -10,9 +10,12 @@ import { Planes } from './pages/Planes';
 import { CertificadosLu } from './pages/CertificadosLu';
 import { CertificadosFecha } from './pages/CertificadosFecha';
 import { CargaCsv } from './pages/CargaCsv';
+import { CargaNotasCsv } from './pages/CargaNotasCsv';
 import { Historial } from './pages/Historial';
 import { ActivarCuenta } from './pages/ActivarCuenta';
 import { ToastProvider } from './context/ToastContext';
+import { GestionPeriodoLectivo } from './pages/admin/PeriodosLectivos';
+import { InscripcionesAlumno } from './pages/InscripcionesAlumno';
 
 function App() {
   return (
@@ -28,6 +31,7 @@ function App() {
             <Route element={<Layout />}>
                 <Route path="/menu" element={<Menu />} />
                 <Route path="/app/historial" element={<Historial />} />
+                <Route path="/app/inscripciones" element={<InscripcionesAlumno />} />
                 
                 {/* Capa 3: Guardia de Rol (Solo ADMIN) */}
                 <Route element={<AdminRoute />}>
@@ -37,6 +41,9 @@ function App() {
                     <Route path="/app/certificados_lu" element={<CertificadosLu />} />
                     <Route path="/app/certificados_fecha" element={<CertificadosFecha />} />
                     <Route path="/app/carga_csv" element={<CargaCsv />} />
+                    <Route path="/app/carga_notas_csv" element={<CargaNotasCsv />} />
+                    <Route path="/app/periodos_lectivos" element={<GestionPeriodoLectivo />} />
+
                 </Route>
             </Route>
         </Route>

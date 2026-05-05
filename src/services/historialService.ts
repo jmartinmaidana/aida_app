@@ -2,6 +2,7 @@ import { AlumnosRepository } from '../repositories/alumnosRepository.js';
 import { CursadasRepository } from '../repositories/cursadaRepository.js';
 import { PlanEstudiosRepository } from '../repositories/planEstudiosRepository.js';
 import { AcademicoService } from './academicoService.js';
+import { FinalesRepository } from '../repositories/finalesRepository.js';
 
 export class HistorialService {
     static async obtenerHistorialCompleto(lu: string) {
@@ -16,8 +17,9 @@ export class HistorialService {
         const alumno = dataAlumno.rows[0];
 
         // 2. Ejecutamos todas las consultas independientes EN PARALELO
-        const [cursadas, cantidadAprobadas, promedio, totalMateriasCarrera] = await Promise.all([
+        const [cursadas, finales, cantidadAprobadas, promedio, totalMateriasCarrera] = await Promise.all([
             CursadasRepository.obtenerCursadas(lu),
+            FinalesRepository.obtenerFinalesAlumno(lu),
             CursadasRepository.cantidadMateriasAprobadas(lu),
             AcademicoService.calcularPromedioAlumno(lu),
             PlanEstudiosRepository.cantidadMateriasRequeridas(lu)
@@ -36,7 +38,8 @@ export class HistorialService {
                 materiasAprobadas: cantidadAprobadas,
                 totalMaterias: totalMateriasCarrera
             },
-            historial: cursadas
+            historial: cursadas,
+            finales: finales
         };
     }
 }

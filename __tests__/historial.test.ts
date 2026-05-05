@@ -44,11 +44,22 @@ describe('Suite de Pruebas: Historial Académico', () => {
 
         cookieSesion = respuestaLogin.headers['set-cookie'];
 
+        // Configuramos la materia en el plan de estudios para evitar rechazos en la cursada
+        await pool.query(`INSERT INTO aida.carreras (id, nombre) SELECT $1, 'Carrera Test' WHERE NOT EXISTS (SELECT 1 FROM aida.carreras WHERE id = $1);`, [CARRERA_ID_PRUEBA]);
+        await pool.query(`INSERT INTO aida.materias (id, nombre) SELECT $1, 'Materia Test' WHERE NOT EXISTS (SELECT 1 FROM aida.materias WHERE id = $1);`, [MATERIA_ID_PRUEBA]);
+        await pool.query(`INSERT INTO aida.plan_estudio (carrera_id, materia_id) SELECT $1, $2 WHERE NOT EXISTS (SELECT 1 FROM aida.plan_estudio WHERE carrera_id = $1 AND materia_id = $2);`, [CARRERA_ID_PRUEBA, MATERIA_ID_PRUEBA]);
+
         // 5. Preparamos el alumno de prueba
         await request(app)
             .post('/api/alumno')
             .set('Cookie', cookieSesion)
             .send(alumnoPrueba);
+
+        // Simulamos la inscripción previa obligatoria
+        await pool.query(
+            `INSERT INTO aida.cursadas (lu_alumno, materia_id, anio, cuatrimestre, estado, aprobada) VALUES ($1, $2, 2024, 1, 'CURSANDO', false)`,
+            [alumnoPrueba.lu, MATERIA_ID_PRUEBA]
+        );
 
         // 6. Le cargamos una nota aprobada (ej. un 8)
         await request(app)

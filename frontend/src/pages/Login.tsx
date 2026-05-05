@@ -56,10 +56,10 @@ export function Login() {
                 
                 <form onSubmit={handleSubmit}>
                     <div className="grupo-form">
-                        <label htmlFor="username">Usuario</label>
+                        <label htmlFor="username">Ingrese su usuario</label>
                         <div className="input-con-icono">
                             <User size={20} style={{ position: 'absolute', left: '14px', color: '#94a3b8' }} />
-                            <input type="text" id="username" placeholder="Ingrese su nombre de usuario" required
+                            <input type="text" id="username" placeholder="Nombre de usuario" required
                                 value={username} 
                                 onChange={(e) => setUsername(e.target.value)} 
                             />
@@ -67,10 +67,10 @@ export function Login() {
                     </div>
                     
                     <div className="grupo-form">
-                        <label htmlFor="password">Contraseña</label>
+                        <label htmlFor="password">Ingrese su contraseña</label>
                         <div className="input-con-icono">
                             <LockKey size={20} style={{ position: 'absolute', left: '14px', color: '#94a3b8' }} />
-                            <input type={showPassword ? 'text' : 'password'} id="password" placeholder="Ingrese su contraseña" required
+                            <input type={showPassword ? 'text' : 'password'} id="password" placeholder="Contraseña" required
                                 value={password} 
                                 onChange={(e) => setPassword(e.target.value)} 
                             />

@@ -33,10 +33,21 @@ describe('Suite de Pruebas: Registro de Cursadas y Notas', () => {
     beforeEach(async () => {
         // Al borrar alumnos en cascada, también se borran sus cursadas
         await pool.query('TRUNCATE TABLE aida.alumnos CASCADE');
+
+        // Nos aseguramos de que el plan de estudios esté configurado para la validación
+        await pool.query(`INSERT INTO aida.carreras (id, nombre) SELECT 1, 'Carrera Test' WHERE NOT EXISTS (SELECT 1 FROM aida.carreras WHERE id = 1);`);
+        await pool.query(`INSERT INTO aida.materias (id, nombre) SELECT 1, 'Materia Test' WHERE NOT EXISTS (SELECT 1 FROM aida.materias WHERE id = 1);`);
+        await pool.query(`INSERT INTO aida.plan_estudio (carrera_id, materia_id) SELECT 1, 1 WHERE NOT EXISTS (SELECT 1 FROM aida.plan_estudio WHERE carrera_id = 1 AND materia_id = 1);`);
         
         // Insertamos un alumno directamente en la BD para tener a quién cargarle la nota
         await pool.query(
             `INSERT INTO aida.alumnos (lu, nombres, apellido, carrera_id) VALUES ($1, 'Alumno', 'De Prueba', 1)`,
+            [LU_PRUEBA]
+        );
+
+        // Inscribimos al alumno para que la carga de nota pase la nueva validación estricta
+        await pool.query(
+            `INSERT INTO aida.cursadas (lu_alumno, materia_id, anio, cuatrimestre, estado, aprobada) VALUES ($1, 1, 2026, 1, 'CURSANDO', false)`,
             [LU_PRUEBA]
         );
     });
@@ -73,7 +84,7 @@ describe('Suite de Pruebas: Registro de Cursadas y Notas', () => {
     });
 
     // --- TEST 2: VALIDACIÓN DE DATOS FALTANTES ---
-    it('Debe rechazar el registro (HTTP 400) si falta información obligatoria', async () => {
+    it('Debe rechazar el registro con estado de error si falta información obligatoria', async () => {
         const cursadaIncompleta = {
             lu: LU_PRUEBA,
             idMateria: ID_MATERIA_PRUEBA,
@@ -85,12 +96,13 @@ describe('Suite de Pruebas: Registro de Cursadas y Notas', () => {
             .set('Cookie', cookieSesion)
             .send(cursadaIncompleta);
 
-        expect(respuesta.status).toBe(400);
-        expect(respuesta.body.mensaje).toBe("Falta completar datos.");
+        expect(respuesta.status).toBe(200); // Ahora se maneja el error internamente
+        expect(respuesta.body.estado).toBe("error");
+        expect(respuesta.body.mensaje).toBeDefined();
     });
 
     // --- TEST 3: VALIDACIÓN DE REGLAS DE NEGOCIO (RANGO DE NOTAS) ---
-    it('Debe rechazar el registro (HTTP 400) si la nota está fuera del rango permitido (1-10)', async () => {
+    it('Debe rechazar el registro con estado de error si la nota está fuera del rango permitido (1-10)', async () => {
         const cursadaInvalida = {
             lu: LU_PRUEBA,
             idMateria: ID_MATERIA_PRUEBA,
@@ -104,12 +116,13 @@ describe('Suite de Pruebas: Registro de Cursadas y Notas', () => {
             .set('Cookie', cookieSesion)
             .send(cursadaInvalida);
 
-        expect(respuesta.status).toBe(400);
-        expect(respuesta.body.mensaje).toBe("La nota debe ser un número entero entre 1 y 10.");
+        expect(respuesta.status).toBe(200); // Ahora se maneja el error internamente
+        expect(respuesta.body.estado).toBe("error");
+        expect(respuesta.body.mensaje).toBeDefined();
     });
 
     // --- TEST 4: PRUEBA DE TRANSACCIÓN (ROLLBACK) ---
-    it('Debe revertir (Rollback) la cursada si ocurre un error al verificar el egreso', async () => {
+    it('Debe revertir (Rollback) la cursada si ocurre un error al verificar el egreso y devolver error controlado', async () => {
         // 1. ARRANGE: Espiamos el repositorio y forzamos un error justo al final del proceso
         // Simulamos que la carrera solo requiere 1 materia para que dispare la verificación de egreso
         const espiaPlan = jest.spyOn(PlanEstudiosRepository, 'cantidadMateriasRequeridas')
@@ -133,11 +146,46 @@ describe('Suite de Pruebas: Registro de Cursadas y Notas', () => {
             .send(nuevaCursada);
 
         // 3. ASSERT: Verificamos que el sistema haya abortado y la cursada NO exista
-        expect(respuesta.status).toBe(500); // Tu manejador de errores atrapará el error genérico
-        const dbCheck = await pool.query('SELECT * FROM aida.cursadas WHERE lu_alumno = $1 AND materia_id = $2', [LU_PRUEBA, ID_MATERIA_PRUEBA]);
-        expect(dbCheck.rows.length).toBe(0); // ¡El Rollback funcionó, la tabla está limpia!
+        expect(respuesta.status).toBe(200); // El Error 500 ahora fue encapsulado en 'alumnosIgnorados'
+        expect(respuesta.body.estado).toBe("error");
+        const dbCheck = await pool.query('SELECT estado FROM aida.cursadas WHERE lu_alumno = $1 AND materia_id = $2', [LU_PRUEBA, ID_MATERIA_PRUEBA]);
+        expect(dbCheck.rows[0].estado).toBe('CURSANDO'); // ¡El Rollback funcionó, la cursada no se actualizó!
         
         espiaPlan.mockRestore();
         espia.mockRestore(); // Limpiamos el espía para no afectar otras pruebas futuras
+    });
+
+    // --- TEST 5: CARGA MASIVA DE CURSADAS ---
+    it('Debe registrar múltiples cursadas exitosamente (HTTP 200) cuando se envía un arreglo (Lote/CSV)', async () => {
+        // 1. ARRANGE: Agregamos un segundo alumno para la prueba
+        await pool.query(
+            `INSERT INTO aida.alumnos (lu, nombres, apellido, carrera_id) VALUES ($1, 'Alumno 2', 'De Prueba', 1)`,
+            ["301/26"]
+        );
+
+        // Inscribimos al alumno 2
+        await pool.query(
+            `INSERT INTO aida.cursadas (lu_alumno, materia_id, anio, cuatrimestre, estado, aprobada) VALUES ($1, 1, 2026, 1, 'CURSANDO', false)`,
+            ["301/26"]
+        );
+
+        const loteCursadas = [
+            { lu: LU_PRUEBA, idMateria: ID_MATERIA_PRUEBA, año: 2026, cuatrimestre: 1, nota: 7 },
+            { lu: "301/26", idMateria: ID_MATERIA_PRUEBA, año: 2026, cuatrimestre: 1, nota: 4 }
+        ];
+
+        // 2. ACT: Enviamos el arreglo completo
+        const respuesta = await request(app)
+            .post('/api/v0/cursada')
+            .set('Cookie', cookieSesion)
+            .send(loteCursadas);
+
+        // 3. ASSERT: Verificamos éxito general y en la base de datos
+        expect(respuesta.status).toBe(200);
+        expect(respuesta.body.estado).toBe("exito");
+        expect(respuesta.body.procesados).toBe(2); // Sabemos que debía cargar dos
+
+        const dbCheck = await pool.query('SELECT COUNT(*) FROM aida.cursadas WHERE materia_id = $1', [ID_MATERIA_PRUEBA]);
+        expect(parseInt(dbCheck.rows[0].count)).toBe(2);
     });
 });

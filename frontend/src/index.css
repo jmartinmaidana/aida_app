@@ -225,6 +225,13 @@ tr:hover td { background-color: #f8fafc; }
 .badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; text-align: center; min-width: 80px;}
 .badge-aprobada { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;}
 .badge-desaprobada { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca;}
+.badge-cursando { background-color: #e0f2fe; color: #075985; border: 1px solid #bae6fd;}
+
+/* --- FILTROS HISTORIAL --- */
+.filtros-historial { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid #e2e8f0; padding-bottom: 20px; flex-wrap: wrap; }
+.filtros-historial button { background: white; border: 1px solid #cbd5e1; padding: 10px 18px; border-radius: 6px; color: #475569; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; font-family: 'Inter', sans-serif; font-size: 0.95rem; }
+.filtros-historial button:hover { background: #f1f5f9; color: #0f172a; }
+.filtros-historial button.activo { background: #0284c7; color: white; border-color: #0284c7; box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2); }
 
 /* --- MÓDULO ARCHIVOS (DRAG & DROP) --- */
 .area-carga { 

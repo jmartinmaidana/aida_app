@@ -29,7 +29,11 @@ export class AcademicoService {
         try {
             await client.query('BEGIN');
 
-            await CursadasRepository.guardarCursada(lu, idMateria, anio, cuatrimestre, nota, aprobada, client);
+            if (aprobada) {
+                await CursadasRepository.aprobarCursada(lu, idMateria, anio, cuatrimestre, nota, client);
+            } else {
+                await CursadasRepository.desaprobarCursada(lu, idMateria, anio, cuatrimestre, nota, client);
+            }
 
             let egreso = false;
             if (aprobada) {
@@ -69,21 +73,15 @@ export class AcademicoService {
     }
     static async calcularPromedioAlumno(lu: string) {
         
-        const cursadas = await CursadasRepository.obtenerCursadas(lu);
-
-        let sumaNotasAprobadas = 0;
-
-        cursadas.forEach((c: any) => {
-            if (c.aprobada) {
-                sumaNotasAprobadas += parseInt(c.nota);
-            }
-        });
-
-        const cantidadAprobadas = await CursadasRepository.cantidadMateriasAprobadas(lu);
+        // Calculamos el promedio "sin aplazos" usando solo los finales aprobados directamente en SQL
+        const query = `
+            SELECT COALESCE(AVG(nota), 0) as promedio 
+            FROM aida.finales 
+            WHERE lu_alumno = $1 AND aprobado = true;
+        `;
+        const res = await pool.query(query, [lu]);
         
-        const promedio = cantidadAprobadas > 0 ? Number((sumaNotasAprobadas / cantidadAprobadas).toFixed(2)) : 0;
-
-        return promedio;
+        return Number(parseFloat(res.rows[0].promedio).toFixed(2));
     }
 
 

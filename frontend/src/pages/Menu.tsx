@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Users, Books, PencilLine, Certificate, Files, UploadSimple } from '@phosphor-icons/react';
+import { Users, Books, PencilLine, Certificate, Files, UploadSimple, CalendarBlank, BookBookmark, Exam } from '@phosphor-icons/react';
 
 export function Menu() {
     const rol = localStorage.getItem('usuarioRol') || 'ADMIN';
@@ -20,6 +20,16 @@ export function Menu() {
                             <div className="icono-contenedor"><Users /></div>
                             <h3>Tabla de Alumnos</h3>
                             <p>Altas, bajas, modificaciones y consultas del padrón.</p>
+                        </div>
+                    </Link>
+
+                    <Link to="/app/periodos_lectivos" style={{ textDecoration: 'none'}}>
+                        <div className="tarjeta-menu">
+                            <div className="icono-contenedor"> 
+                                <CalendarBlank />
+                            </div>
+                            <h3>Períodos Lectivos</h3>
+                            <p>Gestión de oferta académica y apertura de inscripciones.</p>
                         </div>
                     </Link>
                     
@@ -66,17 +76,36 @@ export function Menu() {
                             <p>Importar nuevos inscriptos mediante archivo delimitado.</p>
                         </div>
                     </Link>
+                    
+                    <Link to="/app/carga_notas_csv" style={{ textDecoration: 'none'}}>
+                        <div className="tarjeta-menu">
+                            <div className="icono-contenedor"> 
+                                <Exam />
+                            </div>
+                            <h3>Carga Notas (CSV)</h3>
+                            <p>Subir planillas con resultados de cursadas y exámenes finales.</p>
+                        </div>
+                    </Link>
                         </>
                     )}
 
                     {rol === 'ALUMNO' && (
-                        <Link to={`/app/historial?lu=${encodeURIComponent(lu)}`} style={{ textDecoration: 'none' }}>
-                            <div className="tarjeta-menu">
-                                <div className="icono-contenedor"><Certificate /></div>
-                                <h3>Mi Historial Académico</h3>
-                                <p>Visualiza tus notas, promedio y progreso de carrera.</p>
-                            </div>
-                        </Link>
+                        <>
+                            <Link to={`/app/historial?lu=${encodeURIComponent(lu)}`} style={{ textDecoration: 'none' }}>
+                                <div className="tarjeta-menu">
+                                    <div className="icono-contenedor"><Certificate /></div>
+                                    <h3>Mi Historial Académico</h3>
+                                    <p>Visualiza tus notas, promedio y progreso de carrera.</p>
+                                </div>
+                            </Link>
+                            <Link to="/app/inscripciones" style={{ textDecoration: 'none' }}>
+                                <div className="tarjeta-menu">
+                                    <div className="icono-contenedor"><BookBookmark /></div>
+                                    <h3>Inscripción a Materias</h3>
+                                    <p>Anotate a las materias disponibles para el período lectivo activo.</p>
+                                </div>
+                            </Link>
+                        </>
                     )}
                 </div>
             </div>

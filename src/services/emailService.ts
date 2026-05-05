@@ -17,9 +17,8 @@ export class EmailService {
 
             // Enviamos el correo usando la API de Resend
             const { data, error } = await resend.emails.send({
-                // Nota: Resend proporciona un email de prueba (onboarding@resend.dev) 
-                // Puedes usar tu propio dominio una vez verificado.
-                from: `"Sistema AIDA" <onboarding@resend.dev>`, 
+                // Usamos la variable de entorno, si no existe usamos el sandbox por defecto
+                from: process.env.EMAIL_FROM || `"Sistema AIDA" <onboarding@resend.dev>`, 
                 to: [emailDestino],
                 subject: 'Bienvenido a AIDA - Activa tu cuenta',
                 html: `

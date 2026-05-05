@@ -2,7 +2,7 @@ import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { AuthenticationController } from '../controllers/authenticationController.js';
 import { catchAsync } from '../middlewares/errorHandler.js';
-import { requireAuthAPI } from '../middlewares/auth.middleware.js';
+import { requireAuthAPI } from '../middlewares/authMiddleware.js';
 
 const router = Router();
 const aplicarRateLimit = process.env.NODE_ENV !== 'test';

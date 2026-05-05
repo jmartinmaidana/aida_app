@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { GraduationCap, SquaresFour, List, CaretDown, Users, Books, PencilLine, Certificate, Files, UploadSimple, SignOut } from '@phosphor-icons/react';
+import { GraduationCap, SquaresFour, List, CaretDown, Users, Books, PencilLine, Certificate, Files, UploadSimple, SignOut, CalendarBlankIcon, BookBookmark, Exam } from '@phosphor-icons/react';
 import { api } from '../utils/api';
 
 export function Navbar() {
@@ -55,16 +55,21 @@ export function Navbar() {
                         {rol === 'ADMIN' && (
                             <>
                                 <Link to="/app/alumnos"><Users /> Alumnos</Link>
+                                <Link to="/app/periodos_lectivos"><CalendarBlankIcon /> Períodos Lectivos</Link>
                                 <Link to="/app/planes"><Books /> Planes de Estudio</Link>
                                 <Link to="/app/cursada"><PencilLine /> Carga de Notas</Link>
                                 <Link to="/app/certificados_lu"><Certificate /> Emisión Individual</Link>
                                 <Link to="/app/certificados_fecha"><Files /> Emisión por Fecha</Link>
                                 <Link to="/app/carga_csv"><UploadSimple /> Carga Múltiple (CSV)</Link>
+                                <Link to="/app/carga_notas_csv"><Exam /> Carga Notas (CSV)</Link>
                             </>
                         )}
                         
                         {rol === 'ALUMNO' && (
-                            <Link to={`/app/historial?lu=${encodeURIComponent(lu)}`}><Certificate /> Mi Historial Académico</Link>
+                            <>
+                                <Link to={`/app/historial?lu=${encodeURIComponent(lu)}`}><Certificate /> Mi Historial Académico</Link>
+                                <Link to="/app/inscripciones"><BookBookmark /> Inscripción a Materias</Link>
+                            </>
                         )}
                     </div>
                 </div>

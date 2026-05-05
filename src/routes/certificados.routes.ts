@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { CertificadoController } from '../controllers/certificadoController.js';
 import { catchAsync } from '../middlewares/errorHandler.js';
-import { requireAuthAPI, requireRole } from '../middlewares/auth.middleware.js';
+import { requireAuthAPI, requireRole } from '../middlewares/authMiddleware.js';
 
 const router = Router();
 

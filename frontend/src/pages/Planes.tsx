@@ -74,11 +74,11 @@ export function Planes() {
     return (
         <div className="contenedor">
             <div className="tarjeta-form">
-                <div className="cabecera-pagina" style={{ marginBottom: '30px', flexWrap: 'wrap', gap: '20px' }}>
-                    <h1 style={{ margin: 0, justifyContent: 'flex-start' }}>
+                <div className="cabecera-pagina" style={{ flexWrap: 'wrap', gap: '15px' }}>
+                    <h1 style={{ width: '100%' }}>
                         <Books size="1em" style={{ marginRight: '8px' }} /> Planes de Estudio
                     </h1>
-                    <div className="input-con-icono" style={{ flex: '1 1 250px', maxWidth: '400px' }}>
+                    <div className="input-con-icono" style={{ width: '100%', maxWidth: '500px' }}>
                         <MagnifyingGlass size="1.2rem" style={{ position: 'absolute', left: '14px', color: '#94a3b8' }} />
                         <input 
                             type="text" 

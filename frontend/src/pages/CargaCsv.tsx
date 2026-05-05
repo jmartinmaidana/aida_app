@@ -1,51 +1,18 @@
 import { useState, useRef } from 'react';
-import type { DragEvent, ChangeEvent } from 'react';
 import { FileCsv, Info, FolderOpen, UploadSimple, Spinner, DownloadSimple } from '@phosphor-icons/react';
 import { api } from '../utils/api';
 import { useToast } from '../context/ToastContext';
+import { csvDragAndDrop } from '../hooks/CsvDragAndDrop';
 
 export function CargaCsv() {
-    const [archivo, setArchivo] = useState<File | null>(null);
-    const [dragActivo, setDragActivo] = useState(false);
     const [cargando, setCargando] = useState(false);
     const [erroresSecundarios, setErroresSecundarios] = useState<{ ignorados: number, alumnosIgnorados: any[] } | null>(null);
     
     const inputRef = useRef<HTMLInputElement>(null);
     const { mostrarToast } = useToast();
-
-    // --- EVENTOS DRAG & DROP ---
-    const handleDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setDragActivo(true); };
-    const handleDragLeave = () => setDragActivo(false);
-    const handleDrop = (e: DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setDragActivo(false);
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            const archivoDroppeado = e.dataTransfer.files[0];
-            if (archivoDroppeado.name.endsWith('.csv')) {
-                setArchivo(archivoDroppeado);
-                setErroresSecundarios(null);
-            } else {
-                mostrarToast('Por favor, arrastre únicamente un archivo con extensión .csv', 'error');
-            }
-        }
-    };
-
-    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files.length > 0) {
-            setArchivo(e.target.files[0]);
-            setErroresSecundarios(null);
-        }
-    };
-
-    // --- PROCESAMIENTO Y ENVÍO ---
-    const leerArchivoComoTexto = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-            const lector = new FileReader();
-            lector.onload = (evento) => resolve(evento.target?.result as string);
-            lector.onerror = () => reject(new Error("Error al leer el archivo físico."));
-            lector.readAsText(file);
-        });
-    };
+    
+    // Usamos nuestro Custom Hook. Le pasamos un callback para limpiar el estado de errores si suben otro archivo.
+    const { archivo, setArchivo, dragActivo, handleDragOver, handleDragLeave, handleDrop, handleFileChange, leerArchivoComoTexto } = csvDragAndDrop(() => setErroresSecundarios(null));
 
     const procesarYEnviarArchivo = async () => {
         if (!archivo) return mostrarToast('Por favor, seleccione o arrastre un archivo CSV.', 'error');
@@ -92,6 +59,9 @@ export function CargaCsv() {
             if (inputRef.current) inputRef.current.value = '';
 
         } catch (error: any) {
+            if (error.ignorados && error.ignorados > 0) {
+                setErroresSecundarios({ ignorados: error.ignorados, alumnosIgnorados: error.alumnosIgnorados || [] });
+            }
             mostrarToast(error.message || 'Ocurrió un error inesperado durante el proceso.', 'error');
         } finally {
             setCargando(false);
@@ -100,18 +70,37 @@ export function CargaCsv() {
 
     const descargarCsvErrores = () => {
         if (!erroresSecundarios || erroresSecundarios.alumnosIgnorados.length === 0) return;
-        const cabeceras = ["lu", "nombres", "apellido", "carrera_id", "motivo_error"];
+        
+        // 1. Extraer las cabeceras dinámicamente basadas en el primer registro con error
+        const primerRegistro = erroresSecundarios.alumnosIgnorados[0];
+        const cabecerasOriginales = Object.keys(primerRegistro).filter(k => k !== 'motivo_error');
+        const cabeceras = [...cabecerasOriginales, "motivo_error"];
+        
         const lineasCsv = [cabeceras.join(",")];
         
         erroresSecundarios.alumnosIgnorados.forEach(alumno => {
-            const linea = [alumno.lu || "", alumno.nombres || "", alumno.apellido || "", alumno.carrera_id || "", `"${(alumno.motivo_error || "").replace(/"/g, '""')}"`];
+            const linea = cabeceras.map(cabecera => {
+                const valor = alumno[cabecera];
+                if (valor === null || valor === undefined) return "";
+                // Escapar texto para que las comas internas no rompan el CSV
+                return `"${String(valor).replace(/"/g, '""')}"`;
+            });
             lineasCsv.push(linea.join(","));
         });
         
         const blob = new Blob([lineasCsv.join("\n")], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
-        link.setAttribute("href", url); link.setAttribute("download", "alumnos_con_errores.csv");
+        link.setAttribute("href", url); link.setAttribute("download", "reporte_errores.csv");
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    };
+
+    const descargarPlantilla = () => {
+        const contenido = "lu,nombres,apellido,carrera_id\n123/24,Juan,Perez,1\n124/24,Maria,Gomez,1";
+        const blob = new Blob([contenido], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url); link.setAttribute("download", "plantilla_alumnos.csv");
         document.body.appendChild(link); link.click(); document.body.removeChild(link);
     };
 
@@ -121,15 +110,20 @@ export function CargaCsv() {
                     <h1><FileCsv size="1em" /> Carga Múltiple de Alumnos (CSV)</h1>
                     <p>Seleccione un archivo en formato delimitado por comas (.csv) para importar un lote de inscriptos y registrarlos directamente en la base de datos.</p>
                     
-                    <div className="tooltip-csv">
-                        <div className="tooltip-csv-trigger"><Info size="1.2em" /> Formato requerido para el archivo CSV</div>
-                        <div className="tooltip-csv-content">
-                            <p style={{ marginTop: 0, marginBottom: '8px', fontSize: '0.9rem' }}>El archivo debe contener <strong>al menos 4 columnas</strong> separadas por comas, respetando estrictamente el siguiente orden y formato de nombres:</p>
-                            <ol style={{ margin: 0, paddingLeft: '20px', marginBottom: '8px', fontSize: '0.9rem' }}>
-                                <li><strong>lu</strong> (ej: 123/24)</li> <li><strong>nombres</strong></li> <li><strong>apellido</strong></li> <li><strong>carrera_id</strong> (numérico)</li>
-                            </ol>
-                            <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8' }}><em>Nota: La primera fila será ignorada. Las columnas adicionales no se tomarán en cuenta.</em></p>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '25px', flexWrap: 'wrap' }}>
+                        <div className="tooltip-csv" style={{ marginBottom: 0 }}>
+                            <div className="tooltip-csv-trigger"><Info size="1.2em" /> Formato requerido para el archivo CSV</div>
+                            <div className="tooltip-csv-content">
+                                <p style={{ marginTop: 0, marginBottom: '8px', fontSize: '0.9rem' }}>El archivo debe contener <strong>al menos 4 columnas</strong> separadas por comas, respetando estrictamente el siguiente orden y formato de nombres:</p>
+                                <ol style={{ margin: 0, paddingLeft: '20px', marginBottom: '8px', fontSize: '0.9rem' }}>
+                                    <li><strong>lu</strong> (ej: 123/24)</li> <li><strong>nombres</strong></li> <li><strong>apellido</strong></li> <li><strong>carrera_id</strong> (numérico)</li>
+                                </ol>
+                                <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8' }}><em>Nota: La primera fila será ignorada. Las columnas adicionales no se tomarán en cuenta.</em></p>
+                            </div>
                         </div>
+                        <button type="button" onClick={descargarPlantilla} className="btn-seleccionar" style={{ padding: '8px 12px', fontSize: '0.9rem', backgroundColor: 'transparent' }}>
+                            <DownloadSimple size="1.2em" /> Descargar Plantilla CSV
+                        </button>
                     </div>
 
                     <div className={`area-carga ${dragActivo ? 'drag-over' : ''}`} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>

@@ -2,9 +2,10 @@ import { Router, Request, Response } from 'express';
 import { HistorialController } from '../controllers/historialController.js';
 import { PlanEstudiosController } from '../controllers/planEstudiosController.js';
 import { CursadaController } from '../controllers/cursadaController.js';
+import { FinalesController } from '../controllers/finalesController.js';
 import { CarrerasRepository } from '../repositories/carrerasRepository.js';
 import { catchAsync } from '../middlewares/errorHandler.js';
-import { requireAuthAPI, requireRole } from '../middlewares/auth.middleware.js';
+import { requireAuthAPI, requireRole } from '../middlewares/authMiddleware.js';
 
 const router = Router();
 
@@ -12,6 +13,7 @@ router.get('/v0/historial/:prefijo/:anio', requireAuthAPI, requireRole(['ADMIN',
 
 router.get('/v0/planes-estudio', requireAuthAPI, requireRole(['ADMIN']), catchAsync(PlanEstudiosController.obtenerPlanesCompletosController));
 router.post('/v0/cursada', requireAuthAPI, requireRole(['ADMIN']), catchAsync(CursadaController.registrar));
+router.post('/v0/finales', requireAuthAPI, requireRole(['ADMIN']), catchAsync(FinalesController.registrar));
 
 router.get('/v0/carreras', requireAuthAPI, requireRole(['ADMIN']), catchAsync(async (req: Request, res: Response) => {
     const carreras = await CarrerasRepository.obtenerCarreras();
